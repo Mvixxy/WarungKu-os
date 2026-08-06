@@ -144,16 +144,15 @@ export function KasirView() {
     <div className="grid gap-3 xl:grid-cols-[1.7fr_0.95fr]">
       <div>
         <Card>
-          <CardHeader className="flex flex-col gap-2 pb-3 sm:gap-3 md:flex-row md:items-center md:justify-between sm:pb-4">
-            <div>
-              <CardTitle className="font-heading text-base sm:text-lg">Produk siap jual</CardTitle>
-              <CardDescription className="text-xs sm:text-sm">
-                Cari produk, tap item, lalu lanjut ke keranjang.
-              </CardDescription>
-            </div>
-
-            <div className="flex flex-col gap-1.5 sm:gap-2 md:flex-row md:items-center">
-              <div className="relative min-w-[180px]">
+          <CardHeader className="space-y-2.5 p-3 sm:p-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle className="font-heading text-base sm:text-lg">Produk siap jual</CardTitle>
+                <CardDescription className="text-xs">
+                  Cari produk, tap item, lalu lanjut ke keranjang.
+                </CardDescription>
+              </div>
+              <div className="relative shrink-0 sm:min-w-[200px]">
                 <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   value={query}
@@ -162,20 +161,20 @@ export function KasirView() {
                   className="h-8 rounded-lg border-border bg-muted/50 pl-8 text-xs sm:h-9 sm:text-sm"
                 />
               </div>
-              <div className="flex flex-wrap gap-1">
-                {categoryLabels.map((item) => (
-                  <Button
-                    key={item.value}
-                    type="button"
-                    variant={category === item.value ? "default" : "ghost"}
-                    size="sm"
-                    className="rounded-lg px-2 py-1 text-[10px] sm:text-xs"
-                    onClick={() => setCategory(item.value)}
-                  >
-                    {item.label}
-                  </Button>
-                ))}
-              </div>
+            </div>
+            <div className="flex gap-1 overflow-x-auto scrollbar-none">
+              {categoryLabels.map((item) => (
+                <Button
+                  key={item.value}
+                  type="button"
+                  variant={category === item.value ? "default" : "ghost"}
+                  size="sm"
+                  className="shrink-0 rounded-full px-3 py-1 text-[10px] sm:text-xs"
+                  onClick={() => setCategory(item.value)}
+                >
+                  {item.label}
+                </Button>
+              ))}
             </div>
           </CardHeader>
           <CardContent>
