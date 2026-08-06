@@ -218,10 +218,10 @@ function MobileCartSheet({
               <span>{cartLines.reduce((sum: number, line: any) => sum + line.quantity, 0)} pcs</span>
             </div>
             <p className="mt-1.5 font-heading text-xl font-semibold">{formatCurrency(cartTotal)}</p>
-            <Button type="button" size="lg" className="mt-2 h-10 w-full rounded-lg bg-sidebar-primary text-sidebar-primary-foreground" onClick={() => { handleCheckout(); onOpenChange(false); }}>
-              Bayar sekarang
-            </Button>
           </div>
+          <Button type="button" size="lg" className="mt-2 h-11 w-full rounded-xl bg-primary text-primary-foreground text-sm font-semibold shadow-md" onClick={() => { handleCheckout(); onOpenChange(false); }}>
+            Bayar sekarang — {formatCurrency(cartTotal)}
+          </Button>
         </div>
       </div>
     </>
