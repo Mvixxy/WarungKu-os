@@ -253,7 +253,9 @@ function mapSettings(profile: typeof storeProfiles.$inferSelect): Settings {
     city: profile.city,
     businessNotes: profile.businessNotes,
     stockAlertThreshold: profile.stockAlertThreshold,
-    enabledPayments: profile.enabledPayments,
+    enabledPayments: profile.enabledPayments.filter((m): m is PaymentMethod =>
+      supportedPaymentMethods.includes(m)
+    ),
   };
 }
 
