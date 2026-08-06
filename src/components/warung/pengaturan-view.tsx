@@ -242,7 +242,7 @@ export function PengaturanView() {
               onClick={() => void handleSave()}
               disabled={isSaving}
             >
-              <BadgeCheck className="size-3.5" />
+              <BadgeCheck className="size-3.5 sm:size-4" />
               {isSaving ? (<><Loader2 className="mr-1.5 size-3.5 animate-spin" />Menyimpan...</>) : "Simpan"}
             </Button>
             <Button
@@ -263,7 +263,7 @@ export function PengaturanView() {
               onClick={() => void handleWorkspaceReset()}
               disabled={isResetting}
             >
-              <RotateCcw className="size-3.5" />
+              <RotateCcw className="size-3.5 sm:size-4" />
               {isResetting ? "Resetting..." : "Reset workspace"}
             </Button>
           </div>
@@ -311,7 +311,7 @@ export function PengaturanView() {
                 {form.enabledPayments.map((method) => (
                   <span
                     key={method}
-                    className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary"
+                    className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] sm:text-xs font-medium text-primary"
                   >
                     {method}
                   </span>

@@ -130,7 +130,7 @@ function DesktopCart({
             <CardTitle className="font-heading text-base sm:text-lg">
               Keranjang
             </CardTitle>
-            <CardDescription>Item yang sudah ditap.</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Item yang sudah ditap.</CardDescription>
           </div>
           <Badge variant="secondary" className="rounded-full text-xs">
             {cartLines.length} item
@@ -218,7 +218,7 @@ function DesktopCart({
         </ScrollArea>
 
         <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          <p className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wide">
             Metode bayar
           </p>
           <div className="grid grid-cols-3 gap-1.5">
@@ -243,7 +243,7 @@ function DesktopCart({
         </div>
 
         <div className="rounded-xl bg-primary p-3.5 text-primary-foreground">
-          <div className="flex items-center justify-between text-xs text-primary-foreground/60">
+          <div className="flex items-center justify-between text-xs sm:text-sm text-primary-foreground/60">
             <span>Total</span>
             <span>
               {cartLines.reduce(
@@ -265,7 +265,7 @@ function DesktopCart({
           >
             {checkingOut ? (<><Loader2 className="mr-2 size-4 animate-spin" />Memproses...</>) : "Bayar sekarang"}
           </Button>
-          <p className="mt-2 text-[10px] text-primary-foreground/50">
+          <p className="mt-2 text-[10px] sm:text-xs text-primary-foreground/50">
             Stok akan otomatis berkurang setelah transaksi.
           </p>
         </div>

@@ -120,7 +120,7 @@ export function BukuHutangView() {
               <DialogTrigger
                 render={<Button size="sm" className="h-9 rounded-lg" />}
               >
-                <WalletCards className="size-3.5" />
+                <WalletCards className="size-3.5 sm:size-4" />
                 Tambah kasbon
               </DialogTrigger>
               <DialogContent className="max-w-md rounded-xl p-0">
@@ -209,7 +209,7 @@ export function BukuHutangView() {
                     </div>
                     <Badge
                       variant={debt.isPaid ? "secondary" : "default"}
-                      className="rounded-full text-[10px] px-2 py-0.5"
+                      className="rounded-full text-[10px] sm:text-xs px-2 py-0.5"
                     >
                       {debt.isPaid ? "Lunas" : "Belum lunas"}
                     </Badge>
@@ -217,16 +217,16 @@ export function BukuHutangView() {
 
                   <div className="grid grid-cols-2 gap-2">
                     <div className="rounded-lg bg-muted/50 p-2.5">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Nominal</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">Nominal</p>
                       <p className="mt-0.5 text-sm font-semibold">{formatCurrency(debt.amount)}</p>
                     </div>
                     <div className="rounded-lg bg-muted/50 p-2.5">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Jatuh tempo</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">Jatuh tempo</p>
                       <p className="mt-0.5 text-sm font-semibold">{formatDate(debt.dueDate)}</p>
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-border p-2 text-[10px] text-muted-foreground">
+                  <div className="rounded-lg border border-border p-2 text-[10px] sm:text-xs text-muted-foreground">
                     Dicatat: {formatDateTime(debt.createdAt)} · Pengingat: {debt.lastReminderAt ? formatDateTime(debt.lastReminderAt) : "Belum"}
                   </div>
 
@@ -249,7 +249,7 @@ export function BukuHutangView() {
                         }
                       }}
                     >
-                      <MessageSquareShare className="size-3" />
+                      <MessageSquareShare className="size-3 sm:size-3.5" />
                       Kirim
                     </Button>
                     {!debt.isPaid && (
@@ -266,7 +266,7 @@ export function BukuHutangView() {
                           }
                         }}
                       >
-                        <CheckCircle2 className="size-3" />
+                        <CheckCircle2 className="size-3 sm:size-3.5" />
                         Lunas
                       </Button>
                     )}

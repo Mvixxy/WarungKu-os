@@ -94,8 +94,8 @@ export function LaporanView() {
                       />
                     </div>
                     <div className="text-center">
-                      <p className="text-[10px] font-medium">{item.label}</p>
-                      <p className="text-[9px] text-muted-foreground">
+                      <p className="text-[10px] sm:text-xs font-medium">{item.label}</p>
+                      <p className="text-[9px] sm:text-[10px] text-muted-foreground">
                         {formatCompactCurrency(item.revenue)}
                       </p>
                     </div>
@@ -110,7 +110,7 @@ export function LaporanView() {
                 <p className="mt-1 font-heading text-xl font-semibold">
                   {formatCurrency(summary.averageTicket)}
                 </p>
-                <p className="mt-1 text-[10px] text-muted-foreground">
+                <p className="mt-1 text-[10px] sm:text-xs text-muted-foreground">
                   Per transaksi periode {rangeLabel.toLowerCase()}.
                 </p>
               </div>
@@ -121,7 +121,7 @@ export function LaporanView() {
                   {topVelocity.map((item) => (
                     <div key={item.productId} className="flex items-center justify-between">
                       <span className="text-xs font-medium">{item.name}</span>
-                      <span className="text-[10px] text-muted-foreground">{item.sold} terjual</span>
+                      <span className="text-[10px] sm:text-xs text-muted-foreground">{item.sold} terjual</span>
                     </div>
                   ))}
                 </div>
@@ -150,7 +150,7 @@ export function LaporanView() {
                   })
                 }
               >
-                <Printer className="size-3" />
+                <Printer className="size-3 sm:size-3.5" />
                 Print
               </Button>
               <Button
@@ -163,7 +163,7 @@ export function LaporanView() {
                   })
                 }
               >
-                <Download className="size-3" />
+                <Download className="size-3 sm:size-3.5" />
                 PDF
               </Button>
             </div>
@@ -172,34 +172,34 @@ export function LaporanView() {
             <div className="rounded-xl bg-muted/30 p-4 ring-1 ring-border">
               <div className="flex items-start justify-between gap-3 border-b border-dashed border-border pb-3">
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-primary font-medium">WarungKu report</p>
+                  <p className="text-[10px] sm:text-xs uppercase tracking-widest text-primary font-medium">WarungKu report</p>
                   <h3 className="mt-1 font-heading text-lg font-semibold">{settings.storeName}</h3>
-                  <p className="mt-0.5 text-[10px] text-muted-foreground">
+                  <p className="mt-0.5 text-[10px] sm:text-xs text-muted-foreground">
                     {[settings.storeTagline, settings.city].filter(Boolean).join(" · ")}
                   </p>
-                  <p className="text-[10px] text-muted-foreground">{settings.storeAddress}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">{settings.storeAddress}</p>
                 </div>
                 <div className="rounded-lg bg-primary px-3 py-2 text-right text-primary-foreground">
-                  <p className="text-[9px] uppercase tracking-wider text-primary-foreground/60">{rangeLabel}</p>
+                  <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-primary-foreground/60">{rangeLabel}</p>
                   <p className="mt-0.5 font-heading text-base font-semibold">{formatCurrency(summary.netProfit)}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2 border-b border-dashed border-border py-3">
                 <div className="rounded-lg bg-card border border-border p-2.5">
-                  <p className="text-[10px] text-muted-foreground">Omzet</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Omzet</p>
                   <p className="mt-0.5 text-sm font-semibold">{formatCurrency(summary.revenue)}</p>
                 </div>
                 <div className="rounded-lg bg-card border border-border p-2.5">
-                  <p className="text-[10px] text-muted-foreground">Pengeluaran</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Pengeluaran</p>
                   <p className="mt-0.5 text-sm font-semibold">{formatCurrency(summary.expenseTotal)}</p>
                 </div>
                 <div className="rounded-lg bg-card border border-border p-2.5">
-                  <p className="text-[10px] text-muted-foreground">Laba kotor</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Laba kotor</p>
                   <p className="mt-0.5 text-sm font-semibold">{formatCurrency(summary.grossProfit)}</p>
                 </div>
                 <div className="rounded-lg bg-card border border-border p-2.5">
-                  <p className="text-[10px] text-muted-foreground">Rata-rata transaksi</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Rata-rata transaksi</p>
                   <p className="mt-0.5 text-sm font-semibold">{formatCurrency(summary.averageTicket)}</p>
                 </div>
               </div>
@@ -209,7 +209,7 @@ export function LaporanView() {
                   <TrendingUp className="size-3 text-primary" />
                   Catatan untuk pemilik warung
                 </div>
-                <ul className="space-y-1.5 text-[11px] text-muted-foreground">
+                <ul className="space-y-1.5 text-[11px] sm:text-xs text-muted-foreground">
                   <li className="rounded-lg bg-card border border-border px-2.5 py-2">
                     Laba bersih periode {rangeLabel.toLowerCase()}: {formatCurrency(summary.netProfit)}.
                   </li>
@@ -219,7 +219,7 @@ export function LaporanView() {
                 </ul>
               </div>
 
-              <div className="flex items-center justify-between border-t border-dashed border-border pt-3 text-[10px] text-muted-foreground">
+              <div className="flex items-center justify-between border-t border-dashed border-border pt-3 text-[10px] sm:text-xs text-muted-foreground">
                 <span>Disusun otomatis oleh WarungKu</span>
                 <span>{formatDate(new Date().toISOString())}</span>
               </div>

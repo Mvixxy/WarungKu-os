@@ -326,7 +326,7 @@ export function InventarisView() {
             </div>
             <Dialog open={createOpen} onOpenChange={(o) => { setCreateOpen(o); if (!o) setSaving(false); }}>
               <DialogTrigger render={<Button size="sm" className="h-9 rounded-lg" />}>
-                <PackagePlus className="size-3.5" />
+                <PackagePlus className="size-3.5 sm:size-4" />
                 Tambah barang
               </DialogTrigger>
               <DialogContent className="max-w-md" showCloseButton>
@@ -346,12 +346,12 @@ export function InventarisView() {
           <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs">Produk</TableHead>
-                <TableHead className="text-xs">Kategori</TableHead>
-                <TableHead className="text-xs">Beli</TableHead>
-                <TableHead className="text-xs">Jual</TableHead>
-                <TableHead className="text-xs">Stok</TableHead>
-                <TableHead className="text-xs">Min</TableHead>
+                <TableHead className="text-xs sm:text-sm">Produk</TableHead>
+                <TableHead className="text-xs sm:text-sm">Kategori</TableHead>
+                <TableHead className="text-xs sm:text-sm">Beli</TableHead>
+                <TableHead className="text-xs sm:text-sm">Jual</TableHead>
+                <TableHead className="text-xs sm:text-sm">Stok</TableHead>
+                <TableHead className="text-xs sm:text-sm">Min</TableHead>
                 <TableHead className="text-xs text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
