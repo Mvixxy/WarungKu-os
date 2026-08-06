@@ -26,82 +26,76 @@ export function LaporanView() {
     range === "harian" ? "Hari ini" : range === "mingguan" ? "Minggu ini" : "Bulan ini";
 
   return (
-    <div className="space-y-4">
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="space-y-3">
+      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Omzet"
           value={formatCompactCurrency(summary.revenue)}
-          description={`Total pemasukan untuk periode ${rangeLabel.toLowerCase()}.`}
+          description={`Total pemasukan periode ${rangeLabel.toLowerCase()}.`}
         />
         <StatCard
           title="Laba kotor"
           value={formatCompactCurrency(summary.grossProfit)}
-          description="Penjualan dikurangi modal barang yang terjual."
+          description="Penjualan dikurangi modal barang."
           tone="accent"
         />
         <StatCard
           title="Pengeluaran"
           value={formatCompactCurrency(summary.expenseTotal)}
-          description="Biaya operasional dan belanja yang masuk di periode ini."
+          description="Biaya operasional periode ini."
         />
         <StatCard
           title="Laba bersih"
           value={formatCompactCurrency(summary.netProfit)}
-          description="Perkiraan hasil akhir setelah modal dan pengeluaran dikurangi."
+          description="Hasil akhir setelah semua dikurangi."
           tone="warn"
         />
       </section>
 
-      <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-        <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
-          <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="grid gap-3 xl:grid-cols-[1.05fr_0.95fr]">
+        <Card>
+          <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <CardTitle className="font-heading text-2xl">Ringkasan performa</CardTitle>
+              <CardTitle className="font-heading text-lg">Ringkasan performa</CardTitle>
               <CardDescription>
-                Ganti periode untuk membaca ritme omzet dan laba warung secara cepat.
+                Ganti periode untuk baca ritme omzet warung.
               </CardDescription>
             </div>
 
             <Tabs value={range} onValueChange={(value) => setRange(value as ReportRange)}>
-              <TabsList className="rounded-full p-1">
-                <TabsTrigger value="harian" className="rounded-full px-4">
-                  Harian
-                </TabsTrigger>
-                <TabsTrigger value="mingguan" className="rounded-full px-4">
-                  Mingguan
-                </TabsTrigger>
-                <TabsTrigger value="bulanan" className="rounded-full px-4">
-                  Bulanan
-                </TabsTrigger>
+              <TabsList className="rounded-lg p-0.5">
+                <TabsTrigger value="harian" className="rounded-md px-3 text-xs">Harian</TabsTrigger>
+                <TabsTrigger value="mingguan" className="rounded-md px-3 text-xs">Mingguan</TabsTrigger>
+                <TabsTrigger value="bulanan" className="rounded-md px-3 text-xs">Bulanan</TabsTrigger>
               </TabsList>
             </Tabs>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="rounded-[26px] border border-border/70 bg-card/80 p-5">
+          <CardContent className="space-y-4">
+            <div className="rounded-xl border border-border bg-muted/30 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Tren omzet</p>
-                  <p className="mt-2 font-heading text-3xl font-semibold">{formatCurrency(summary.revenue)}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Tren omzet</p>
+                  <p className="mt-1 font-heading text-2xl font-semibold">{formatCurrency(summary.revenue)}</p>
                 </div>
-                <div className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-foreground">
+                <span className="rounded-lg bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
                   {summary.transactionCount} transaksi
-                </div>
+                </span>
               </div>
 
-              <div className="mt-6 flex h-52 items-end gap-3">
+              <div className="mt-4 flex h-40 items-end gap-2">
                 {series.map((item) => (
-                  <div key={item.label} className="flex flex-1 flex-col items-center gap-3">
+                  <div key={item.label} className="flex flex-1 flex-col items-center gap-2">
                     <div className="flex w-full flex-1 items-end">
                       <div
-                        className="w-full rounded-t-[18px] bg-gradient-to-t from-primary to-chart-3 shadow-[0_18px_28px_-18px_rgba(186,92,35,0.8)]"
+                        className="w-full rounded-t-md bg-primary/80"
                         style={{
-                          height: `${Math.max(14, (item.revenue / highestValue) * 100)}%`,
+                          height: `${Math.max(12, (item.revenue / highestValue) * 100)}%`,
                         }}
                       />
                     </div>
                     <div className="text-center">
-                      <p className="text-xs font-medium text-foreground">{item.label}</p>
-                      <p className="mt-1 text-[11px] text-muted-foreground">
+                      <p className="text-[10px] font-medium">{item.label}</p>
+                      <p className="text-[9px] text-muted-foreground">
                         {formatCompactCurrency(item.revenue)}
                       </p>
                     </div>
@@ -110,24 +104,24 @@ export function LaporanView() {
               </div>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-2">
-              <div className="rounded-[26px] border border-border/70 bg-card/80 p-5">
-                <p className="text-sm text-muted-foreground">Rata-rata tiket</p>
-                <p className="mt-2 font-heading text-3xl font-semibold">
+            <div className="grid gap-2.5 lg:grid-cols-2">
+              <div className="rounded-xl border border-border bg-card p-3.5">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">Rata-rata tiket</p>
+                <p className="mt-1 font-heading text-xl font-semibold">
                   {formatCurrency(summary.averageTicket)}
                 </p>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Nilai rata-rata per transaksi untuk periode {rangeLabel.toLowerCase()}.
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  Per transaksi periode {rangeLabel.toLowerCase()}.
                 </p>
               </div>
 
-              <div className="rounded-[26px] border border-border/70 bg-card/80 p-5">
-                <p className="text-sm text-muted-foreground">Produk paling bergerak</p>
-                <div className="mt-4 space-y-3">
+              <div className="rounded-xl border border-border bg-card p-3.5">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">Produk paling laris</p>
+                <div className="mt-2 space-y-1.5">
                   {topVelocity.map((item) => (
                     <div key={item.productId} className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{item.name}</span>
-                      <span className="text-sm text-muted-foreground">{item.sold} terjual</span>
+                      <span className="text-xs font-medium">{item.name}</span>
+                      <span className="text-[10px] text-muted-foreground">{item.sold} terjual</span>
                     </div>
                   ))}
                 </div>
@@ -136,99 +130,96 @@ export function LaporanView() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
-          <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <Card>
+          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle className="font-heading text-2xl">Preview laporan PDF</CardTitle>
-              <CardDescription>
-                Layout ini sengaja dibuat printable, tapi tombol ekspor masih demo frontend.
+              <CardTitle className="font-heading text-lg">Preview laporan PDF</CardTitle>
+              <CardDescription className="text-xs">
+                Layout printable untuk kebutuhan cetak.
               </CardDescription>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-full"
+                size="sm"
+                className="h-8 rounded-lg text-xs"
                 onClick={() =>
-                  toast.info("Mode print browser belum diaktifkan.", {
-                    description: "Layout preview sudah disiapkan untuk tahap integrasi selanjutnya.",
+                  toast.info("Mode print belum diaktifkan.", {
+                    description: "Layout sudah disiapkan.",
                   })
                 }
               >
-                <Printer className="size-4" />
-                Preview print
+                <Printer className="size-3" />
+                Print
               </Button>
               <Button
                 type="button"
-                className="rounded-full"
+                size="sm"
+                className="h-8 rounded-lg text-xs"
                 onClick={() =>
                   toast.info("Cetak PDF masih placeholder.", {
-                    description: "Nanti tombol ini bisa dihubungkan ke generator PDF atau print layout.",
+                    description: "Akan dihubungkan ke generator PDF.",
                   })
                 }
               >
-                <Download className="size-4" />
-                Cetak PDF
+                <Download className="size-3" />
+                PDF
               </Button>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="rounded-[30px] bg-[#fffaf5] p-6 shadow-inner ring-1 ring-border/80">
-              <div className="flex items-start justify-between gap-4 border-b border-dashed border-border/80 pb-5">
+            <div className="rounded-xl bg-muted/30 p-4 ring-1 ring-border">
+              <div className="flex items-start justify-between gap-3 border-b border-dashed border-border pb-3">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.22em] text-primary">Warung OS report</p>
-                  <h3 className="mt-2 font-heading text-3xl font-semibold">{settings.storeName}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {[settings.storeTagline, settings.city].filter(Boolean).join(" • ")}
+                  <p className="text-[10px] uppercase tracking-widest text-primary font-medium">Warung OS report</p>
+                  <h3 className="mt-1 font-heading text-lg font-semibold">{settings.storeName}</h3>
+                  <p className="mt-0.5 text-[10px] text-muted-foreground">
+                    {[settings.storeTagline, settings.city].filter(Boolean).join(" · ")}
                   </p>
-                  <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-                    {settings.storeAddress}
-                  </p>
+                  <p className="text-[10px] text-muted-foreground">{settings.storeAddress}</p>
                 </div>
-                <div className="rounded-[22px] bg-foreground px-4 py-3 text-right text-background">
-                  <p className="text-xs uppercase tracking-[0.18em] text-background/70">{rangeLabel}</p>
-                  <p className="mt-2 font-heading text-2xl font-semibold">{formatCurrency(summary.netProfit)}</p>
+                <div className="rounded-lg bg-sidebar px-3 py-2 text-right text-sidebar-foreground">
+                  <p className="text-[9px] uppercase tracking-wider text-sidebar-foreground/60">{rangeLabel}</p>
+                  <p className="mt-0.5 font-heading text-base font-semibold">{formatCurrency(summary.netProfit)}</p>
                 </div>
               </div>
 
-              <div className="grid gap-4 border-b border-dashed border-border/80 py-5 sm:grid-cols-2">
-                <div className="rounded-[22px] bg-card p-4 ring-1 ring-border/70">
-                  <p className="text-sm text-muted-foreground">Omzet</p>
-                  <p className="mt-2 text-2xl font-semibold">{formatCurrency(summary.revenue)}</p>
+              <div className="grid grid-cols-2 gap-2 border-b border-dashed border-border py-3">
+                <div className="rounded-lg bg-card border border-border p-2.5">
+                  <p className="text-[10px] text-muted-foreground">Omzet</p>
+                  <p className="mt-0.5 text-sm font-semibold">{formatCurrency(summary.revenue)}</p>
                 </div>
-                <div className="rounded-[22px] bg-card p-4 ring-1 ring-border/70">
-                  <p className="text-sm text-muted-foreground">Pengeluaran</p>
-                  <p className="mt-2 text-2xl font-semibold">{formatCurrency(summary.expenseTotal)}</p>
+                <div className="rounded-lg bg-card border border-border p-2.5">
+                  <p className="text-[10px] text-muted-foreground">Pengeluaran</p>
+                  <p className="mt-0.5 text-sm font-semibold">{formatCurrency(summary.expenseTotal)}</p>
                 </div>
-                <div className="rounded-[22px] bg-card p-4 ring-1 ring-border/70">
-                  <p className="text-sm text-muted-foreground">Laba kotor</p>
-                  <p className="mt-2 text-2xl font-semibold">{formatCurrency(summary.grossProfit)}</p>
+                <div className="rounded-lg bg-card border border-border p-2.5">
+                  <p className="text-[10px] text-muted-foreground">Laba kotor</p>
+                  <p className="mt-0.5 text-sm font-semibold">{formatCurrency(summary.grossProfit)}</p>
                 </div>
-                <div className="rounded-[22px] bg-card p-4 ring-1 ring-border/70">
-                  <p className="text-sm text-muted-foreground">Rata-rata transaksi</p>
-                  <p className="mt-2 text-2xl font-semibold">{formatCurrency(summary.averageTicket)}</p>
+                <div className="rounded-lg bg-card border border-border p-2.5">
+                  <p className="text-[10px] text-muted-foreground">Rata-rata transaksi</p>
+                  <p className="mt-0.5 text-sm font-semibold">{formatCurrency(summary.averageTicket)}</p>
                 </div>
               </div>
 
-              <div className="space-y-4 py-5">
-                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                  <TrendingUp className="size-4 text-primary" />
+              <div className="space-y-2 py-3">
+                <div className="flex items-center gap-1.5 text-xs font-medium">
+                  <TrendingUp className="size-3 text-primary" />
                   Catatan untuk pemilik warung
                 </div>
-                <ul className="space-y-3 text-sm text-muted-foreground">
-                  <li className="rounded-[18px] bg-card px-4 py-3 ring-1 ring-border/70">
-                    Laba bersih periode {rangeLabel.toLowerCase()} tercatat {formatCurrency(summary.netProfit)}.
+                <ul className="space-y-1.5 text-[11px] text-muted-foreground">
+                  <li className="rounded-lg bg-card border border-border px-2.5 py-2">
+                    Laba bersih periode {rangeLabel.toLowerCase()}: {formatCurrency(summary.netProfit)}.
                   </li>
-                  <li className="rounded-[18px] bg-card px-4 py-3 ring-1 ring-border/70">
-                    Produk paling sering bergerak: {topVelocity.map((item) => item.name).join(", ")}.
-                  </li>
-                  <li className="rounded-[18px] bg-card px-4 py-3 ring-1 ring-border/70">
-                    Data ini masih mock frontend, namun layout dan struktur metrik sudah siap dipakai saat API aktif.
+                  <li className="rounded-lg bg-card border border-border px-2.5 py-2">
+                    Produk terlaris: {topVelocity.map((item) => item.name).join(", ")}.
                   </li>
                 </ul>
               </div>
 
-              <div className="flex items-center justify-between border-t border-dashed border-border/80 pt-5 text-sm text-muted-foreground">
+              <div className="flex items-center justify-between border-t border-dashed border-border pt-3 text-[10px] text-muted-foreground">
                 <span>Disusun otomatis oleh Warung OS</span>
                 <span>{formatDate(new Date().toISOString())}</span>
               </div>

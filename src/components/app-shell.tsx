@@ -89,21 +89,22 @@ export function AppShell({
 
   return (
     <div className="h-screen overflow-hidden bg-background">
-      <div className="mx-auto flex h-full w-full max-w-[1600px] gap-3 p-3 lg:gap-4 lg:p-5">
+      <div className="mx-auto flex h-full w-full max-w-[1600px] gap-2 p-2 lg:gap-3 lg:p-3">
+        {/* Desktop Sidebar */}
         <aside
           className={cn(
-            "glass-panel hidden h-full shrink-0 flex-col overflow-hidden rounded-[30px] border border-border/60 shadow-[0_32px_80px_-50px_rgba(68,39,20,0.65)] transition-[width] duration-200 ease-out lg:flex",
-            leftCollapsed ? "w-[88px] items-center px-5 py-4" : "w-[292px] p-5",
+            "hidden h-full shrink-0 flex-col overflow-hidden rounded-2xl border border-border bg-card transition-[width] duration-200 ease-out lg:flex",
+            leftCollapsed ? "w-[72px] items-center px-3 py-4" : "w-[260px] p-4",
           )}
         >
           {leftCollapsed ? (
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground">
-              <Store className="size-5" />
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+              <Store className="size-4" />
             </div>
           ) : (
-            <div className="rounded-[22px] bg-sidebar px-4 py-3 text-sidebar-foreground transition-all">
+            <div className="rounded-xl bg-sidebar px-4 py-3 text-sidebar-foreground">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <Store className="size-4" />
                 </div>
                 <p className="truncate text-sm font-medium">
@@ -128,8 +129,8 @@ export function AppShell({
                   : "Tutup sidebar"
             }
             className={cn(
-              "mt-3 rounded-xl",
-              leftCollapsed ? "size-12 p-0" : "self-end",
+              "mt-2 rounded-lg",
+              leftCollapsed ? "size-10 p-0" : "self-end",
             )}
           >
             {leftCollapsed ? (
@@ -141,10 +142,10 @@ export function AppShell({
 
           <nav
             className={cn(
-              "mt-3 flex-1 overflow-y-auto",
+              "mt-2 flex-1 overflow-y-auto",
               leftCollapsed
-                ? "flex flex-col items-center gap-1.5"
-                : "space-y-2",
+                ? "flex flex-col items-center gap-1"
+                : "space-y-1",
             )}
           >
             {navigation.map((item) => {
@@ -157,14 +158,14 @@ export function AppShell({
                   href={item.href}
                   title={leftCollapsed ? item.label : undefined}
                   className={cn(
-                    "flex items-center gap-3 rounded-2xl text-sm font-medium transition-colors",
-                    leftCollapsed ? "size-12 justify-center" : "px-4 py-3",
+                    "flex items-center gap-3 rounded-xl text-sm font-medium transition-all duration-150",
+                    leftCollapsed ? "size-10 justify-center" : "px-3 py-2.5",
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-[0_20px_45px_-28px_rgba(186,92,35,0.75)]"
-                      : "text-foreground/70 hover:bg-card/50 hover:text-foreground",
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}
                 >
-                  <Icon className={cn("shrink-0", leftCollapsed ? "size-5" : "size-4")} />
+                  <Icon className={cn("shrink-0", leftCollapsed ? "size-[18px]" : "size-4")} />
                   {!leftCollapsed && item.label}
                 </Link>
               );
@@ -174,6 +175,7 @@ export function AppShell({
           {!leftCollapsed && <AccountPanel />}
         </aside>
 
+        {/* Mobile Sidebar */}
         <div className="pointer-events-none fixed top-3 left-3 z-40 lg:hidden">
           <Sheet>
             <SheetTrigger
@@ -181,7 +183,7 @@ export function AppShell({
                 <Button
                   variant="outline"
                   size="icon-lg"
-                  className="pointer-events-auto rounded-2xl bg-card/85 shadow-[0_18px_40px_-28px_rgba(68,39,20,0.75)] backdrop-blur"
+                  className="pointer-events-auto rounded-xl bg-card shadow-sm backdrop-blur"
                 />
               }
             >
@@ -189,7 +191,7 @@ export function AppShell({
             </SheetTrigger>
             <SheetContent
               side="left"
-              className="w-[320px] bg-sidebar text-sidebar-foreground"
+              className="w-[300px] bg-sidebar text-sidebar-foreground"
             >
               <SheetHeader className="px-6 pt-6">
                 <SheetTitle className="text-sidebar-foreground">
@@ -199,7 +201,7 @@ export function AppShell({
                   {activePage.title}
                 </SheetDescription>
               </SheetHeader>
-              <div className="space-y-2 px-4 pb-6">
+              <div className="space-y-1 px-4 pb-6">
                 {navigation.map((item) => {
                   const Icon = item.icon;
                   const isActive = pathname === item.href;
@@ -212,7 +214,7 @@ export function AppShell({
                           variant: isActive ? "secondary" : "ghost",
                           size: "lg",
                         }),
-                        "w-full justify-start rounded-2xl",
+                        "w-full justify-start rounded-xl",
                         isActive
                           ? "bg-sidebar-primary text-sidebar-primary-foreground"
                           : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
@@ -227,7 +229,7 @@ export function AppShell({
                   href="/auth"
                   className={cn(
                     buttonVariants({ size: "lg" }),
-                    "mt-4 h-11 w-full rounded-2xl",
+                    "mt-4 h-10 w-full rounded-xl",
                   )}
                 >
                   Akun

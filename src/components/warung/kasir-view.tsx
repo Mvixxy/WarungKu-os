@@ -29,18 +29,15 @@ const categoryLabels: Array<{ value: "Semua" | ProductCategory; label: string }>
 
 function ProductCategoryIcon({ category }: { category: ProductCategory }) {
   if (category === "Minuman") {
-    return <Coffee className="size-5" />;
+    return <Coffee className="size-4" />;
   }
-
   if (category === "Sembako") {
-    return <Wheat className="size-5" />;
+    return <Wheat className="size-4" />;
   }
-
   if (category === "Kebutuhan Harian") {
-    return <Sparkles className="size-5" />;
+    return <Sparkles className="size-4" />;
   }
-
-  return <ShoppingBasket className="size-5" />;
+  return <ShoppingBasket className="size-4" />;
 }
 
 function ProductCard({
@@ -58,39 +55,32 @@ function ProductCard({
       onClick={onAdd}
       disabled={product.stock <= 0}
       className={cn(
-        "group flex min-h-[164px] flex-col justify-between rounded-[26px] border border-border/65 bg-card/80 p-4 text-left shadow-[0_24px_50px_-36px_rgba(66,38,20,0.48)] transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_26px_60px_-34px_rgba(186,92,35,0.4)] disabled:cursor-not-allowed disabled:opacity-55",
-        lowStock && "border-primary/45 bg-primary/8"
+        "group flex min-h-[140px] flex-col justify-between rounded-xl border border-border bg-card p-3.5 text-left transition-all duration-150 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50",
+        lowStock && "border-primary/30 bg-primary/5"
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex size-12 items-center justify-center rounded-2xl bg-foreground text-background">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
           <ProductCategoryIcon category={product.category} />
         </div>
         <Badge
-          className={cn(
-            "rounded-full border-0 px-3 py-1 text-xs",
-            lowStock ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"
-          )}
+          variant={lowStock ? "destructive" : "secondary"}
+          className="rounded-full text-[10px] px-2 py-0.5"
         >
           {product.stock} stok
         </Badge>
       </div>
 
-      <div className="space-y-2">
-        <p className="font-heading text-lg font-semibold tracking-tight">{product.name}</p>
-        <p className="line-clamp-2 text-sm text-muted-foreground">{product.description}</p>
+      <div className="mt-2 space-y-1">
+        <p className="font-heading text-sm font-semibold leading-tight">{product.name}</p>
+        <p className="text-xs text-muted-foreground">{product.category}</p>
       </div>
 
-      <div className="flex items-end justify-between gap-3">
-        <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-            {product.category}
-          </p>
-          <p className="mt-1 text-lg font-semibold">{formatCurrency(product.sellPrice)}</p>
-        </div>
-        <div className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition group-hover:bg-primary">
-          Tap
-        </div>
+      <div className="mt-2 flex items-end justify-between gap-2">
+        <p className="font-heading text-base font-semibold">{formatCurrency(product.sellPrice)}</p>
+        <span className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground opacity-0 transition group-hover:opacity-100">
+          + Tambah
+        </span>
       </div>
     </button>
   );
@@ -131,14 +121,8 @@ export function KasirView() {
 
       const lowProducts = transaction.items.reduce<Product[]>((items, item) => {
         const product = products.find((candidate) => candidate.id === item.productId);
-        if (!product) {
-          return items;
-        }
-
-        if (product.stock - item.quantity <= product.minimumStock) {
-          items.push(product);
-        }
-
+        if (!product) return items;
+        if (product.stock - item.quantity <= product.minimumStock) items.push(product);
         return items;
       }, []);
 
@@ -157,34 +141,35 @@ export function KasirView() {
   }
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[1.7fr_0.95fr]">
+    <div className="grid gap-3 xl:grid-cols-[1.7fr_0.95fr]">
       <div>
-        <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
-          <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <Card>
+          <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <CardTitle className="font-heading text-2xl">Produk siap jual</CardTitle>
+              <CardTitle className="font-heading text-lg">Produk siap jual</CardTitle>
               <CardDescription>
-                Semua fokus kasir ada di sini: cari produk, tap item, lalu lanjut ke keranjang.
+                Cari produk, tap item, lalu lanjut ke keranjang.
               </CardDescription>
             </div>
 
-            <div className="flex flex-col gap-3 md:flex-row md:items-center">
-              <div className="relative min-w-[220px]">
-                <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <div className="flex flex-col gap-2 md:flex-row md:items-center">
+              <div className="relative min-w-[200px]">
+                <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Cari produk atau kategori"
-                  className="h-11 rounded-2xl border-border/80 bg-card/80 pl-9"
+                  placeholder="Cari produk..."
+                  className="h-9 rounded-lg border-border bg-muted/50 pl-8 text-sm"
                 />
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1">
                 {categoryLabels.map((item) => (
                   <Button
                     key={item.value}
                     type="button"
-                    variant={category === item.value ? "default" : "outline"}
-                    className="rounded-full"
+                    variant={category === item.value ? "default" : "ghost"}
+                    size="sm"
+                    className="rounded-lg text-xs"
                     onClick={() => setCategory(item.value)}
                   >
                     {item.label}
@@ -195,26 +180,26 @@ export function KasirView() {
           </CardHeader>
           <CardContent>
             {filteredProducts.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+              <div className="grid gap-2.5 sm:grid-cols-2 2xl:grid-cols-3">
                 {filteredProducts.map((product) => (
                   <ProductCard
                     key={product.id}
                     product={product}
                     onAdd={() => {
                       addToCart(product.id);
-                      toast.success(`${product.name} ditambahkan ke keranjang.`, {
-                        description: `Stok tersedia ${product.stock} pcs.`,
+                      toast.success(`${product.name} ditambahkan.`, {
+                        description: `Stok: ${product.stock} pcs.`,
                       });
                     }}
                   />
                 ))}
               </div>
             ) : (
-              <div className="flex min-h-[240px] flex-col items-center justify-center rounded-[26px] border border-dashed border-border bg-card/55 text-center">
-                <PackageSearch className="size-10 text-muted-foreground" />
-                <p className="mt-4 font-heading text-xl font-semibold">Produk tidak ditemukan</p>
-                <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                  Coba kata kunci lain atau pilih kategori yang lebih luas untuk melihat produk aktif.
+              <div className="flex min-h-[200px] flex-col items-center justify-center rounded-xl border border-dashed border-border text-center">
+                <PackageSearch className="size-8 text-muted-foreground" />
+                <p className="mt-3 font-heading text-base font-semibold">Produk tidak ditemukan</p>
+                <p className="mt-1 max-w-sm text-xs text-muted-foreground">
+                  Coba kata kunci lain atau pilih kategori yang berbeda.
                 </p>
               </div>
             )}
@@ -223,119 +208,117 @@ export function KasirView() {
       </div>
 
       <div>
-        <Card className="glass-panel sticky top-4 border-border/60 shadow-[0_28px_70px_-48px_rgba(66,38,20,0.6)]">
+        <Card className="sticky top-3">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="font-heading text-2xl">Keranjang aktif</CardTitle>
-                <CardDescription>Semua item yang sudah ditap akan muncul di sini.</CardDescription>
+                <CardTitle className="font-heading text-lg">Keranjang</CardTitle>
+                <CardDescription>Item yang sudah ditap.</CardDescription>
               </div>
-              <Badge className="rounded-full bg-foreground text-background">{cartLines.length} item</Badge>
+              <Badge variant="secondary" className="rounded-full text-xs">{cartLines.length} item</Badge>
             </div>
           </CardHeader>
-          <CardContent className="space-y-5">
-            <ScrollArea className="h-[300px] rounded-[22px] border border-border/70 bg-card/60 p-3">
+          <CardContent className="space-y-3">
+            <ScrollArea className="h-[260px] rounded-lg border border-border bg-muted/30 p-2.5">
               {cartLines.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {cartLines.map((line) => (
                     <div
                       key={line.product.id}
-                      className="rounded-[20px] border border-border/70 bg-card/85 p-3"
+                      className="rounded-lg border border-border bg-card p-2.5"
                     >
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p className="font-medium">{line.product.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {formatCurrency(line.product.sellPrice)} per item
+                          <p className="text-sm font-medium">{line.product.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatCurrency(line.product.sellPrice)} / item
                           </p>
                         </div>
                         <button
                           type="button"
                           onClick={() => removeFromCart(line.product.id)}
-                          className="rounded-full p-1 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                          className="rounded p-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                           aria-label={`Hapus ${line.product.name}`}
                         >
-                          <X className="size-4" />
+                          <X className="size-3.5" />
                         </button>
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between gap-3">
-                        <div className="inline-flex items-center gap-2 rounded-full bg-muted px-2 py-1">
+                      <div className="mt-2 flex items-center justify-between gap-2">
+                        <div className="inline-flex items-center gap-1 rounded-lg bg-muted px-1.5 py-0.5">
                           <Button
                             type="button"
                             size="icon-sm"
                             variant="ghost"
-                            className="rounded-full"
+                            className="size-6 rounded-md"
                             onClick={() => updateCartQuantity(line.product.id, line.quantity - 1)}
                           >
-                            <Minus className="size-4" />
+                            <Minus className="size-3" />
                           </Button>
-                          <span className="min-w-6 text-center text-sm font-semibold">{line.quantity}</span>
+                          <span className="min-w-5 text-center text-xs font-semibold">{line.quantity}</span>
                           <Button
                             type="button"
                             size="icon-sm"
                             variant="ghost"
-                            className="rounded-full"
+                            className="size-6 rounded-md"
                             onClick={() => updateCartQuantity(line.product.id, line.quantity + 1)}
                           >
-                            <Plus className="size-4" />
+                            <Plus className="size-3" />
                           </Button>
                         </div>
-                        <p className="font-semibold">{formatCurrency(line.lineTotal)}</p>
+                        <p className="text-sm font-semibold">{formatCurrency(line.lineTotal)}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="flex h-full min-h-[240px] flex-col items-center justify-center text-center">
-                  <ReceiptText className="size-10 text-muted-foreground" />
-                  <p className="mt-4 font-heading text-xl font-semibold">Belum ada item</p>
-                  <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-                    Tap produk dari sisi kiri untuk mulai membuat transaksi baru.
+                <div className="flex h-full min-h-[200px] flex-col items-center justify-center text-center">
+                  <ReceiptText className="size-8 text-muted-foreground" />
+                  <p className="mt-3 font-heading text-sm font-semibold">Belum ada item</p>
+                  <p className="mt-1 max-w-[200px] text-xs text-muted-foreground">
+                    Tap produk dari sisi kiri untuk mulai transaksi.
                   </p>
                 </div>
               )}
             </ScrollArea>
 
-            <div className="space-y-3">
-              <p className="text-sm font-medium text-muted-foreground">Metode pembayaran</p>
-              <div className="grid gap-2 sm:grid-cols-3">
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Metode bayar</p>
+              <div className="grid grid-cols-3 gap-1.5">
                 {settings.enabledPayments.map((method) => (
                   <Button
                     key={method}
                     type="button"
                     variant={paymentMethod === method ? "default" : "outline"}
-                    className={cn(
-                      "h-12 rounded-2xl",
-                      paymentMethod === method && "shadow-[0_20px_40px_-22px_rgba(186,92,35,0.75)]"
-                    )}
+                    size="sm"
+                    className="h-9 rounded-lg text-xs"
                     onClick={() => setPaymentMethod(method)}
                   >
-                    {method === "Tunai" ? <BanknoteArrowDown className="size-4" /> : <CreditCard className="size-4" />}
+                    {method === "Tunai" ? <BanknoteArrowDown className="size-3.5" /> : <CreditCard className="size-3.5" />}
                     {paymentLabels[method]}
                   </Button>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-[24px] bg-foreground px-4 py-4 text-background">
-              <div className="flex items-center justify-between text-sm text-background/70">
-                <span>Total tagihan</span>
+            <div className="rounded-xl bg-sidebar p-3.5 text-sidebar-foreground">
+              <div className="flex items-center justify-between text-xs text-sidebar-foreground/60">
+                <span>Total</span>
                 <span>{cartLines.reduce((sum, line) => sum + line.quantity, 0)} pcs</span>
               </div>
-              <p className="mt-3 font-heading text-4xl font-semibold tracking-tight">
+              <p className="mt-2 font-heading text-2xl font-semibold tracking-tight">
                 {formatCurrency(cartTotal)}
               </p>
               <Button
                 type="button"
                 size="lg"
-                className="mt-4 h-13 w-full rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90"
+                className="mt-2.5 h-10 w-full rounded-lg bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90"
                 onClick={() => void handleCheckout()}
               >
-                Selesaikan transaksi
+                Bayar sekarang
               </Button>
-              <p className="mt-3 text-sm text-background/70">
-                Checkout akan mengurangi stok dan menyimpan transaksi ke laporan.
+              <p className="mt-2 text-[10px] text-sidebar-foreground/50">
+                Stok akan otomatis berkurang setelah transaksi.
               </p>
             </div>
           </CardContent>

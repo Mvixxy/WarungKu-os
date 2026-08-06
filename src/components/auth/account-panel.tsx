@@ -14,47 +14,45 @@ export function AccountPanel() {
   async function handleSignOut() {
     try {
       await signOut();
-      toast.success("Kamu sudah keluar dari akun.");
+      toast.success("Berhasil keluar.");
       router.refresh();
       router.push("/auth");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal keluar dari akun.");
+      toast.error(error instanceof Error ? error.message : "Gagal keluar.");
     }
   }
 
   if (isPending) {
     return (
-      <div className="mt-4 rounded-[24px] border border-border/70 bg-card/55 p-4">
-        <p className="text-sm text-muted-foreground">Memuat sesi akun...</p>
+      <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
+        <p className="text-xs text-muted-foreground">Memuat sesi...</p>
       </div>
     );
   }
 
-  if (!session) {
-    return null;
-  }
+  if (!session) return null;
 
   return (
-    <div className="mt-4 rounded-[24px] border border-border/70 bg-card/55 p-4">
-      <div className="flex items-center gap-3">
-        <div className="flex size-10 items-center justify-center rounded-xl bg-foreground text-background">
-          <span className="text-xs font-semibold">
+    <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
+      <div className="flex items-center gap-2.5">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+          <span className="text-[10px] font-semibold">
             {getInitials(session.user.name || session.user.email || "WU")}
           </span>
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium">{session.user.name || "Pemilik Warung"}</p>
-          <p className="truncate text-xs text-muted-foreground">{session.user.email}</p>
+          <p className="truncate text-xs font-medium">{session.user.name || "Pemilik Warung"}</p>
+          <p className="truncate text-[10px] text-muted-foreground">{session.user.email}</p>
         </div>
       </div>
       <Button
         type="button"
-        variant="outline"
-        size="lg"
-        className="mt-4 h-11 w-full rounded-2xl"
+        variant="ghost"
+        size="sm"
+        className="mt-2 h-7 w-full rounded-md text-xs text-muted-foreground hover:text-foreground"
         onClick={() => void handleSignOut()}
       >
-        <LogOut className="size-4" />
+        <LogOut className="size-3" />
         Keluar
       </Button>
     </div>

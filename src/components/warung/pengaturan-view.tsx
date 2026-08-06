@@ -28,10 +28,7 @@ export function PengaturanView() {
   const hasUnsavedChanges = JSON.stringify(form) !== JSON.stringify(settings);
 
   function updateField<Key extends keyof Settings>(field: Key, value: Settings[Key]) {
-    setForm((current) => ({
-      ...current,
-      [field]: value,
-    }));
+    setForm((current) => ({ ...current, [field]: value }));
   }
 
   function togglePayment(method: PaymentMethod) {
@@ -54,17 +51,14 @@ export function PengaturanView() {
         form.city.trim().length === 0 ||
         form.enabledPayments.length === 0
       ) {
-        toast.error(
-          "Lengkapi nama warung, alamat, pemilik, WhatsApp, kota, dan pilih minimal satu metode bayar."
-        );
+        toast.error("Lengkapi semua data yang diperlukan.");
         return;
       }
-
       setIsSaving(true);
       await updateSettings(form);
-      toast.success("Profil warung berhasil diperbarui.");
+      toast.success("Pengaturan berhasil disimpan.");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal menyimpan pengaturan.");
+      toast.error(error instanceof Error ? error.message : "Gagal menyimpan.");
     } finally {
       setIsSaving(false);
     }
@@ -74,141 +68,132 @@ export function PengaturanView() {
     try {
       setIsResetting(true);
       await resetWorkspace();
-      toast.success("Workspace dikosongkan dan dikembalikan ke kondisi awal.");
+      toast.success("Workspace dikembalikan ke kondisi awal.");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal mereset workspace.");
+      toast.error(error instanceof Error ? error.message : "Gagal reset.");
     } finally {
       setIsResetting(false);
     }
   }
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
-      <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
+    <div className="grid gap-3 xl:grid-cols-[1.08fr_0.92fr]">
+      <Card>
         <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <CardTitle className="font-heading text-2xl">Profil warung & notifikasi</CardTitle>
-              <CardDescription className="mt-1">
-                Atur identitas warung yang akan dipakai di dashboard, laporan, dan pengingat operasional.
+              <CardTitle className="font-heading text-lg">Profil warung</CardTitle>
+              <CardDescription className="text-xs">
+                Atur identitas warung untuk dashboard dan laporan.
               </CardDescription>
             </div>
-            <div
+            <span
               className={cn(
-                "rounded-full px-4 py-2 text-sm font-medium",
+                "rounded-full px-2.5 py-1 text-[10px] font-medium",
                 hasUnsavedChanges
-                  ? "bg-primary/12 text-primary"
-                  : "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                  ? "bg-primary/10 text-primary"
+                  : "bg-accent/10 text-accent"
               )}
             >
-              {hasUnsavedChanges ? "Ada perubahan belum disimpan" : "Profil sudah sinkron"}
-            </div>
+              {hasUnsavedChanges ? "Belum disimpan" : "Sinkron"}
+            </span>
           </div>
         </CardHeader>
-        <CardContent className="grid gap-6">
-          <div className="rounded-[26px] border border-border/70 bg-card/85 p-5">
-            <div className="flex items-center gap-2">
-              <Store className="size-4 text-primary" />
-              <p className="font-medium">Identitas warung</p>
+        <CardContent className="space-y-3">
+          <div className="rounded-xl border border-border p-3.5">
+            <div className="flex items-center gap-1.5">
+              <Store className="size-3.5 text-primary" />
+              <p className="text-xs font-medium">Identitas warung</p>
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Ubah nama warung, tagline singkat, kota, dan alamat lengkap dari satu tempat.
-            </p>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="store-name">Nama warung</Label>
+            <div className="mt-2.5 grid gap-2 sm:grid-cols-2">
+              <div className="grid gap-1">
+                <Label htmlFor="store-name" className="text-[10px]">Nama warung</Label>
                 <Input
                   id="store-name"
                   value={form.storeName}
                   onChange={(event) => updateField("storeName", event.target.value)}
-                  className="h-11 rounded-2xl"
-                  placeholder="Contoh: Warung Berkah Bu Rani"
+                  className="h-8 rounded-lg text-sm"
+                  placeholder="Warung Berkah"
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="store-tagline">Tagline / fokus jualan</Label>
+              <div className="grid gap-1">
+                <Label htmlFor="store-tagline" className="text-[10px]">Tagline</Label>
                 <Input
                   id="store-tagline"
                   value={form.storeTagline}
                   onChange={(event) => updateField("storeTagline", event.target.value)}
-                  className="h-11 rounded-2xl"
-                  placeholder="Contoh: Sembako, kopi, dan jajanan harian"
+                  className="h-8 rounded-lg text-sm"
+                  placeholder="Sembako & kopi"
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="city">Kota / area</Label>
+              <div className="grid gap-1">
+                <Label htmlFor="city" className="text-[10px]">Kota</Label>
                 <Input
                   id="city"
                   value={form.city}
                   onChange={(event) => updateField("city", event.target.value)}
-                  className="h-11 rounded-2xl"
-                  placeholder="Contoh: Depok"
+                  className="h-8 rounded-lg text-sm"
+                  placeholder="Depok"
                 />
               </div>
-              <div className="grid gap-2 sm:col-span-2">
-                <Label htmlFor="store-address">Alamat warung</Label>
+              <div className="grid gap-1 sm:col-span-2">
+                <Label htmlFor="store-address" className="text-[10px]">Alamat</Label>
                 <Textarea
                   id="store-address"
                   value={form.storeAddress}
                   onChange={(event) => updateField("storeAddress", event.target.value)}
-                  className="min-h-24 rounded-[22px]"
-                  placeholder="Contoh: Jl. Mawar No. 8, dekat mushola Al-Ikhlas"
+                  className="min-h-16 rounded-lg text-sm"
+                  placeholder="Jl. Mawar No. 8"
                 />
               </div>
             </div>
           </div>
 
-          <div className="rounded-[26px] border border-border/70 bg-card/85 p-5">
-            <div className="flex items-center gap-2">
-              <MapPin className="size-4 text-primary" />
-              <p className="font-medium">Pemilik & catatan bisnis</p>
+          <div className="rounded-xl border border-border p-3.5">
+            <div className="flex items-center gap-1.5">
+              <MapPin className="size-3.5 text-primary" />
+              <p className="text-xs font-medium">Pemilik</p>
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Data ini berguna untuk reminder WhatsApp, laporan internal, dan catatan operasional warung.
-            </p>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="owner-name">Nama pemilik</Label>
+            <div className="mt-2.5 grid gap-2 sm:grid-cols-2">
+              <div className="grid gap-1">
+                <Label htmlFor="owner-name" className="text-[10px]">Nama pemilik</Label>
                 <Input
                   id="owner-name"
                   value={form.ownerName}
                   onChange={(event) => updateField("ownerName", event.target.value)}
-                  className="h-11 rounded-2xl"
-                  placeholder="Contoh: Ibu Rani"
+                  className="h-8 rounded-lg text-sm"
+                  placeholder="Bu Rani"
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="owner-whatsapp">No. WhatsApp pemilik</Label>
+              <div className="grid gap-1">
+                <Label htmlFor="owner-whatsapp" className="text-[10px]">WhatsApp</Label>
                 <Input
                   id="owner-whatsapp"
                   value={form.ownerWhatsapp}
                   onChange={(event) => updateField("ownerWhatsapp", event.target.value)}
-                  className="h-11 rounded-2xl"
-                  placeholder="Contoh: 081234567890"
+                  className="h-8 rounded-lg text-sm"
+                  placeholder="081234567890"
                 />
               </div>
-              <div className="grid gap-2 sm:col-span-2">
-                <Label htmlFor="business-notes">Catatan bisnis</Label>
+              <div className="grid gap-1 sm:col-span-2">
+                <Label htmlFor="business-notes" className="text-[10px]">Catatan bisnis</Label>
                 <Textarea
                   id="business-notes"
                   value={form.businessNotes}
                   onChange={(event) => updateField("businessNotes", event.target.value)}
-                  className="min-h-28 rounded-[22px]"
-                  placeholder="Contoh: Fokus belanja stok tiap Senin pagi, pelanggan ramai setelah magrib."
+                  className="min-h-16 rounded-lg text-sm"
+                  placeholder="Fokus stok tiap Senin pagi..."
                 />
               </div>
             </div>
           </div>
 
-          <div className="rounded-[26px] border border-border/70 bg-card/85 p-5">
-            <div className="flex items-center gap-2">
-              <Bell className="size-4 text-primary" />
-              <p className="font-medium">Batas notifikasi stok menipis</p>
+          <div className="rounded-xl border border-border p-3.5">
+            <div className="flex items-center gap-1.5">
+              <Bell className="size-3.5 text-primary" />
+              <p className="text-xs font-medium">Batas stok alert</p>
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Produk dengan stok di bawah angka ini akan disorot lebih agresif di kasir dan inventaris.
-            </p>
-            <div className="mt-4 grid gap-2 sm:grid-cols-[160px_1fr] sm:items-center">
+            <div className="mt-2.5 flex items-center gap-2">
               <Input
                 type="number"
                 min={1}
@@ -217,20 +202,20 @@ export function PengaturanView() {
                   const nextValue = Number(event.target.value);
                   updateField("stockAlertThreshold", Number.isFinite(nextValue) ? nextValue : 0);
                 }}
-                className="h-11 rounded-2xl"
+                className="h-8 w-24 rounded-lg text-sm"
               />
-              <div className="rounded-[20px] bg-muted/55 px-4 py-3 text-sm text-muted-foreground">
-                Saat ini ada {lowStockProducts.length} produk yang berada di area peringatan.
-              </div>
+              <span className="text-xs text-muted-foreground">
+                {lowStockProducts.length} produk di area peringatan
+              </span>
             </div>
           </div>
 
-          <div className="rounded-[26px] border border-border/70 bg-card/85 p-5">
-            <div className="flex items-center gap-2">
-              <WalletCards className="size-4 text-primary" />
-              <p className="font-medium">Metode bayar yang ditampilkan</p>
+          <div className="rounded-xl border border-border p-3.5">
+            <div className="flex items-center gap-1.5">
+              <WalletCards className="size-3.5 text-primary" />
+              <p className="text-xs font-medium">Metode bayar</p>
             </div>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-2.5 flex flex-wrap gap-1.5">
               {paymentMethods.map((method) => {
                 const active = form.enabledPayments.includes(method);
                 return (
@@ -238,10 +223,8 @@ export function PengaturanView() {
                     key={method}
                     type="button"
                     variant={active ? "default" : "outline"}
-                    className={cn(
-                      "rounded-full",
-                      active && "shadow-[0_20px_40px_-24px_rgba(186,92,35,0.75)]"
-                    )}
+                    size="sm"
+                    className="h-7 rounded-md text-xs"
                     onClick={() => togglePayment(method)}
                   >
                     {method}
@@ -249,101 +232,86 @@ export function PengaturanView() {
                 );
               })}
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Daftar ini langsung dipakai untuk opsi pembayaran di kasir utama.
-            </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-1.5">
             <Button
               type="button"
-              size="lg"
-              className="rounded-2xl"
+              size="sm"
+              className="rounded-lg"
               onClick={() => void handleSave()}
               disabled={isSaving}
             >
-              <BadgeCheck className="size-4" />
-              {isSaving ? "Menyimpan..." : "Simpan pengaturan"}
+              <BadgeCheck className="size-3.5" />
+              {isSaving ? "Menyimpan..." : "Simpan"}
             </Button>
             <Button
               type="button"
-              size="lg"
+              size="sm"
               variant="outline"
-              className="rounded-2xl"
+              className="rounded-lg"
               onClick={() => setForm(settings)}
               disabled={!hasUnsavedChanges || isSaving}
             >
-              Kembalikan draft
+              Reset draft
             </Button>
             <Button
               type="button"
-              size="lg"
+              size="sm"
               variant="outline"
-              className="rounded-2xl"
+              className="rounded-lg"
               onClick={() => void handleWorkspaceReset()}
               disabled={isResetting}
             >
-              <RotateCcw className="size-4" />
-              {isResetting ? "Mereset..." : "Reset workspace"}
+              <RotateCcw className="size-3.5" />
+              {isResetting ? "Resetting..." : "Reset workspace"}
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      <div className="space-y-4">
-        <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
+      <div className="space-y-3">
+        <Card>
           <CardHeader>
-            <CardTitle className="font-heading text-2xl">Preview identitas warung</CardTitle>
-            <CardDescription>
-              Cek ringkasan yang akan muncul di area operasional dan header laporan setelah disimpan.
+            <CardTitle className="font-heading text-lg">Preview profil</CardTitle>
+            <CardDescription className="text-xs">
+              Ringkasan yang muncul di dashboard dan laporan.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-[24px] bg-foreground px-5 py-5 text-background">
-              <div className="flex items-center gap-2">
-                <Store className="size-4 text-primary" />
-                <p className="text-sm font-medium text-background/75">Warung aktif</p>
+          <CardContent className="space-y-2.5">
+            <div className="rounded-xl bg-sidebar p-3.5 text-sidebar-foreground">
+              <div className="flex items-center gap-1.5 text-sidebar-foreground/60">
+                <Store className="size-3 text-sidebar-primary" />
+                <p className="text-[10px] font-medium uppercase tracking-wide">Warung aktif</p>
               </div>
-              <p className="mt-3 font-heading text-3xl font-semibold">{form.storeName || "Nama warung"}</p>
-              <p className="mt-2 text-sm text-background/75">
-                {form.storeTagline || "Tagline warung akan muncul di sini"}
+              <p className="mt-2 font-heading text-lg font-semibold">{form.storeName || "Nama warung"}</p>
+              <p className="text-xs text-sidebar-foreground/60">
+                {form.storeTagline || "Tagline"}
               </p>
-              <div className="mt-4 space-y-2 text-sm text-background/75">
-                <p>{form.city || "Kota / area belum diisi"}</p>
-                <p>{form.storeAddress || "Alamat warung belum diisi"}</p>
-                <p>
-                  Pemilik: {form.ownerName || "-"} • {form.ownerWhatsapp || "-"}
-                </p>
+              <div className="mt-2 space-y-0.5 text-[10px] text-sidebar-foreground/50">
+                <p>{form.city || "Kota"} · {form.storeAddress || "Alamat"}</p>
+                <p>Pemilik: {form.ownerName || "-"} · {form.ownerWhatsapp || "-"}</p>
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-[22px] border border-border/70 bg-card/85 p-4">
-                <p className="text-sm text-muted-foreground">Produk aktif</p>
-                <p className="mt-2 font-heading text-3xl font-semibold">{products.length}</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-lg border border-border bg-card p-2.5">
+                <p className="text-[10px] text-muted-foreground">Produk aktif</p>
+                <p className="mt-0.5 font-heading text-lg font-semibold">{products.length}</p>
               </div>
-              <div className="rounded-[22px] border border-border/70 bg-card/85 p-4">
-                <p className="text-sm text-muted-foreground">Batas stok alert</p>
-                <p className="mt-2 font-heading text-3xl font-semibold">
-                  {form.stockAlertThreshold || 0} pcs
-                </p>
+              <div className="rounded-lg border border-border bg-card p-2.5">
+                <p className="text-[10px] text-muted-foreground">Batas alert</p>
+                <p className="mt-0.5 font-heading text-lg font-semibold">{form.stockAlertThreshold} pcs</p>
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-border/70 bg-card/85 p-5">
-              <p className="text-sm text-muted-foreground">Catatan bisnis</p>
-              <p className="mt-3 text-sm leading-6 text-foreground/80">
-                {form.businessNotes || "Belum ada catatan bisnis. Tambahkan info penting untuk operasional harian."}
-              </p>
-            </div>
-
-            <div className="rounded-[24px] border border-border/70 bg-card/85 p-5">
-              <p className="text-sm text-muted-foreground">Metode pembayaran aktif</p>
-              <div className="mt-3 flex flex-wrap gap-2">
+            <div className="rounded-lg border border-border bg-card p-3">
+              <p className="text-[10px] text-muted-foreground">Metode bayar</p>
+              <div className="mt-1.5 flex flex-wrap gap-1">
                 {form.enabledPayments.map((method) => (
                   <span
                     key={method}
-                    className="rounded-full bg-primary/12 px-3 py-1 text-sm font-medium text-primary"
+                    className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary"
                   >
                     {method}
                   </span>
@@ -353,21 +321,21 @@ export function PengaturanView() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
+        <Card>
           <CardHeader>
-            <CardTitle className="font-heading text-2xl">Acuan bisnis</CardTitle>
-            <CardDescription>Contoh kasar valuasi stok aktif untuk kebutuhan diskusi internal.</CardDescription>
+            <CardTitle className="font-heading text-lg">Acuan bisnis</CardTitle>
+            <CardDescription className="text-xs">Estimasi modal stok aktif.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="rounded-[26px] border border-border/70 bg-card/85 p-5">
-              <p className="text-sm text-muted-foreground">Estimasi modal stok berjalan</p>
-              <p className="mt-3 font-heading text-4xl font-semibold">
+            <div className="rounded-xl border border-border bg-muted/30 p-3.5">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Estimasi modal</p>
+              <p className="mt-1 font-heading text-xl font-semibold">
                 {formatCurrency(
                   products.reduce((sum, product) => sum + product.buyPrice * product.stock, 0)
                 )}
               </p>
-              <p className="mt-3 text-sm text-muted-foreground">
-                Angka ini membantu saat mau membandingkan modal persediaan dengan omzet dari laporan.
+              <p className="mt-1 text-[10px] text-muted-foreground">
+                Bandingkan dengan omzet dari laporan.
               </p>
             </div>
           </CardContent>

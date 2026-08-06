@@ -65,7 +65,6 @@ export function BukuHutangView() {
         toast.error("Lengkapi nama, nomor WA, dan nominal hutang.");
         return;
       }
-
       await addDebt(draft);
       setCreateOpen(false);
       setDraft(emptyDraft);
@@ -76,8 +75,8 @@ export function BukuHutangView() {
   }
 
   return (
-    <div className="space-y-4">
-      <section className="grid gap-4 md:grid-cols-3">
+    <div className="space-y-3">
+      <section className="grid gap-3 md:grid-cols-3">
         <StatCard
           title="Kasbon aktif"
           value={formatCurrency(outstandingTotal)}
@@ -92,190 +91,185 @@ export function BukuHutangView() {
         <StatCard
           title="Pengingat terkirim"
           value={`${reminderCount} kali`}
-          description="Simulasi notifikasi WA yang sudah dipicu dari frontend."
+          description="Notifikasi WA yang sudah dipicu."
           tone="warn"
         />
       </section>
 
-      <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
-        <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <Card>
+        <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <CardTitle className="font-heading text-2xl">Buku hutang pelanggan</CardTitle>
+            <CardTitle className="font-heading text-lg">Buku hutang pelanggan</CardTitle>
             <CardDescription>
-              Rapi untuk warung, gampang dilihat lagi saat butuh menagih atau memeriksa langganan.
+              Catat kasbon, kirim pengingat, dan tandai pelunasan.
             </CardDescription>
           </div>
 
-          <div className="flex flex-col gap-3 md:flex-row md:items-center">
-            <div className="relative min-w-[220px]">
-              <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="flex flex-col gap-2 md:flex-row md:items-center">
+            <div className="relative min-w-[200px]">
+              <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Cari nama atau no. WhatsApp"
-                className="h-11 rounded-2xl bg-card/85 pl-9"
+                placeholder="Cari nama atau WA..."
+                className="h-9 rounded-lg border-border bg-muted/50 pl-8 text-sm"
               />
             </div>
 
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
               <DialogTrigger
-                render={<Button size="lg" className="h-11 rounded-2xl" />}
+                render={<Button size="sm" className="h-9 rounded-lg" />}
               >
-                <WalletCards className="size-4" />
+                <WalletCards className="size-3.5" />
                 Tambah kasbon
               </DialogTrigger>
-              <DialogContent className="max-w-xl rounded-[28px] p-0">
-                <DialogHeader className="p-6 pb-0">
-                  <DialogTitle className="font-heading text-2xl">Catat hutang baru</DialogTitle>
-                  <DialogDescription>
-                    Simpan nama pelanggan, nomor WhatsApp, nominal, dan tanggal jatuh tempo.
+              <DialogContent className="max-w-md rounded-xl p-0">
+                <DialogHeader className="p-4 pb-0">
+                  <DialogTitle className="font-heading text-lg">Catat hutang baru</DialogTitle>
+                  <DialogDescription className="text-xs">
+                    Simpan data pelanggan dan nominal hutang.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 p-6 pt-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="borrower-name">Nama peminjam</Label>
+                <div className="grid gap-3 p-4 pt-2">
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="borrower-name" className="text-xs">Nama peminjam</Label>
                     <Input
                       id="borrower-name"
                       value={draft.borrowerName}
                       onChange={(event) => setDraft({ ...draft, borrowerName: event.target.value })}
-                      className="h-11 rounded-2xl"
+                      className="h-9 rounded-lg text-sm"
                     />
                   </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="borrower-wa">Nomor WhatsApp</Label>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="borrower-wa" className="text-xs">Nomor WhatsApp</Label>
                     <Input
                       id="borrower-wa"
                       value={draft.whatsapp}
                       onChange={(event) => setDraft({ ...draft, whatsapp: event.target.value })}
                       placeholder="08xxxxxxxxxx"
-                      className="h-11 rounded-2xl"
+                      className="h-9 rounded-lg text-sm"
                     />
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="grid gap-2">
-                      <Label htmlFor="borrower-amount">Nominal hutang</Label>
+                  <div className="grid gap-1.5 sm:grid-cols-2">
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="borrower-amount" className="text-xs">Nominal hutang</Label>
                       <Input
                         id="borrower-amount"
                         type="number"
                         min={0}
                         value={draft.amount}
                         onChange={(event) => setDraft({ ...draft, amount: Number(event.target.value) })}
-                        className="h-11 rounded-2xl"
+                        className="h-9 rounded-lg text-sm"
                       />
                     </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="borrower-due-date">Jatuh tempo</Label>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="borrower-due-date" className="text-xs">Jatuh tempo</Label>
                       <Input
                         id="borrower-due-date"
                         type="date"
                         value={draft.dueDate}
                         onChange={(event) => setDraft({ ...draft, dueDate: event.target.value })}
-                        className="h-11 rounded-2xl"
+                        className="h-9 rounded-lg text-sm"
                       />
                     </div>
                   </div>
                 </div>
-                <DialogFooter className="rounded-b-[28px]" showCloseButton>
-                  <Button type="button" onClick={() => void handleCreateDebt()}>
-                    Simpan kasbon
+                <DialogFooter className="rounded-b-xl px-4 pb-4" showCloseButton>
+                  <Button type="button" size="sm" className="rounded-lg" onClick={() => void handleCreateDebt()}>
+                    Simpan
                   </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
         </CardHeader>
-        <CardContent className="space-y-5">
+        <CardContent className="space-y-3">
           <Tabs value={status} onValueChange={(value) => setStatus(value as typeof status)}>
-            <TabsList className="rounded-full p-1">
-              <TabsTrigger value="semua" className="rounded-full px-4">
+            <TabsList className="rounded-lg p-0.5">
+              <TabsTrigger value="semua" className="rounded-md px-3 text-xs">
                 Semua
               </TabsTrigger>
-              <TabsTrigger value="belum" className="rounded-full px-4">
+              <TabsTrigger value="belum" className="rounded-md px-3 text-xs">
                 Belum lunas
               </TabsTrigger>
-              <TabsTrigger value="lunas" className="rounded-full px-4">
+              <TabsTrigger value="lunas" className="rounded-md px-3 text-xs">
                 Lunas
               </TabsTrigger>
             </TabsList>
           </Tabs>
 
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-2.5 lg:grid-cols-2">
             {filteredDebts.map((debt) => (
-              <Card key={debt.id} className="rounded-[26px] border border-border/70 bg-card/78">
-                <CardContent className="space-y-4 p-5">
-                  <div className="flex items-start justify-between gap-4">
+              <Card key={debt.id} className="p-0">
+                <CardContent className="space-y-2.5 p-3.5">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-heading text-xl font-semibold">{debt.borrowerName}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">{debt.whatsapp}</p>
+                      <p className="font-heading text-sm font-semibold">{debt.borrowerName}</p>
+                      <p className="text-xs text-muted-foreground">{debt.whatsapp}</p>
                     </div>
                     <Badge
-                      className={
-                        debt.isPaid
-                          ? "rounded-full bg-accent text-accent-foreground"
-                          : "rounded-full bg-primary text-primary-foreground"
-                      }
+                      variant={debt.isPaid ? "secondary" : "default"}
+                      className="rounded-full text-[10px] px-2 py-0.5"
                     >
                       {debt.isPaid ? "Lunas" : "Belum lunas"}
                     </Badge>
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-[20px] bg-muted/55 p-4">
-                      <p className="text-sm text-muted-foreground">Nominal</p>
-                      <p className="mt-2 text-xl font-semibold">{formatCurrency(debt.amount)}</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-lg bg-muted/50 p-2.5">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Nominal</p>
+                      <p className="mt-0.5 text-sm font-semibold">{formatCurrency(debt.amount)}</p>
                     </div>
-                    <div className="rounded-[20px] bg-muted/55 p-4">
-                      <p className="text-sm text-muted-foreground">Jatuh tempo</p>
-                      <p className="mt-2 text-xl font-semibold">{formatDate(debt.dueDate)}</p>
+                    <div className="rounded-lg bg-muted/50 p-2.5">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Jatuh tempo</p>
+                      <p className="mt-0.5 text-sm font-semibold">{formatDate(debt.dueDate)}</p>
                     </div>
                   </div>
 
-                  <div className="rounded-[20px] border border-border/70 bg-card/75 p-4 text-sm text-muted-foreground">
-                    <p>Dicatat: {formatDateTime(debt.createdAt)}</p>
-                    <p className="mt-1">
-                      Pengingat terakhir:{" "}
-                      {debt.lastReminderAt ? formatDateTime(debt.lastReminderAt) : "Belum pernah dikirim"}
-                    </p>
+                  <div className="rounded-lg border border-border p-2 text-[10px] text-muted-foreground">
+                    Dicatat: {formatDateTime(debt.createdAt)} · Pengingat: {debt.lastReminderAt ? formatDateTime(debt.lastReminderAt) : "Belum"}
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex gap-1.5">
                     <Button
                       type="button"
                       variant="outline"
-                      className="rounded-full"
+                      size="sm"
+                      className="h-7 rounded-md text-xs"
                       onClick={async () => {
                         try {
                           const reminded = await sendDebtReminder(debt.id);
                           if (reminded) {
-                            toast.success("Simulasi pengingat WhatsApp terkirim.", {
-                              description: `Pesan sopan untuk ${reminded.borrowerName} dipicu dari frontend.`,
+                            toast.success("Pengingat terkirim.", {
+                              description: `Pesan untuk ${reminded.borrowerName}.`,
                             });
                           }
                         } catch (error) {
-                          toast.error(error instanceof Error ? error.message : "Gagal mengirim pengingat.");
+                          toast.error(error instanceof Error ? error.message : "Gagal kirim pengingat.");
                         }
                       }}
                     >
-                      <MessageSquareShare className="size-4" />
-                      Kirim pengingat
+                      <MessageSquareShare className="size-3" />
+                      Kirim
                     </Button>
-                    {!debt.isPaid ? (
+                    {!debt.isPaid && (
                       <Button
                         type="button"
-                        className="rounded-full"
+                        size="sm"
+                        className="h-7 rounded-md text-xs"
                         onClick={async () => {
                           try {
                             await markDebtPaid(debt.id);
-                            toast.success(`${debt.borrowerName} ditandai lunas.`);
+                            toast.success(`${debt.borrowerName} lunas.`);
                           } catch (error) {
-                            toast.error(error instanceof Error ? error.message : "Gagal memperbarui status hutang.");
+                            toast.error(error instanceof Error ? error.message : "Gagal.");
                           }
                         }}
                       >
-                        <CheckCircle2 className="size-4" />
-                        Tandai lunas
+                        <CheckCircle2 className="size-3" />
+                        Lunas
                       </Button>
-                    ) : null}
+                    )}
                   </div>
                 </CardContent>
               </Card>

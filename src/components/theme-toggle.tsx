@@ -16,13 +16,12 @@ const options: { value: Mode; label: string; icon: typeof Sun }[] = [
 
 const styles: Record<Variant, { container: string; active: string; inactive: string }> = {
   sidebar: {
-    container: "border-sidebar-border/60 bg-sidebar-accent/40",
+    container: "border-sidebar-border bg-sidebar-accent",
     active: "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm",
-    inactive:
-      "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+    inactive: "text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground",
   },
   default: {
-    container: "border-border/60 bg-muted/60",
+    container: "border-border bg-muted",
     active: "bg-primary text-primary-foreground shadow-sm",
     inactive: "text-muted-foreground hover:bg-card hover:text-foreground",
   },
@@ -39,7 +38,6 @@ export function ThemeToggle({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -51,7 +49,7 @@ export function ThemeToggle({
       role="radiogroup"
       aria-label="Mode tampilan"
       className={cn(
-        "inline-flex items-center gap-1 rounded-2xl border p-1",
+        "inline-flex items-center gap-0.5 rounded-lg border p-0.5",
         tokens.container,
         className,
       )}
@@ -69,11 +67,11 @@ export function ThemeToggle({
             title={option.label}
             onClick={() => setTheme(option.value)}
             className={cn(
-              "flex size-8 items-center justify-center rounded-xl transition-colors",
+              "flex size-7 items-center justify-center rounded-md transition-colors",
               isActive ? tokens.active : tokens.inactive,
             )}
           >
-            <Icon className="size-4" />
+            <Icon className="size-3.5" />
           </button>
         );
       })}

@@ -18,18 +18,18 @@ export function StatCard({
   return (
     <Card
       className={cn(
-        "border-border/60 shadow-[0_20px_60px_-36px_rgba(65,35,18,0.45)]",
-        tone === "accent" && "bg-accent text-accent-foreground",
-        tone === "warn" && "bg-primary text-primary-foreground"
+        "border-border bg-card",
+        tone === "accent" && "bg-accent text-accent-foreground border-accent/30",
+        tone === "warn" && "bg-primary/8 text-primary border-primary/20"
       )}
     >
-      <CardContent className="space-y-3 p-5">
+      <CardContent className="space-y-2 p-4">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-medium opacity-80">{title}</p>
-          <ArrowUpRight className="size-4 opacity-70" />
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{title}</p>
+          <ArrowUpRight className="size-3.5 text-muted-foreground" />
         </div>
-        <p className="font-heading text-3xl font-semibold tracking-tight">{value}</p>
-        <p className="text-sm opacity-75">{description}</p>
+        <p className="font-heading text-2xl font-semibold tracking-tight">{value}</p>
+        <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
       </CardContent>
     </Card>
   );

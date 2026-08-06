@@ -49,26 +49,26 @@ function ProductForm({
   onChange: (draft: ProductDraft) => void;
 }) {
   return (
-    <div className="grid gap-4">
-      <div className="grid gap-2">
-        <Label htmlFor="product-name">Nama barang</Label>
+    <div className="grid gap-3">
+      <div className="grid gap-1.5">
+        <Label htmlFor="product-name" className="text-xs">Nama barang</Label>
         <Input
           id="product-name"
           value={draft.name}
           onChange={(event) => onChange({ ...draft, name: event.target.value })}
           placeholder="Contoh: Mi Instan Goreng"
-          className="h-11 rounded-2xl"
+          className="h-9 rounded-lg text-sm"
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="grid gap-2">
-          <Label>Kategori</Label>
+      <div className="grid gap-1.5 sm:grid-cols-2">
+        <div className="grid gap-1.5">
+          <Label className="text-xs">Kategori</Label>
           <Select
             value={draft.category}
             onValueChange={(value) => onChange({ ...draft, category: value as ProductCategory })}
           >
-            <SelectTrigger className="h-11 w-full rounded-2xl bg-card">
+            <SelectTrigger className="h-9 w-full rounded-lg bg-card text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -79,64 +79,64 @@ function ProductForm({
             </SelectContent>
           </Select>
         </div>
-        <div className="grid gap-2">
-          <Label htmlFor="product-stock">Stok awal</Label>
+        <div className="grid gap-1.5">
+          <Label htmlFor="product-stock" className="text-xs">Stok awal</Label>
           <Input
             id="product-stock"
             type="number"
             min={0}
             value={draft.stock}
             onChange={(event) => onChange({ ...draft, stock: Number(event.target.value) })}
-            className="h-11 rounded-2xl"
+            className="h-9 rounded-lg text-sm"
           />
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="grid gap-2">
-          <Label htmlFor="product-buy-price">Harga beli</Label>
+      <div className="grid gap-1.5 sm:grid-cols-2">
+        <div className="grid gap-1.5">
+          <Label htmlFor="product-buy-price" className="text-xs">Harga beli</Label>
           <Input
             id="product-buy-price"
             type="number"
             min={0}
             value={draft.buyPrice}
             onChange={(event) => onChange({ ...draft, buyPrice: Number(event.target.value) })}
-            className="h-11 rounded-2xl"
+            className="h-9 rounded-lg text-sm"
           />
         </div>
-        <div className="grid gap-2">
-          <Label htmlFor="product-sell-price">Harga jual</Label>
+        <div className="grid gap-1.5">
+          <Label htmlFor="product-sell-price" className="text-xs">Harga jual</Label>
           <Input
             id="product-sell-price"
             type="number"
             min={0}
             value={draft.sellPrice}
             onChange={(event) => onChange({ ...draft, sellPrice: Number(event.target.value) })}
-            className="h-11 rounded-2xl"
+            className="h-9 rounded-lg text-sm"
           />
         </div>
       </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="product-minimum-stock">Stok minimum</Label>
+      <div className="grid gap-1.5">
+        <Label htmlFor="product-minimum-stock" className="text-xs">Stok minimum</Label>
         <Input
           id="product-minimum-stock"
           type="number"
           min={0}
           value={draft.minimumStock}
           onChange={(event) => onChange({ ...draft, minimumStock: Number(event.target.value) })}
-          className="h-11 rounded-2xl"
+          className="h-9 rounded-lg text-sm"
         />
       </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="product-description">Catatan singkat</Label>
+      <div className="grid gap-1.5">
+        <Label htmlFor="product-description" className="text-xs">Catatan singkat</Label>
         <Input
           id="product-description"
           value={draft.description}
           onChange={(event) => onChange({ ...draft, description: event.target.value })}
           placeholder="Penempatan rak, paket laris, atau info kasir"
-          className="h-11 rounded-2xl"
+          className="h-9 rounded-lg text-sm"
         />
       </div>
     </div>
@@ -183,7 +183,6 @@ export function InventarisView() {
         toast.error("Lengkapi data produk lebih dulu.");
         return;
       }
-
       await addProduct(draft);
       setDraft(emptyDraft);
       setCreateOpen(false);
@@ -199,7 +198,6 @@ export function InventarisView() {
         toast.error("Periksa kembali data yang ingin diperbarui.");
         return;
       }
-
       await updateProduct(editingProduct.id, editDraft);
       setEditingProduct(null);
       toast.success(`${editDraft.name} berhasil diperbarui.`);
@@ -214,7 +212,6 @@ export function InventarisView() {
         toast.error("Masukkan jumlah restok yang valid.");
         return;
       }
-
       await restockProduct(restockTarget.id, restockAmount);
       toast.success(`${restockTarget.name} ditambah ${restockAmount} stok.`);
       setRestockTarget(null);
@@ -225,66 +222,66 @@ export function InventarisView() {
   }
 
   return (
-    <div className="space-y-4">
-      <section className="grid gap-4 md:grid-cols-3">
+    <div className="space-y-3">
+      <section className="grid gap-3 md:grid-cols-3">
         <StatCard
           title="Total SKU"
           value={`${products.length} produk`}
-          description="Produk siap jual yang sedang aktif di warung."
+          description="Produk aktif di warung."
         />
         <StatCard
           title="Stok menipis"
           value={`${lowStockProducts.length} item`}
-          description="Pantau dan restok sebelum pelanggan kehabisan pilihan."
+          description="Perlu restok sebelum kehabisan."
           tone="warn"
         />
         <StatCard
           title="Nilai stok"
           value={formatCurrency(totalInventoryValue)}
-          description="Perkiraan modal yang sedang tersimpan di inventaris."
+          description="Total modal di inventaris."
           tone="accent"
         />
       </section>
 
-      <Card className="border-border/60 bg-card/74 shadow-[0_28px_70px_-45px_rgba(66,38,20,0.55)]">
-        <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <Card>
+        <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <CardTitle className="font-heading text-2xl">Inventaris barang jadi</CardTitle>
+            <CardTitle className="font-heading text-lg">Inventaris barang</CardTitle>
             <CardDescription>
-              Semua perubahan di layar ini langsung mengubah state mock yang dipakai POS dan laporan.
+              Kelola produk, stok, dan harga jual.
             </CardDescription>
           </div>
 
-          <div className="flex flex-col gap-3 md:flex-row md:items-center">
-            <div className="relative min-w-[260px]">
-              <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="flex flex-col gap-2 md:flex-row md:items-center">
+            <div className="relative min-w-[220px]">
+              <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Cari nama, kategori, atau catatan"
-                className="h-11 rounded-2xl bg-card/85 pl-9"
+                placeholder="Cari produk..."
+                className="h-9 rounded-lg border-border bg-muted/50 pl-8 text-sm"
               />
             </div>
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
               <DialogTrigger
-                render={<Button size="lg" className="h-11 rounded-2xl" />}
+                render={<Button size="sm" className="h-9 rounded-lg" />}
               >
-                <PackagePlus className="size-4" />
+                <PackagePlus className="size-3.5" />
                 Tambah barang
               </DialogTrigger>
-              <DialogContent className="max-w-2xl rounded-[28px] p-0">
-                <DialogHeader className="p-6 pb-0">
-                  <DialogTitle className="font-heading text-2xl">Tambah produk baru</DialogTitle>
-                  <DialogDescription>
-                    Isi data minimum supaya kasir bisa langsung menjual barang ini.
+              <DialogContent className="max-w-lg rounded-xl p-0">
+                <DialogHeader className="p-4 pb-0">
+                  <DialogTitle className="font-heading text-lg">Tambah produk baru</DialogTitle>
+                  <DialogDescription className="text-xs">
+                    Isi data supaya kasir bisa langsung menjual barang ini.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="p-6 pt-4">
+                <div className="p-4 pt-2">
                   <ProductForm draft={draft} onChange={setDraft} />
                 </div>
-                <DialogFooter className="rounded-b-[28px]" showCloseButton>
-                  <Button type="button" onClick={() => void handleCreateProduct()}>
-                    Simpan produk
+                <DialogFooter className="rounded-b-xl px-4 pb-4" showCloseButton>
+                  <Button type="button" size="sm" className="rounded-lg" onClick={() => void handleCreateProduct()}>
+                    Simpan
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -292,53 +289,53 @@ export function InventarisView() {
           </div>
         </CardHeader>
         <CardContent>
-          <Table className="min-w-[760px]">
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
-                <TableHead>Produk</TableHead>
-                <TableHead>Kategori</TableHead>
-                <TableHead>Harga beli</TableHead>
-                <TableHead>Harga jual</TableHead>
-                <TableHead>Stok</TableHead>
-                <TableHead>Minimum</TableHead>
-                <TableHead className="text-right">Aksi</TableHead>
+                <TableHead className="text-xs">Produk</TableHead>
+                <TableHead className="text-xs">Kategori</TableHead>
+                <TableHead className="text-xs">Beli</TableHead>
+                <TableHead className="text-xs">Jual</TableHead>
+                <TableHead className="text-xs">Stok</TableHead>
+                <TableHead className="text-xs">Min</TableHead>
+                <TableHead className="text-xs text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredProducts.map((product) => {
                 const lowStock = product.stock <= product.minimumStock;
-
                 return (
-                  <TableRow key={product.id} className={cn(lowStock && "bg-primary/6")}>
-                    <TableCell className="min-w-[220px]">
+                  <TableRow key={product.id} className={cn(lowStock && "bg-primary/5")}>
+                    <TableCell className="min-w-[200px]">
                       <div>
-                        <p className="font-medium">{product.name}</p>
-                        <p className="text-sm text-muted-foreground">{product.description}</p>
+                        <p className="text-sm font-medium">{product.name}</p>
+                        {product.description && (
+                          <p className="text-xs text-muted-foreground">{product.description}</p>
+                        )}
                       </div>
                     </TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell>{formatCurrency(product.buyPrice)}</TableCell>
-                    <TableCell>{formatCurrency(product.sellPrice)}</TableCell>
+                    <TableCell className="text-xs">{product.category}</TableCell>
+                    <TableCell className="text-xs">{formatCurrency(product.buyPrice)}</TableCell>
+                    <TableCell className="text-xs font-medium">{formatCurrency(product.sellPrice)}</TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <Badge
-                          className={cn(
-                            "rounded-full border-0",
-                            lowStock ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"
-                          )}
+                          variant={lowStock ? "destructive" : "secondary"}
+                          className="rounded-full text-[10px] px-2 py-0.5"
                         >
-                          {product.stock} pcs
+                          {product.stock}
                         </Badge>
-                        {lowStock ? <AlertTriangle className="size-4 text-primary" /> : null}
+                        {lowStock && <AlertTriangle className="size-3 text-destructive" />}
                       </div>
                     </TableCell>
-                    <TableCell>{product.minimumStock} pcs</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{product.minimumStock}</TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-1">
                         <Button
                           type="button"
-                          variant="outline"
-                          className="rounded-full"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 rounded-md text-xs"
                           onClick={() => {
                             setEditingProduct(product);
                             setEditDraft({
@@ -352,17 +349,16 @@ export function InventarisView() {
                             });
                           }}
                         >
-                          <PencilLine className="size-4" />
-                          Edit
+                          <PencilLine className="size-3" />
                         </Button>
                         <Button
                           type="button"
-                          variant="secondary"
-                          className="rounded-full"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 rounded-md text-xs"
                           onClick={() => setRestockTarget(product)}
                         >
-                          <Warehouse className="size-4" />
-                          Restok
+                          <Warehouse className="size-3" />
                         </Button>
                       </div>
                     </TableCell>
@@ -375,52 +371,52 @@ export function InventarisView() {
       </Card>
 
       <Dialog open={Boolean(editingProduct)} onOpenChange={(open) => !open && setEditingProduct(null)}>
-        <DialogContent className="max-w-2xl rounded-[28px] p-0">
-          <DialogHeader className="p-6 pb-0">
-            <DialogTitle className="font-heading text-2xl">Edit produk</DialogTitle>
-            <DialogDescription>Perbarui stok, harga, atau posisi minimum sebelum notifikasi muncul.</DialogDescription>
+        <DialogContent className="max-w-lg rounded-xl p-0">
+          <DialogHeader className="p-4 pb-0">
+            <DialogTitle className="font-heading text-lg">Edit produk</DialogTitle>
+            <DialogDescription className="text-xs">Perbarui data produk.</DialogDescription>
           </DialogHeader>
-          <div className="p-6 pt-4">
+          <div className="p-4 pt-2">
             <ProductForm draft={editDraft} onChange={setEditDraft} />
           </div>
-          <DialogFooter className="rounded-b-[28px]" showCloseButton>
-            <Button type="button" onClick={() => void handleUpdateProduct()}>
-              Simpan perubahan
+          <DialogFooter className="rounded-b-xl px-4 pb-4" showCloseButton>
+            <Button type="button" size="sm" className="rounded-lg" onClick={() => void handleUpdateProduct()}>
+              Simpan
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={Boolean(restockTarget)} onOpenChange={(open) => !open && setRestockTarget(null)}>
-        <DialogContent className="max-w-md rounded-[28px] p-0">
-          <DialogHeader className="p-6 pb-0">
-            <DialogTitle className="font-heading text-2xl">Restok barang</DialogTitle>
-            <DialogDescription>
-              Tambahkan stok untuk {restockTarget?.name ?? "produk terpilih"}.
+        <DialogContent className="max-w-sm rounded-xl p-0">
+          <DialogHeader className="p-4 pb-0">
+            <DialogTitle className="font-heading text-lg">Restok</DialogTitle>
+            <DialogDescription className="text-xs">
+              Tambah stok untuk {restockTarget?.name ?? "produk"}.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 p-6 pt-4">
-            <div className="rounded-[22px] border border-border/70 bg-card/75 p-4">
-              <p className="text-sm text-muted-foreground">Stok sekarang</p>
-              <p className="mt-2 font-heading text-3xl font-semibold">
+          <div className="space-y-3 p-4 pt-2">
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <p className="text-xs text-muted-foreground">Stok sekarang</p>
+              <p className="mt-1 font-heading text-xl font-semibold">
                 {restockTarget?.stock ?? 0} pcs
               </p>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="restock-amount">Jumlah tambahan stok</Label>
+            <div className="grid gap-1.5">
+              <Label htmlFor="restock-amount" className="text-xs">Jumlah tambahan</Label>
               <Input
                 id="restock-amount"
                 type="number"
                 min={1}
                 value={restockAmount}
                 onChange={(event) => setRestockAmount(Number(event.target.value))}
-                className="h-11 rounded-2xl"
+                className="h-9 rounded-lg text-sm"
               />
             </div>
           </div>
-          <DialogFooter className="rounded-b-[28px]" showCloseButton>
-            <Button type="button" onClick={() => void handleRestock()}>
-              Simpan restok
+          <DialogFooter className="rounded-b-xl px-4 pb-4" showCloseButton>
+            <Button type="button" size="sm" className="rounded-lg" onClick={() => void handleRestock()}>
+              Simpan
             </Button>
           </DialogFooter>
         </DialogContent>
