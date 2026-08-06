@@ -14,6 +14,7 @@ import {
   Sparkles,
   Wallet,
   Wheat,
+  Printer,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -30,7 +31,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatCurrency } from "@/lib/format";
-import { PaymentMethod, Product, ProductCategory } from "@/lib/types";
+import { PaymentMethod, Product, ProductCategory, Transaction } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const paymentLabels: Record<PaymentMethod, string> = {
@@ -464,6 +465,10 @@ export function KasirView() {
     whatsapp: "",
     dueDate: "",
   });
+  const [receiptTransaction, setReceiptTransaction] = useState<{
+    transaction: Transaction;
+    cashGiven?: number;
+  } | null>(null);
 
   const allCategories = Array.from(new Set(products.map((p) => p.category)));
 
@@ -504,9 +509,13 @@ export function KasirView() {
         },
         []
       );
-      toast.success("Transaksi berhasil disimpan.", {
-        description: `${transaction.items.length} produk masuk ke penjualan ${paymentLabels[transaction.paymentMethod]}.`,
-      });
+      if (transaction.paymentMethod !== "Hutang") {
+        setReceiptTransaction({ transaction });
+      } else {
+        toast.success("Transaksi berhasil disimpan.", {
+          description: `${transaction.items.length} produk masuk ke penjualan ${paymentLabels[transaction.paymentMethod]}.`,
+        });
+      }
       if (lowProducts.length > 0) {
         toast.warning("Ada produk yang mendekati stok minimum.", {
           description: `Siapkan restok untuk ${lowProducts
@@ -810,6 +819,152 @@ export function KasirView() {
           </div>
         </div>
       </div>
+
+      {/* Receipt Popup */}
+      {receiptTransaction && (
+        <>
+          <div
+            className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm"
+            onClick={() => setReceiptTransaction(null)}
+          />
+          <div className="fixed inset-x-0 bottom-0 z-[60] max-h-[90vh] overflow-y-auto rounded-t-2xl border-t border-border bg-card shadow-2xl sm:inset-auto sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:max-w-sm sm:rounded-2xl">
+            <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-muted-foreground/30 sm:hidden" />
+            <div className="p-5">
+              {/* Receipt content */}
+              <div id="receipt-content" className="space-y-4">
+                <div className="text-center">
+                  <p className="font-heading text-lg font-bold">{settings.storeName || "WarungKu"}</p>
+                  {settings.storeAddress && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">{settings.storeAddress}{settings.city ? `, ${settings.city}` : ""}</p>
+                  )}
+                  {settings.ownerWhatsapp && (
+                    <p className="text-[10px] text-muted-foreground">Telp: {settings.ownerWhatsapp}</p>
+                  )}
+                </div>
+                <div className="h-px bg-border" />
+                <div className="space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">No. Transaksi</span>
+                    <span className="font-mono">{receiptTransaction.transaction.id.slice(-8).toUpperCase()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Tanggal</span>
+                    <span>{new Date(receiptTransaction.transaction.createdAt).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Metode</span>
+                    <span>{paymentLabels[receiptTransaction.transaction.paymentMethod as PaymentMethod]}</span>
+                  </div>
+                </div>
+                <div className="h-px bg-border" />
+                <div className="space-y-2">
+                  {receiptTransaction.transaction.items.map((item: { productName: string; quantity: number; unitPrice: number }, i: number) => (
+                    <div key={i} className="text-xs">
+                      <div className="flex justify-between">
+                        <span>{item.productName}</span>
+                        <span>{formatCurrency(item.unitPrice * item.quantity)}</span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground">
+                        {item.quantity} x {formatCurrency(item.unitPrice)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                <div className="h-px bg-border" />
+                <div className="space-y-1.5 text-xs">
+                  <div className="flex justify-between font-semibold">
+                    <span>Total</span>
+                    <span className="font-heading text-base">{formatCurrency(receiptTransaction.transaction.total)}</span>
+                  </div>
+                  {receiptTransaction.transaction.paymentMethod === "Tunai" && receiptTransaction.cashGiven != null && (
+                    <>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Dibayar</span>
+                        <span>{formatCurrency(receiptTransaction.cashGiven)}</span>
+                      </div>
+                      <div className="flex justify-between font-semibold text-primary">
+                        <span>Kembali</span>
+                        <span>{formatCurrency(receiptTransaction.cashGiven - receiptTransaction.transaction.total)}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+                <div className="h-px bg-border" />
+                <p className="text-center text-[10px] text-muted-foreground">Terima kasih atas kunjungan Anda!</p>
+              </div>
+
+              {/* Action buttons */}
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const t = receiptTransaction.transaction;
+                    const itemLines = t.items.map(
+                      (item: { productName: string; quantity: number; unitPrice: number }) => `  ${item.productName}  ${item.quantity}x  ${formatCurrency(item.unitPrice * item.quantity)}`
+                    ).join("\n");
+                    const storeName = settings.storeName || "WarungKu";
+                    const addr = settings.storeAddress ? `${settings.storeAddress}${settings.city ? ", " + settings.city : ""}` : "";
+                    const date = new Date(t.createdAt).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
+                    const msg = [
+                      `*${storeName}*`,
+                      addr,
+                      `─────────────`,
+                      `No: ${t.id.slice(-8).toUpperCase()}`,
+                      `Tanggal: ${date}`,
+                      `Bayar: ${paymentLabels[t.paymentMethod as PaymentMethod]}`,
+                      `─────────────`,
+                      itemLines,
+                      `─────────────`,
+                      `*Total: ${formatCurrency(t.total)}*`,
+                      ``,
+                      `Terima kasih!`,
+                    ].join("\n");
+                    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+                  }}
+                  className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-2.5 text-[10px] font-medium transition hover:bg-muted"
+                >
+                  <svg className="size-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.627.616l4.584-1.202A11.952 11.952 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.37 0-4.567-.82-6.293-2.192l-.44-.356-2.64.693.706-2.575-.385-.456A9.935 9.935 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
+                  WhatsApp
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const printContent = document.getElementById("receipt-content");
+                    if (!printContent) return;
+                    const w = window.open("", "_blank", "width=400,height=600");
+                    if (!w) return;
+                    w.document.write(`<!DOCTYPE html><html><head><title>Struk</title><style>
+                      body{font-family:monospace;max-width:320px;margin:0 auto;padding:16px;font-size:13px;color:#000}
+                      .text-center{text-align:center}.font-bold{font-weight:700}
+                      .font-heading{font-weight:700;font-size:16px}
+                      .text-muted{color:#666;font-size:11px}.text-xs{font-size:12px}.text-[10px]{font-size:10px}
+                      .text-base{font-size:14px}.space-y-1>div{margin-bottom:4px}.space-y-2>div{margin-bottom:6px}
+                      .space-y-1\.5>div{margin-bottom:5px}
+                      hr{border:none;border-top:1px dashed #ccc;margin:10px 0}
+                      .flex{display:flex}.justify-between{justify-content:space-between}
+                    </style></head><body>${printContent.innerHTML}</body></html>`);
+                    w.document.close();
+                    w.focus();
+                    setTimeout(() => { w.print(); }, 300);
+                  }}
+                  className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-2.5 text-[10px] font-medium transition hover:bg-muted"
+                >
+                  <Printer className="size-5" />
+                  Cetak
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReceiptTransaction(null)}
+                  className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card p-2.5 text-[10px] font-medium transition hover:bg-muted"
+                >
+                  <X className="size-5" />
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
