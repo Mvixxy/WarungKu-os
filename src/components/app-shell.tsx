@@ -204,15 +204,11 @@ export function AppShell({
                 side="left"
                 className="w-[300px] bg-sidebar text-sidebar-foreground"
               >
-                <SheetHeader className="px-6 pt-6">
-                  <SheetTitle className="text-sidebar-foreground">
-                    {settings.storeName}
-                  </SheetTitle>
-                  <SheetDescription className="text-sidebar-foreground/70">
-                    {activePage.title}
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="flex flex-1 flex-col space-y-1 px-4 pb-6">
+                <div className="flex items-center justify-between px-5 pt-5 pb-3">
+                  <p className="text-sm font-semibold text-sidebar-foreground">{settings.storeName}</p>
+                  <ThemeToggle />
+                </div>
+                <div className="flex flex-1 flex-col space-y-1 border-t border-sidebar-border px-4 pt-3 pb-6">
                   {navigation.map((item) => {
                     const Icon = item.icon;
                     const isActive = pathname === item.href;
@@ -247,7 +243,6 @@ export function AppShell({
                       Keluar akun
                     </button>
                   </div>
-                  <ThemeToggle className="mt-3" />
                 </div>
               </SheetContent>
             </Sheet>
