@@ -320,23 +320,29 @@ export function KasirView() {
       </div>
 
       {/* Mobile: compact floating bar */}
-      <div className="fixed bottom-14 left-0 right-0 z-30 border-t border-border bg-card/95 px-3 py-2.5 backdrop-blur-sm lg:hidden">
+      <div className="fixed bottom-14 left-2 right-2 z-30 lg:hidden">
         <button
           type="button"
-          className="flex w-full items-center justify-between"
+          className="flex w-full items-center justify-between rounded-2xl border border-border bg-card p-3 shadow-lg"
           onClick={() => setMobileCartOpen(true)}
         >
-          <div className="flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <ShoppingBasket className="size-4" />
+          <div className="flex items-center gap-3">
+            <div className="relative flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+              <ShoppingBasket className="size-5" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full bg-foreground text-[9px] font-bold text-background">
+                  {totalItems}
+                </span>
+              )}
             </div>
             <div className="text-left">
-              <p className="text-[10px] text-muted-foreground">{totalItems} item</p>
-              <p className="font-heading text-sm font-semibold">{formatCurrency(cartTotal)}</p>
+              <p className="text-[10px] text-muted-foreground">{totalItems} item di keranjang</p>
+              <p className="font-heading text-base font-semibold tracking-tight">{formatCurrency(cartTotal)}</p>
             </div>
           </div>
-          <div className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">
-            Lihat keranjang
+          <div className="flex items-center gap-1 rounded-xl bg-primary/10 px-3.5 py-2 text-xs font-medium text-primary transition-colors">
+            Buka
+            <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
           </div>
         </button>
       </div>
