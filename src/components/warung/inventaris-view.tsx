@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, PackagePlus, PencilLine, Plus, Search, Warehouse, X } from "lucide-react";
+import { AlertTriangle, PackagePlus, PencilLine, Plus, Search, Trash2, Warehouse, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
 import { StatCard } from "@/components/stat-card";
@@ -204,7 +204,7 @@ function ProductForm({
 }
 
 export function InventarisView() {
-  const { products, addProduct, updateProduct, restockProduct, lowStockProducts } = useAppState();
+  const { products, addProduct, updateProduct, restockProduct, deleteProduct, lowStockProducts } = useAppState();
   const [query, setQuery] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [draft, setDraft] = useState<ProductDraft>(emptyDraft);
@@ -212,6 +212,7 @@ export function InventarisView() {
   const [editDraft, setEditDraft] = useState<ProductDraft>(emptyDraft);
   const [restockTarget, setRestockTarget] = useState<Product | null>(null);
   const [restockAmount, setRestockAmount] = useState(12);
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [localCategories, setLocalCategories] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
@@ -285,6 +286,20 @@ export function InventarisView() {
       setRestockAmount(12);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Gagal menambah stok.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDeleteProduct() {
+    if (saving || !deleteTarget) return;
+    try {
+      setSaving(true);
+      await deleteProduct(deleteTarget.id);
+      setDeleteTarget(null);
+      toast.success(deleteTarget.name + " berhasil dihapus.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal menghapus produk.");
     } finally {
       setSaving(false);
     }
@@ -372,6 +387,9 @@ export function InventarisView() {
                         <Button type="button" variant="ghost" size="sm" className="h-7 rounded-md text-xs" onClick={() => setRestockTarget(product)}>
                           <Warehouse className="size-3" />
                         </Button>
+                        <Button type="button" variant="ghost" size="sm" className="h-7 rounded-md text-xs text-destructive hover:text-destructive" onClick={() => setDeleteTarget(product)}>
+                          <Trash2 className="size-3" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -413,6 +431,21 @@ export function InventarisView() {
           </div>
           <DialogFooter>
             <Button type="button" size="sm" className="rounded-lg px-4" disabled={saving} onClick={() => void handleRestock()}>{saving ? "Menyimpan..." : "Simpan"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(deleteTarget)} onOpenChange={(o) => { if (!o) { setDeleteTarget(null); setSaving(false); } }}>
+        <DialogContent className="max-w-sm" showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Hapus produk</DialogTitle>
+            <DialogDescription>
+              Yakin ingin menghapus <span className="font-medium text-foreground">{deleteTarget?.name}</span>? Tindakan ini tidak dapat dibatalkan.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" size="sm" className="rounded-lg" onClick={() => setDeleteTarget(null)}>Batal</Button>
+            <Button type="button" variant="destructive" size="sm" className="rounded-lg px-4" disabled={saving} onClick={() => void handleDeleteProduct()}>{saving ? "Menghapus..." : "Hapus"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -474,6 +474,24 @@ export async function restockProduct(userId: string, productId: string, quantity
   };
 }
 
+export async function deleteProduct(userId: string, productId: string) {
+  const [existing] = await db
+    .select()
+    .from(products)
+    .where(and(eq(products.id, productId), eq(products.userId, userId)))
+    .limit(1);
+
+  if (!existing) {
+    throw new Error("Produk tidak ditemukan.");
+  }
+
+  await db
+    .delete(products)
+    .where(and(eq(products.id, productId), eq(products.userId, userId)));
+
+  return { id: productId };
+}
+
 export async function createTransaction(
   userId: string,
   payload: {
