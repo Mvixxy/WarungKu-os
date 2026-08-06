@@ -268,13 +268,13 @@ export function AppShell({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="-mt-3"
+                    className="flex h-full items-center"
                   >
                     <div className={cn(
-                      "flex h-10 items-center gap-1.5 rounded-xl px-3 shadow-md transition-colors",
+                      "flex h-full items-center gap-1.5 rounded-xl px-3.5 transition-colors",
                       isActive
-                        ? "bg-card border-2 border-primary text-primary"
-                        : "bg-card border border-border text-primary",
+                        ? "bg-primary/10 text-primary"
+                        : "text-primary",
                     )}>
                       <Icon className="size-4" strokeWidth={isActive ? 2.2 : 1.8} />
                       <span className={cn(
