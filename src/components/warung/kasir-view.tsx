@@ -743,7 +743,7 @@ export function KasirView() {
         )}
       >
         <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-muted-foreground/30 sm:mt-3" />
-        <div className="p-4 pt-3">
+        <div className="p-5 pt-4 sm:p-6 sm:pt-5">
           <p className="text-sm sm:text-base font-semibold">Data pelanggan hutang</p>
           <p className="mt-0.5 text-[11px] text-muted-foreground">
             Isi data di bawah untuk mencatat hutang.
@@ -803,7 +803,7 @@ export function KasirView() {
             </div>
           </div>
 
-          <div className="mt-5 space-y-2">
+          <div className="mt-6 space-y-3">
             <div className="rounded-lg bg-primary/10 p-3 text-center">
               <p className="text-[10px] text-muted-foreground">
                 Total hutang
@@ -812,20 +812,20 @@ export function KasirView() {
                 {formatCurrency(cartTotal)}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
-                className="flex-1 rounded-lg"
+                size="lg"
+                className="flex-1 rounded-xl"
                 onClick={() => setDebtFormOpen(false)}
               >
                 Batal
               </Button>
               <Button
                 type="button"
-                size="sm"
-                className="flex-1 rounded-lg"
+                size="lg"
+                className="flex-1 rounded-xl"
                 onClick={() => void handleCheckoutWithDebt()}
                 disabled={checkingOut}
               >
