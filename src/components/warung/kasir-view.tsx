@@ -320,7 +320,7 @@ export function KasirView() {
       </div>
 
       {/* Mobile: compact floating bar */}
-      <div className="fixed bottom-14 left-2 right-2 z-30 lg:hidden">
+      <div className="fixed bottom-16 left-2 right-2 z-30 lg:hidden">
         <button
           type="button"
           className="flex w-full items-center justify-between rounded-2xl border border-border bg-card p-3 shadow-lg"
