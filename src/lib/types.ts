@@ -4,7 +4,8 @@ export type ProductCategory =
   | "Makanan"
   | "Minuman"
   | "Sembako"
-  | "Kebutuhan Harian";
+  | "Kebutuhan Harian"
+  | (string & {});
 
 export interface Product {
   id: string;

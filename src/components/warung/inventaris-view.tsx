@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, PackagePlus, PencilLine, Search, Warehouse } from "lucide-react";
+import { AlertTriangle, PackagePlus, PencilLine, Plus, Search, Warehouse, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
 import { StatCard } from "@/components/stat-card";
@@ -19,17 +19,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/format";
 import { Product, ProductCategory, ProductDraft } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+const defaultCategories = ["Makanan", "Minuman", "Sembako", "Kebutuhan Harian"];
 
 const emptyDraft: ProductDraft = {
   name: "",
@@ -44,14 +39,31 @@ const emptyDraft: ProductDraft = {
 function ProductForm({
   draft,
   onChange,
+  categories,
 }: {
   draft: ProductDraft;
   onChange: (draft: ProductDraft) => void;
+  categories: string[];
 }) {
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+
+  function handleAddCategory() {
+    const trimmed = newCategory.trim();
+    if (!trimmed) return;
+    if (categories.some((c) => c.toLowerCase() === trimmed.toLowerCase())) {
+      toast.error("Kategori ini sudah ada.");
+      return;
+    }
+    onChange({ ...draft, category: trimmed as ProductCategory });
+    setNewCategory("");
+    setAddingCategory(false);
+  }
+
   return (
-    <div className="grid gap-3">
-      <div className="grid gap-1.5">
-        <Label htmlFor="product-name" className="text-xs">Nama barang</Label>
+    <div className="space-y-4">
+      <div className="space-y-1.5">
+        <Label htmlFor="product-name" className="text-xs font-medium">Nama barang</Label>
         <Input
           id="product-name"
           value={draft.name}
@@ -61,26 +73,73 @@ function ProductForm({
         />
       </div>
 
-      <div className="grid gap-1.5 sm:grid-cols-2">
-        <div className="grid gap-1.5">
-          <Label className="text-xs">Kategori</Label>
-          <Select
-            value={draft.category}
-            onValueChange={(value) => onChange({ ...draft, category: value as ProductCategory })}
-          >
-            <SelectTrigger className="h-9 w-full rounded-lg bg-card text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Makanan">Makanan</SelectItem>
-              <SelectItem value="Minuman">Minuman</SelectItem>
-              <SelectItem value="Sembako">Sembako</SelectItem>
-              <SelectItem value="Kebutuhan Harian">Kebutuhan Harian</SelectItem>
-            </SelectContent>
-          </Select>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium">Kategori</Label>
+          {addingCategory ? (
+            <div className="flex items-center gap-1">
+              <Input
+                value={newCategory}
+                onChange={(event) => setNewCategory(event.target.value)}
+                placeholder="Nama kategori..."
+                className="h-9 rounded-lg text-sm"
+                autoFocus
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    handleAddCategory();
+                  }
+                  if (event.key === "Escape") {
+                    setAddingCategory(false);
+                    setNewCategory("");
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="shrink-0 rounded-lg"
+                onClick={() => handleAddCategory()}
+              >
+                <Plus className="size-3.5" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="shrink-0 rounded-lg"
+                onClick={() => { setAddingCategory(false); setNewCategory(""); }}
+              >
+                <X className="size-3.5" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1">
+              <select
+                value={draft.category}
+                onChange={(event) => onChange({ ...draft, category: event.target.value as ProductCategory })}
+                className="h-9 w-full rounded-lg border border-input bg-card px-3 text-sm"
+              >
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                className="shrink-0 rounded-lg"
+                title="Tambah kategori baru"
+                onClick={() => setAddingCategory(true)}
+              >
+                <Plus className="size-3.5" />
+              </Button>
+            </div>
+          )}
         </div>
-        <div className="grid gap-1.5">
-          <Label htmlFor="product-stock" className="text-xs">Stok awal</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="product-stock" className="text-xs font-medium">Stok awal</Label>
           <Input
             id="product-stock"
             type="number"
@@ -92,9 +151,9 @@ function ProductForm({
         </div>
       </div>
 
-      <div className="grid gap-1.5 sm:grid-cols-2">
-        <div className="grid gap-1.5">
-          <Label htmlFor="product-buy-price" className="text-xs">Harga beli</Label>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="product-buy-price" className="text-xs font-medium">Harga beli</Label>
           <Input
             id="product-buy-price"
             type="number"
@@ -104,8 +163,8 @@ function ProductForm({
             className="h-9 rounded-lg text-sm"
           />
         </div>
-        <div className="grid gap-1.5">
-          <Label htmlFor="product-sell-price" className="text-xs">Harga jual</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="product-sell-price" className="text-xs font-medium">Harga jual</Label>
           <Input
             id="product-sell-price"
             type="number"
@@ -117,8 +176,8 @@ function ProductForm({
         </div>
       </div>
 
-      <div className="grid gap-1.5">
-        <Label htmlFor="product-minimum-stock" className="text-xs">Stok minimum</Label>
+      <div className="space-y-1.5">
+        <Label htmlFor="product-minimum-stock" className="text-xs font-medium">Stok minimum</Label>
         <Input
           id="product-minimum-stock"
           type="number"
@@ -129,8 +188,8 @@ function ProductForm({
         />
       </div>
 
-      <div className="grid gap-1.5">
-        <Label htmlFor="product-description" className="text-xs">Catatan singkat</Label>
+      <div className="space-y-1.5">
+        <Label htmlFor="product-description" className="text-xs font-medium">Catatan singkat</Label>
         <Input
           id="product-description"
           value={draft.description}
@@ -152,6 +211,14 @@ export function InventarisView() {
   const [editDraft, setEditDraft] = useState<ProductDraft>(emptyDraft);
   const [restockTarget, setRestockTarget] = useState<Product | null>(null);
   const [restockAmount, setRestockAmount] = useState(12);
+
+  // Collect all unique categories from products + defaults
+  const categories = Array.from(
+    new Set([
+      ...defaultCategories,
+      ...products.map((p) => p.category),
+    ])
+  );
 
   const filteredProducts = products.filter((product) => {
     const keyword = query.toLowerCase();
@@ -269,18 +336,18 @@ export function InventarisView() {
                 <PackagePlus className="size-3.5" />
                 Tambah barang
               </DialogTrigger>
-              <DialogContent className="max-w-lg rounded-xl p-0">
+              <DialogContent className="max-w-md rounded-xl p-0">
                 <DialogHeader className="p-4 pb-0">
-                  <DialogTitle className="font-heading text-lg">Tambah produk baru</DialogTitle>
+                  <DialogTitle className="font-heading text-base">Tambah produk baru</DialogTitle>
                   <DialogDescription className="text-xs">
                     Isi data supaya kasir bisa langsung menjual barang ini.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="p-4 pt-2">
-                  <ProductForm draft={draft} onChange={setDraft} />
+                <div className="p-4 pt-3">
+                  <ProductForm draft={draft} onChange={setDraft} categories={categories} />
                 </div>
-                <DialogFooter className="rounded-b-xl px-4 pb-4" showCloseButton>
-                  <Button type="button" size="sm" className="rounded-lg" onClick={() => void handleCreateProduct()}>
+                <DialogFooter className="rounded-b-xl border-t border-border px-4 py-3" showCloseButton>
+                  <Button type="button" size="sm" className="rounded-lg px-4" onClick={() => void handleCreateProduct()}>
                     Simpan
                   </Button>
                 </DialogFooter>
@@ -371,16 +438,16 @@ export function InventarisView() {
       </Card>
 
       <Dialog open={Boolean(editingProduct)} onOpenChange={(open) => !open && setEditingProduct(null)}>
-        <DialogContent className="max-w-lg rounded-xl p-0">
+        <DialogContent className="max-w-md rounded-xl p-0">
           <DialogHeader className="p-4 pb-0">
-            <DialogTitle className="font-heading text-lg">Edit produk</DialogTitle>
+            <DialogTitle className="font-heading text-base">Edit produk</DialogTitle>
             <DialogDescription className="text-xs">Perbarui data produk.</DialogDescription>
           </DialogHeader>
-          <div className="p-4 pt-2">
-            <ProductForm draft={editDraft} onChange={setEditDraft} />
+          <div className="p-4 pt-3">
+            <ProductForm draft={editDraft} onChange={setEditDraft} categories={categories} />
           </div>
-          <DialogFooter className="rounded-b-xl px-4 pb-4" showCloseButton>
-            <Button type="button" size="sm" className="rounded-lg" onClick={() => void handleUpdateProduct()}>
+          <DialogFooter className="rounded-b-xl border-t border-border px-4 py-3" showCloseButton>
+            <Button type="button" size="sm" className="rounded-lg px-4" onClick={() => void handleUpdateProduct()}>
               Simpan
             </Button>
           </DialogFooter>
@@ -390,20 +457,20 @@ export function InventarisView() {
       <Dialog open={Boolean(restockTarget)} onOpenChange={(open) => !open && setRestockTarget(null)}>
         <DialogContent className="max-w-sm rounded-xl p-0">
           <DialogHeader className="p-4 pb-0">
-            <DialogTitle className="font-heading text-lg">Restok</DialogTitle>
+            <DialogTitle className="font-heading text-base">Restok</DialogTitle>
             <DialogDescription className="text-xs">
               Tambah stok untuk {restockTarget?.name ?? "produk"}.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-3 p-4 pt-2">
+          <div className="space-y-3 p-4 pt-3">
             <div className="rounded-lg border border-border bg-muted/30 p-3">
               <p className="text-xs text-muted-foreground">Stok sekarang</p>
               <p className="mt-1 font-heading text-xl font-semibold">
                 {restockTarget?.stock ?? 0} pcs
               </p>
             </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="restock-amount" className="text-xs">Jumlah tambahan</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="restock-amount" className="text-xs font-medium">Jumlah tambahan</Label>
               <Input
                 id="restock-amount"
                 type="number"
@@ -414,8 +481,8 @@ export function InventarisView() {
               />
             </div>
           </div>
-          <DialogFooter className="rounded-b-xl px-4 pb-4" showCloseButton>
-            <Button type="button" size="sm" className="rounded-lg" onClick={() => void handleRestock()}>
+          <DialogFooter className="rounded-b-xl border-t border-border px-4 py-3" showCloseButton>
+            <Button type="button" size="sm" className="rounded-lg px-4" onClick={() => void handleRestock()}>
               Simpan
             </Button>
           </DialogFooter>

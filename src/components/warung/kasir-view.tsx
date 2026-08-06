@@ -19,8 +19,7 @@ const paymentLabels: Record<PaymentMethod, string> = {
   Transfer: "Transfer",
 };
 
-const categoryLabels: Array<{ value: "Semua" | ProductCategory; label: string }> = [
-  { value: "Semua", label: "Semua" },
+const defaultCategoryLabels: Array<{ value: ProductCategory; label: string }> = [
   { value: "Makanan", label: "Makanan" },
   { value: "Minuman", label: "Minuman" },
   { value: "Sembako", label: "Sembako" },
@@ -101,6 +100,7 @@ export function KasirView() {
   } = useAppState();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<"Semua" | ProductCategory>("Semua");
+  const allCategories = Array.from(new Set(products.map((p) => p.category)));
 
   const filteredProducts = products.filter((product) => {
     const queryMatch =
@@ -163,16 +163,25 @@ export function KasirView() {
               </div>
             </div>
             <div className="flex gap-1 overflow-x-auto scrollbar-none">
-              {categoryLabels.map((item) => (
+              <Button
+                type="button"
+                variant={category === "Semua" ? "default" : "ghost"}
+                size="sm"
+                className="shrink-0 rounded-full px-3 py-1 text-[10px] sm:text-xs"
+                onClick={() => setCategory("Semua")}
+              >
+                Semua
+              </Button>
+              {allCategories.map((cat) => (
                 <Button
-                  key={item.value}
+                  key={cat}
                   type="button"
-                  variant={category === item.value ? "default" : "ghost"}
+                  variant={category === cat ? "default" : "ghost"}
                   size="sm"
                   className="shrink-0 rounded-full px-3 py-1 text-[10px] sm:text-xs"
-                  onClick={() => setCategory(item.value)}
+                  onClick={() => setCategory(cat)}
                 >
-                  {item.label}
+                  {cat}
                 </Button>
               ))}
             </div>
