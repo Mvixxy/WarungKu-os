@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, PackagePlus, PencilLine, Plus, Search, Trash2, Warehouse, X } from "lucide-react";
+import { AlertTriangle, Loader2, PackagePlus, PencilLine, Plus, Search, Trash2, Warehouse, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
 import { StatCard } from "@/components/stat-card";
@@ -336,7 +336,7 @@ export function InventarisView() {
                 </DialogHeader>
                 <ProductForm draft={draft} onDraftChange={setDraft} categories={categories} onAddCategory={addCategory} />
                 <DialogFooter>
-                  <Button type="button" size="sm" className="rounded-lg px-4" disabled={saving} onClick={() => void handleCreateProduct()}>{saving ? "Menyimpan..." : "Simpan"}</Button>
+                  <Button type="button" size="sm" className="rounded-lg px-4" disabled={saving} onClick={() => void handleCreateProduct()}>{saving ? (<><Loader2 className="mr-1.5 size-3.5 animate-spin" />Menyimpan...</>) : "Simpan"}</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -408,7 +408,7 @@ export function InventarisView() {
           </DialogHeader>
           <ProductForm draft={editDraft} onDraftChange={setEditDraft} categories={categories} onAddCategory={addCategory} />
           <DialogFooter>
-            <Button type="button" size="sm" className="rounded-lg px-4" disabled={saving} onClick={() => void handleUpdateProduct()}>{saving ? "Menyimpan..." : "Simpan"}</Button>
+            <Button type="button" size="sm" className="rounded-lg px-4" disabled={saving} onClick={() => void handleUpdateProduct()}>{saving ? (<><Loader2 className="mr-1.5 size-3.5 animate-spin" />Menyimpan...</>) : "Simpan"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -430,7 +430,7 @@ export function InventarisView() {
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" size="sm" className="rounded-lg px-4" disabled={saving} onClick={() => void handleRestock()}>{saving ? "Menyimpan..." : "Simpan"}</Button>
+            <Button type="button" size="sm" className="rounded-lg px-4" disabled={saving} onClick={() => void handleRestock()}>{saving ? (<><Loader2 className="mr-1.5 size-3.5 animate-spin" />Menyimpan...</>) : "Simpan"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -445,7 +445,7 @@ export function InventarisView() {
           </DialogHeader>
           <DialogFooter>
             <Button type="button" variant="outline" size="sm" className="rounded-lg" onClick={() => setDeleteTarget(null)}>Batal</Button>
-            <Button type="button" variant="destructive" size="sm" className="rounded-lg px-4" disabled={saving} onClick={() => void handleDeleteProduct()}>{saving ? "Menghapus..." : "Hapus"}</Button>
+            <Button type="button" variant="destructive" size="sm" className="rounded-lg px-4" disabled={saving} onClick={() => void handleDeleteProduct()}>{saving ? (<><Loader2 className="mr-1.5 size-3.5 animate-spin" />Menghapus...</>) : "Hapus"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

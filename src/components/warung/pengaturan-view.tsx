@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BadgeCheck, Bell, MapPin, RotateCcw, Store, WalletCards } from "lucide-react";
+import { BadgeCheck, Bell, Loader2, MapPin, RotateCcw, Store, WalletCards } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
 import { Button } from "@/components/ui/button";
@@ -243,7 +243,7 @@ export function PengaturanView() {
               disabled={isSaving}
             >
               <BadgeCheck className="size-3.5" />
-              {isSaving ? "Menyimpan..." : "Simpan"}
+              {isSaving ? (<><Loader2 className="mr-1.5 size-3.5 animate-spin" />Menyimpan...</>) : "Simpan"}
             </Button>
             <Button
               type="button"

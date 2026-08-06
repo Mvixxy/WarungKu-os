@@ -14,6 +14,7 @@ import {
   Sparkles,
   Wallet,
   Wheat,
+  Loader2,
   Printer,
   X,
 } from "lucide-react";
@@ -109,6 +110,7 @@ function DesktopCart({
   removeFromCart,
   setPaymentMethod,
   handleCheckout,
+  checkingOut,
 }: {
   cartLines: any[];
   cartTotal: number;
@@ -118,6 +120,7 @@ function DesktopCart({
   removeFromCart: (id: string) => void;
   setPaymentMethod: (m: PaymentMethod) => void;
   handleCheckout: () => void;
+  checkingOut: boolean;
 }) {
   return (
     <Card className="sticky top-3">
@@ -258,8 +261,9 @@ function DesktopCart({
             size="lg"
             className="mt-2.5 h-10 w-full rounded-lg bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90"
             onClick={handleCheckout}
+            disabled={checkingOut}
           >
-            Bayar sekarang
+            {checkingOut ? (<><Loader2 className="mr-2 size-4 animate-spin" />Memproses...</>) : "Bayar sekarang"}
           </Button>
           <p className="mt-2 text-[10px] text-primary-foreground/50">
             Stok akan otomatis berkurang setelah transaksi.
@@ -281,6 +285,7 @@ function MobileCartSheet({
   removeFromCart,
   setPaymentMethod,
   handleCheckout,
+  checkingOut,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -292,6 +297,7 @@ function MobileCartSheet({
   removeFromCart: (id: string) => void;
   setPaymentMethod: (m: PaymentMethod) => void;
   handleCheckout: () => void;
+  checkingOut: boolean;
 }) {
   return (
     <>
@@ -432,8 +438,9 @@ function MobileCartSheet({
               handleCheckout();
               onOpenChange(false);
             }}
+            disabled={checkingOut}
           >
-            Bayar sekarang — {formatCurrency(cartTotal)}
+            {checkingOut ? (<><Loader2 className="mr-2 size-4 animate-spin" />Memproses...</>) : `Bayar sekarang — ${formatCurrency(cartTotal)}`}
           </Button>
         </div>
       </div>
@@ -465,6 +472,7 @@ export function KasirView() {
     whatsapp: "",
     dueDate: "",
   });
+  const [checkingOut, setCheckingOut] = useState(false);
   const [receiptTransaction, setReceiptTransaction] = useState<{
     transaction: Transaction;
     cashGiven?: number;
@@ -493,6 +501,7 @@ export function KasirView() {
       setDebtFormOpen(true);
       return;
     }
+    setCheckingOut(true);
     try {
       const transaction = await checkout();
       if (!transaction) {
@@ -528,6 +537,8 @@ export function KasirView() {
       toast.error(
         error instanceof Error ? error.message : "Gagal menyimpan transaksi."
       );
+    } finally {
+      setCheckingOut(false);
     }
   }
 
@@ -655,6 +666,7 @@ export function KasirView() {
           removeFromCart={removeFromCart}
           setPaymentMethod={setPaymentMethod}
           handleCheckout={() => void handleCheckout(false)}
+          checkingOut={checkingOut}
         />
       </div>
 
@@ -712,6 +724,7 @@ export function KasirView() {
         removeFromCart={removeFromCart}
         setPaymentMethod={setPaymentMethod}
         handleCheckout={() => void handleCheckout(false)}
+        checkingOut={checkingOut}
       />
 
       {/* Debt form popup */}
@@ -812,8 +825,9 @@ export function KasirView() {
                 size="sm"
                 className="flex-1 rounded-lg"
                 onClick={() => void handleCheckoutWithDebt()}
+                disabled={checkingOut}
               >
-                Simpan hutang
+                {checkingOut ? (<><Loader2 className="mr-1.5 size-3.5 animate-spin" />Menyimpan...</>) : "Simpan hutang"}
               </Button>
             </div>
           </div>

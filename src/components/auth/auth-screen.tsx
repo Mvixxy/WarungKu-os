@@ -2,8 +2,8 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowRight, KeyRound, ShieldCheck, Store } from "lucide-react";
-import { useSession } from "@/lib/auth-client";
+import { ArrowRight, KeyRound, ShieldCheck, Store, Loader2 } from "lucide-react";
+import { signIn, signUp, useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +18,9 @@ export function AuthScreen() {
   const { data: session, isPending: isSessionPending } = useSession();
   const queryMode = searchParams.get("mode") === "signup" ? "signup" : "signin";
   const authError = searchParams.get("error");
+  const [authErrMsg, setAuthErrMsg] = useState(authError || "");
   const [mode, setMode] = useState<AuthMode>(queryMode);
+  const [submitting, setSubmitting] = useState(false);
   const [signInForm, setSignInForm] = useState({ email: "", password: "" });
   const [signUpForm, setSignUpForm] = useState({ name: "", email: "", password: "" });
 
@@ -80,9 +82,9 @@ export function AuthScreen() {
             </button>
           </div>
 
-          {authError && (
+          {authErrMsg && (
             <div className="mt-3 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-              {authError}
+              {authErrMsg}
             </div>
           )}
 
@@ -119,14 +121,33 @@ export function AuthScreen() {
                     required
                   />
                 </div>
-                <Button type="submit" form="signin-form" className="h-10 w-full rounded-lg text-sm">
-                  Masuk
-                  <ArrowRight className="size-3.5" />
+                <Button
+                  type="button"
+                  className="h-10 w-full rounded-lg text-sm"
+                  disabled={submitting}
+                  onClick={async () => {
+                    setSubmitting(true);
+                    setAuthErrMsg("");
+                    try {
+                      const res = await signIn.email({
+                        email: signInForm.email,
+                        password: signInForm.password,
+                      });
+                      if (res.error) {
+                        setAuthErrMsg(res.error.message || "Email atau sandi salah.");
+                      } else {
+                        router.replace("/dashboard");
+                      }
+                    } catch {
+                      setAuthErrMsg("Gagal terhubung ke server.");
+                    } finally {
+                      setSubmitting(false);
+                    }
+                  }}
+                >
+                  {submitting ? (<><Loader2 className="mr-2 size-3.5 animate-spin" />Masuk...</>) : (<>Masuk<ArrowRight className="size-3.5" /></>)}
                 </Button>
               </div>
-              <form id="signin-form" action="/api/session/sign-in" method="post">
-                <input type="hidden" name="callbackURL" value="/dashboard" />
-              </form>
             </>
           ) : (
             <>
@@ -176,14 +197,34 @@ export function AuthScreen() {
                     required
                   />
                 </div>
-                <Button type="submit" form="signup-form" className="h-10 w-full rounded-lg text-sm">
-                  Buat akun
-                  <ArrowRight className="size-3.5" />
+                <Button
+                  type="button"
+                  className="h-10 w-full rounded-lg text-sm"
+                  disabled={submitting}
+                  onClick={async () => {
+                    setSubmitting(true);
+                    setAuthErrMsg("");
+                    try {
+                      const res = await signUp.email({
+                        name: signUpForm.name,
+                        email: signUpForm.email,
+                        password: signUpForm.password,
+                      });
+                      if (res.error) {
+                        setAuthErrMsg(res.error.message || "Gagal membuat akun.");
+                      } else {
+                        router.replace("/dashboard");
+                      }
+                    } catch {
+                      setAuthErrMsg("Gagal terhubung ke server.");
+                    } finally {
+                      setSubmitting(false);
+                    }
+                  }}
+                >
+                  {submitting ? (<><Loader2 className="mr-2 size-3.5 animate-spin" />Membuat akun...</>) : (<>Buat akun<ArrowRight className="size-3.5" /></>)}
                 </Button>
               </div>
-              <form id="signup-form" action="/api/session/sign-up" method="post">
-                <input type="hidden" name="callbackURL" value="/dashboard" />
-              </form>
             </>
           )}
         </div>
