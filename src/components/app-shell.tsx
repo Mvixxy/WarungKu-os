@@ -34,9 +34,17 @@ const navigation = [
   { href: "/dashboard", label: "Dashboard", icon: Gauge },
   { href: "/kasir", label: "Kasir", icon: ShoppingBasket },
   { href: "/inventaris", label: "Inventaris", icon: Package2 },
-  { href: "/buku-hutang", label: "Buku Hutang", icon: Wallet },
+  { href: "/buku-hutang", label: "Hutang", icon: Wallet },
   { href: "/laporan", label: "Laporan", icon: ScrollText },
   { href: "/pengaturan", label: "Pengaturan", icon: Settings2 },
+];
+
+const bottomNav = [
+  { href: "/dashboard", label: "Beranda", icon: Gauge },
+  { href: "/kasir", label: "Kasir", icon: ShoppingBasket },
+  { href: "/inventaris", label: "Stok", icon: Package2 },
+  { href: "/buku-hutang", label: "Hutang", icon: Wallet },
+  { href: "/laporan", label: "Laporan", icon: ScrollText },
 ];
 
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
@@ -175,72 +183,113 @@ export function AppShell({
           {!leftCollapsed && <AccountPanel />}
         </aside>
 
-        {/* Mobile Sidebar */}
-        <div className="pointer-events-none fixed top-3 left-3 z-40 lg:hidden">
-          <Sheet>
-            <SheetTrigger
-              render={
-                <Button
-                  variant="outline"
-                  size="icon-lg"
-                  className="pointer-events-auto rounded-xl bg-card shadow-sm backdrop-blur"
-                />
-              }
-            >
-              <Menu className="size-5" />
-            </SheetTrigger>
-            <SheetContent
-              side="left"
-              className="w-[300px] bg-sidebar text-sidebar-foreground"
-            >
-              <SheetHeader className="px-6 pt-6">
-                <SheetTitle className="text-sidebar-foreground">
-                  {settings.storeName}
-                </SheetTitle>
-                <SheetDescription className="text-sidebar-foreground/70">
-                  {activePage.title}
-                </SheetDescription>
-              </SheetHeader>
-              <div className="space-y-1 px-4 pb-6">
-                {navigation.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={cn(
-                        buttonVariants({
-                          variant: isActive ? "secondary" : "ghost",
-                          size: "lg",
-                        }),
-                        "w-full justify-start rounded-xl",
-                        isActive
-                          ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                      )}
-                    >
-                      <Icon className="size-4" />
-                      {item.label}
-                    </Link>
-                  );
-                })}
-                <Link
-                  href="/auth"
-                  className={cn(
-                    buttonVariants({ size: "lg" }),
-                    "mt-4 h-10 w-full rounded-xl",
-                  )}
-                >
-                  Akun
-                </Link>
-                <ThemeToggle className="mt-4" />
+        {/* Mobile Header */}
+        <div className="fixed top-0 left-0 right-0 z-40 flex h-12 items-center justify-between border-b border-border bg-card/95 px-3 backdrop-blur-sm lg:hidden">
+          <div className="flex items-center gap-2.5">
+            <Sheet>
+              <SheetTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    className="rounded-lg"
+                  />
+                }
+              >
+                <Menu className="size-4" />
+              </SheetTrigger>
+              <SheetContent
+                side="left"
+                className="w-[300px] bg-sidebar text-sidebar-foreground"
+              >
+                <SheetHeader className="px-6 pt-6">
+                  <SheetTitle className="text-sidebar-foreground">
+                    {settings.storeName}
+                  </SheetTitle>
+                  <SheetDescription className="text-sidebar-foreground/70">
+                    {activePage.title}
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="space-y-1 px-4 pb-6">
+                  {navigation.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = pathname === item.href;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={cn(
+                          buttonVariants({
+                            variant: isActive ? "secondary" : "ghost",
+                            size: "lg",
+                          }),
+                          "w-full justify-start rounded-xl",
+                          isActive
+                            ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                        )}
+                      >
+                        <Icon className="size-4" />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                  <Link
+                    href="/pengaturan"
+                    className={cn(
+                      buttonVariants({ size: "lg" }),
+                      "mt-2 h-10 w-full rounded-xl",
+                    )}
+                  >
+                    <Settings2 className="size-4" />
+                    Pengaturan
+                  </Link>
+                  <ThemeToggle className="mt-4" />
+                </div>
+              </SheetContent>
+            </Sheet>
+            <div className="flex items-center gap-2">
+              <div className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <Store className="size-3.5" />
               </div>
-            </SheetContent>
-          </Sheet>
+              <p className="text-sm font-semibold tracking-tight">{settings.storeName}</p>
+            </div>
+          </div>
+          <ThemeToggle />
         </div>
 
-        <main className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto pt-14 lg:pt-0">
+        {/* Mobile Bottom Navigation */}
+        <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur-sm lg:hidden">
+          <div className="flex h-14 items-center justify-around px-1">
+            {bottomNav.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex flex-col items-center gap-0.5 rounded-lg px-2.5 py-1.5 transition-colors",
+                    isActive
+                      ? "text-primary"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.8} />
+                  <span className={cn(
+                    "text-[10px] leading-tight",
+                    isActive ? "font-semibold" : "font-medium",
+                  )}>
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+
+        {/* Main Content — padded for mobile header + bottom nav */}
+        <main className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto pt-12 pb-16 lg:pt-0 lg:pb-0">
           {children}
         </main>
 

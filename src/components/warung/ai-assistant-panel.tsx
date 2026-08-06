@@ -508,7 +508,7 @@ export function AIAssistantPanel({ open, onOpenChange }: { open: boolean; onOpen
         <button
           type="button"
           onClick={() => onOpenChange(true)}
-          className="fixed bottom-5 right-5 z-40 flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 lg:hidden"
+          className="fixed bottom-[72px] right-5 z-40 flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 lg:hidden"
           aria-label="Buka asisten AI"
         >
           <Sparkles className="size-5" />

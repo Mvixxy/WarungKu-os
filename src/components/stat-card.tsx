@@ -23,27 +23,27 @@ export function StatCard({
         tone === "warn" && "border-primary/20 bg-primary/5"
       )}
     >
-      <CardContent className="space-y-1.5 p-4">
+      <CardContent className="space-y-1 p-3 sm:space-y-1.5 sm:p-4">
         <div className="flex items-center justify-between">
           <p className={cn(
-            "text-[10px] font-medium uppercase tracking-wider",
+            "text-[9px] font-medium uppercase tracking-wider sm:text-[10px]",
             tone === "accent" && "text-accent",
             tone === "warn" && "text-primary",
             tone === "default" && "text-muted-foreground"
           )}>{title}</p>
           <ArrowUpRight className={cn(
-            "size-3",
+            "size-2.5 sm:size-3",
             tone === "accent" && "text-accent",
             tone === "warn" && "text-primary",
             tone === "default" && "text-muted-foreground"
           )} />
         </div>
         <p className={cn(
-          "font-heading text-2xl font-semibold tracking-tight",
+          "font-heading text-xl font-semibold tracking-tight sm:text-2xl",
           tone === "accent" && "text-accent-foreground dark:text-accent",
           tone === "warn" && "text-primary"
         )}>{value}</p>
-        <p className="text-[11px] text-muted-foreground leading-relaxed">{description}</p>
+        <p className="text-[10px] text-muted-foreground leading-relaxed sm:text-[11px]">{description}</p>
       </CardContent>
     </Card>
   );
