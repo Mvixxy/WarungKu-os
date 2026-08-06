@@ -43,7 +43,7 @@ export function AuthScreen() {
             <Store className="size-5" />
           </div>
           <h1 className="mt-4 font-heading text-xl font-semibold tracking-tight">
-            WarungKu OS
+            WarungKu
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Kelola warung jadi lebih gampang.

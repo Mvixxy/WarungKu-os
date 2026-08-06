@@ -293,7 +293,7 @@ function ChatContent({
         <div className="space-y-2.5 px-3 py-3">
           {visibleMessages.length === 0 && !isLoading && (
             <MessageBubble role="assistant">
-              <AssistantTextBubble text="Halo! Saya WarungOS AI. Saya bisa cek stok, hitung untung, atau jalankan aksi. Coba: 'untung minggu ini berapa?'" />
+              <AssistantTextBubble text="Halo! Saya WarungKu AI. Saya bisa cek stok, hitung untung, atau jalankan aksi. Coba: 'untung minggu ini berapa?'" />
             </MessageBubble>
           )}
           {visibleMessages.map((m) => {

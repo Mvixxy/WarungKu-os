@@ -22,7 +22,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Warung OS",
+  title: "WarungKu",
   description: "Aplikasi kasir tablet-first untuk operasional warung modern.",
 };
 

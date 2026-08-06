@@ -172,7 +172,7 @@ export function LaporanView() {
             <div className="rounded-xl bg-muted/30 p-4 ring-1 ring-border">
               <div className="flex items-start justify-between gap-3 border-b border-dashed border-border pb-3">
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-primary font-medium">Warung OS report</p>
+                  <p className="text-[10px] uppercase tracking-widest text-primary font-medium">WarungKu report</p>
                   <h3 className="mt-1 font-heading text-lg font-semibold">{settings.storeName}</h3>
                   <p className="mt-0.5 text-[10px] text-muted-foreground">
                     {[settings.storeTagline, settings.city].filter(Boolean).join(" · ")}
@@ -220,7 +220,7 @@ export function LaporanView() {
               </div>
 
               <div className="flex items-center justify-between border-t border-dashed border-border pt-3 text-[10px] text-muted-foreground">
-                <span>Disusun otomatis oleh Warung OS</span>
+                <span>Disusun otomatis oleh WarungKu</span>
                 <span>{formatDate(new Date().toISOString())}</span>
               </div>
             </div>
