@@ -43,8 +43,8 @@ const navigation = [
 
 const bottomNav = [
   { href: "/dashboard", label: "Beranda", icon: Gauge },
-  { href: "/kasir", label: "Kasir", icon: ShoppingBasket },
   { href: "/inventaris", label: "Stok", icon: Package2 },
+  { href: "/kasir", label: "Kasir", icon: ShoppingBasket, primary: true },
   { href: "/buku-hutang", label: "Hutang", icon: Wallet },
   { href: "/laporan", label: "Laporan", icon: ScrollText },
 ];
@@ -262,6 +262,31 @@ export function AppShell({
             {bottomNav.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
+              const isPrimary = (item as any).primary;
+              if (isPrimary) {
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex flex-col items-center gap-0.5 -mt-3"
+                  >
+                    <div className={cn(
+                      "flex size-11 items-center justify-center rounded-full shadow-md transition-colors",
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-card border border-border text-primary",
+                    )}>
+                      <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.8} />
+                    </div>
+                    <span className={cn(
+                      "text-[10px] leading-tight",
+                      isActive ? "font-semibold text-primary" : "font-medium text-muted-foreground",
+                    )}>
+                      {item.label}
+                    </span>
+                  </Link>
+                );
+              }
               return (
                 <Link
                   key={item.href}
