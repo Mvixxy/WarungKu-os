@@ -36,32 +36,114 @@ const emptyDraft: ProductDraft = {
   description: "",
 };
 
-function ProductForm({
-  draft,
-  onFieldChange,
-  onCategoryChange,
-  categories,
+function NumberInput({
+  id,
+  value,
+  onChange,
+  min = 0,
 }: {
-  draft: ProductDraft;
-  onFieldChange: (fields: Partial<ProductDraft>) => void;
-  onCategoryChange: (category: ProductCategory) => void;
-  categories: string[];
+  id: string;
+  value: number;
+  onChange: (v: number) => void;
+  min?: number;
 }) {
-  const [addingCategory, setAddingCategory] = useState(false);
-  const [newCategory, setNewCategory] = useState("");
+  return (
+    <Input
+      id={id}
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      value={value || ""}
+      onChange={(e) => {
+        const raw = e.target.value.replace(/[^0-9]/g, "");
+        onChange(raw === "" ? 0 : Number(raw));
+      }}
+      className="h-9 rounded-lg text-sm"
+    />
+  );
+}
 
-  function handleAddCategory() {
-    const trimmed = newCategory.trim();
+function CategorySelect({
+  value,
+  onChange,
+  categories,
+  onAddCategory,
+}: {
+  value: string;
+  onChange: (v: ProductCategory) => void;
+  categories: string[];
+  onAddCategory: (name: string) => void;
+}) {
+  const [adding, setAdding] = useState(false);
+  const [newName, setNewName] = useState("");
+
+  function submit() {
+    const trimmed = newName.trim();
     if (!trimmed) return;
     if (categories.some((c) => c.toLowerCase() === trimmed.toLowerCase())) {
-      toast.error("Kategori ini sudah ada.");
+      toast.error("Kategori sudah ada.");
       return;
     }
-    onCategoryChange(trimmed as ProductCategory);
-    setNewCategory("");
-    setAddingCategory(false);
+    onAddCategory(trimmed);
+    onChange(trimmed as ProductCategory);
+    setNewName("");
+    setAdding(false);
   }
 
+  if (adding) {
+    return (
+      <div className="flex items-center gap-1">
+        <input
+          type="text"
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          placeholder="Nama kategori..."
+          autoFocus
+          className="h-9 w-full rounded-lg border border-input bg-card px-3 text-sm outline-none"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") { e.preventDefault(); submit(); }
+            if (e.key === "Escape") { setAdding(false); setNewName(""); }
+          }}
+        />
+        <Button type="button" variant="ghost" size="icon-sm" className="shrink-0 rounded-lg" onClick={submit}>
+          <Plus className="size-3.5" />
+        </Button>
+        <Button type="button" variant="ghost" size="icon-sm" className="shrink-0 rounded-lg" onClick={() => { setAdding(false); setNewName(""); }}>
+          <X className="size-3.5" />
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value as ProductCategory)}
+        className="h-9 w-full rounded-lg border border-input bg-card px-3 text-sm"
+      >
+        {categories.map((cat) => (
+          <option key={cat} value={cat}>{cat}</option>
+        ))}
+      </select>
+      <Button type="button" variant="outline" size="icon-sm" className="shrink-0 rounded-lg" title="Tambah kategori baru" onClick={() => setAdding(true)}>
+        <Plus className="size-3.5" />
+      </Button>
+    </div>
+  );
+}
+
+function ProductForm({
+  draft,
+  onDraftChange,
+  categories,
+  onAddCategory,
+}: {
+  draft: ProductDraft;
+  onDraftChange: (d: ProductDraft) => void;
+  categories: string[];
+  onAddCategory: (name: string) => void;
+}) {
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
@@ -69,7 +151,7 @@ function ProductForm({
         <Input
           id="product-name"
           value={draft.name}
-          onChange={(event) => onFieldChange({ name: event.target.value })}
+          onChange={(e) => onDraftChange({ ...draft, name: e.target.value })}
           placeholder="Contoh: Mi Instan Goreng"
           className="h-9 rounded-lg text-sm"
         />
@@ -78,116 +160,33 @@ function ProductForm({
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label className="text-xs font-medium">Kategori</Label>
-          {addingCategory ? (
-            <div className="flex items-center gap-1">
-              <Input
-                value={newCategory}
-                onChange={(event) => setNewCategory(event.target.value)}
-                placeholder="Nama kategori..."
-                className="h-9 rounded-lg text-sm"
-                autoFocus
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    handleAddCategory();
-                  }
-                  if (event.key === "Escape") {
-                    setAddingCategory(false);
-                    setNewCategory("");
-                  }
-                }}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                className="shrink-0 rounded-lg"
-                onClick={handleAddCategory}
-              >
-                <Plus className="size-3.5" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                className="shrink-0 rounded-lg"
-                onClick={() => { setAddingCategory(false); setNewCategory(""); }}
-              >
-                <X className="size-3.5" />
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1">
-              <select
-                value={draft.category}
-                onChange={(event) => onCategoryChange(event.target.value as ProductCategory)}
-                className="h-9 w-full rounded-lg border border-input bg-card px-3 text-sm"
-              >
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-sm"
-                className="shrink-0 rounded-lg"
-                title="Tambah kategori baru"
-                onClick={() => setAddingCategory(true)}
-              >
-                <Plus className="size-3.5" />
-              </Button>
-            </div>
-          )}
+          <CategorySelect
+            value={draft.category}
+            onChange={(category) => onDraftChange({ ...draft, category })}
+            categories={categories}
+            onAddCategory={onAddCategory}
+          />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="product-stock" className="text-xs font-medium">Stok awal</Label>
-          <Input
-            id="product-stock"
-            type="number"
-            min={0}
-            value={draft.stock}
-            onChange={(event) => onFieldChange({ stock: Number(event.target.value) })}
-            className="h-9 rounded-lg text-sm"
-          />
+          <NumberInput id="product-stock" value={draft.stock} onChange={(v) => onDraftChange({ ...draft, stock: v })} />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label htmlFor="product-buy-price" className="text-xs font-medium">Harga beli</Label>
-          <Input
-            id="product-buy-price"
-            type="number"
-            min={0}
-            value={draft.buyPrice}
-            onChange={(event) => onFieldChange({ buyPrice: Number(event.target.value) })}
-            className="h-9 rounded-lg text-sm"
-          />
+          <NumberInput id="product-buy-price" value={draft.buyPrice} onChange={(v) => onDraftChange({ ...draft, buyPrice: v })} />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="product-sell-price" className="text-xs font-medium">Harga jual</Label>
-          <Input
-            id="product-sell-price"
-            type="number"
-            min={0}
-            value={draft.sellPrice}
-            onChange={(event) => onFieldChange({ sellPrice: Number(event.target.value) })}
-            className="h-9 rounded-lg text-sm"
-          />
+          <NumberInput id="product-sell-price" value={draft.sellPrice} onChange={(v) => onDraftChange({ ...draft, sellPrice: v })} />
         </div>
       </div>
 
       <div className="space-y-1.5">
         <Label htmlFor="product-minimum-stock" className="text-xs font-medium">Stok minimum</Label>
-        <Input
-          id="product-minimum-stock"
-          type="number"
-          min={0}
-          value={draft.minimumStock}
-          onChange={(event) => onFieldChange({ minimumStock: Number(event.target.value) })}
-          className="h-9 rounded-lg text-sm"
-        />
+        <NumberInput id="product-minimum-stock" value={draft.minimumStock} onChange={(v) => onDraftChange({ ...draft, minimumStock: v })} />
       </div>
 
       <div className="space-y-1.5">
@@ -195,7 +194,7 @@ function ProductForm({
         <Input
           id="product-description"
           value={draft.description}
-          onChange={(event) => onFieldChange({ description: event.target.value })}
+          onChange={(e) => onDraftChange({ ...draft, description: e.target.value })}
           placeholder="Penempatan rak, paket laris, atau info kasir"
           className="h-9 rounded-lg text-sm"
         />
@@ -218,6 +217,12 @@ export function InventarisView() {
     new Set([...defaultCategories, ...products.map((p) => p.category)])
   );
 
+  function addCategory(name: string) {
+    // Categories are derived from products + defaults.
+    // When user creates a product with a new category, it'll appear automatically.
+    // No-op here — the category is saved with the product on submit.
+  }
+
   const filteredProducts = products.filter((product) => {
     const keyword = query.toLowerCase();
     return (
@@ -232,22 +237,13 @@ export function InventarisView() {
     0
   );
 
-  function validateProduct(nextDraft: ProductDraft) {
-    return (
-      nextDraft.name.trim().length > 0 &&
-      nextDraft.sellPrice > 0 &&
-      nextDraft.buyPrice >= 0 &&
-      nextDraft.stock >= 0 &&
-      nextDraft.minimumStock >= 0
-    );
+  function validateProduct(d: ProductDraft) {
+    return d.name.trim().length > 0 && d.sellPrice > 0 && d.buyPrice >= 0 && d.stock >= 0 && d.minimumStock >= 0;
   }
 
   async function handleCreateProduct() {
     try {
-      if (!validateProduct(draft)) {
-        toast.error("Lengkapi data produk lebih dulu.");
-        return;
-      }
+      if (!validateProduct(draft)) { toast.error("Lengkapi data produk lebih dulu."); return; }
       await addProduct(draft);
       setDraft(emptyDraft);
       setCreateOpen(false);
@@ -259,10 +255,7 @@ export function InventarisView() {
 
   async function handleUpdateProduct() {
     try {
-      if (!editingProduct || !validateProduct(editDraft)) {
-        toast.error("Periksa kembali data yang ingin diperbarui.");
-        return;
-      }
+      if (!editingProduct || !validateProduct(editDraft)) { toast.error("Periksa kembali data yang ingin diperbarui."); return; }
       await updateProduct(editingProduct.id, editDraft);
       setEditingProduct(null);
       toast.success(`${editDraft.name} berhasil diperbarui.`);
@@ -273,10 +266,7 @@ export function InventarisView() {
 
   async function handleRestock() {
     try {
-      if (!restockTarget || restockAmount <= 0) {
-        toast.error("Masukkan jumlah restok yang valid.");
-        return;
-      }
+      if (!restockTarget || restockAmount <= 0) { toast.error("Masukkan jumlah restok yang valid."); return; }
       await restockProduct(restockTarget.id, restockAmount);
       toast.success(`${restockTarget.name} ditambah ${restockAmount} stok.`);
       setRestockTarget(null);
@@ -303,12 +293,7 @@ export function InventarisView() {
           <div className="flex flex-col gap-2 md:flex-row md:items-center">
             <div className="relative min-w-[220px]">
               <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Cari produk..."
-                className="h-9 rounded-lg border-border bg-muted/50 pl-8 text-sm"
-              />
+              <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari produk..." className="h-9 rounded-lg border-border bg-muted/50 pl-8 text-sm" />
             </div>
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
               <DialogTrigger render={<Button size="sm" className="h-9 rounded-lg" />}>
@@ -320,16 +305,9 @@ export function InventarisView() {
                   <DialogTitle>Tambah produk baru</DialogTitle>
                   <DialogDescription>Isi data supaya kasir bisa langsung menjual barang ini.</DialogDescription>
                 </DialogHeader>
-                <ProductForm
-                  draft={draft}
-                  categories={categories}
-                  onFieldChange={(fields) => setDraft((prev) => ({ ...prev, ...fields }))}
-                  onCategoryChange={(category) => setDraft((prev) => ({ ...prev, category }))}
-                />
+                <ProductForm draft={draft} onDraftChange={setDraft} categories={categories} onAddCategory={addCategory} />
                 <DialogFooter>
-                  <Button type="button" size="sm" className="rounded-lg px-4" onClick={() => void handleCreateProduct()}>
-                    Simpan
-                  </Button>
+                  <Button type="button" size="sm" className="rounded-lg px-4" onClick={() => void handleCreateProduct()}>Simpan</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -390,27 +368,20 @@ export function InventarisView() {
         </CardContent>
       </Card>
 
-      <Dialog open={Boolean(editingProduct)} onOpenChange={(open) => !open && setEditingProduct(null)}>
+      <Dialog open={Boolean(editingProduct)} onOpenChange={(o) => !o && setEditingProduct(null)}>
         <DialogContent className="max-w-md" showCloseButton>
           <DialogHeader>
             <DialogTitle>Edit produk</DialogTitle>
             <DialogDescription>Perbarui data produk.</DialogDescription>
           </DialogHeader>
-          <ProductForm
-            draft={editDraft}
-            categories={categories}
-            onFieldChange={(fields) => setEditDraft((prev) => ({ ...prev, ...fields }))}
-            onCategoryChange={(category) => setEditDraft((prev) => ({ ...prev, category }))}
-          />
+          <ProductForm draft={editDraft} onDraftChange={setEditDraft} categories={categories} onAddCategory={addCategory} />
           <DialogFooter>
-            <Button type="button" size="sm" className="rounded-lg px-4" onClick={() => void handleUpdateProduct()}>
-              Simpan
-            </Button>
+            <Button type="button" size="sm" className="rounded-lg px-4" onClick={() => void handleUpdateProduct()}>Simpan</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={Boolean(restockTarget)} onOpenChange={(open) => !open && setRestockTarget(null)}>
+      <Dialog open={Boolean(restockTarget)} onOpenChange={(o) => !o && setRestockTarget(null)}>
         <DialogContent className="max-w-sm" showCloseButton>
           <DialogHeader>
             <DialogTitle>Restok</DialogTitle>
@@ -423,13 +394,11 @@ export function InventarisView() {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="restock-amount" className="text-xs font-medium">Jumlah tambahan</Label>
-              <Input id="restock-amount" type="number" min={1} value={restockAmount} onChange={(event) => setRestockAmount(Number(event.target.value))} className="h-9 rounded-lg text-sm" />
+              <NumberInput id="restock-amount" value={restockAmount} onChange={setRestockAmount} />
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" size="sm" className="rounded-lg px-4" onClick={() => void handleRestock()}>
-              Simpan
-            </Button>
+            <Button type="button" size="sm" className="rounded-lg px-4" onClick={() => void handleRestock()}>Simpan</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
