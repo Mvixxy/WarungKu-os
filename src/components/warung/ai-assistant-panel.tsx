@@ -78,6 +78,8 @@ async function api<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   return data as T;
 }
 
+/* ─── Sub-components ─── */
+
 function MessageBubble({ role, children }: { role: "user" | "assistant"; children: React.ReactNode }) {
   return (
     <div className={cn("flex w-full", role === "user" ? "justify-end" : "justify-start")}>
@@ -256,6 +258,103 @@ function ToolCard({ message }: { message: ServerMessage }) {
   }
 }
 
+/* ─── Chat content (shared between mobile & desktop) ─── */
+
+function ChatContent({
+  messages,
+  visibleMessages,
+  isThinking,
+  isLoading,
+  error,
+  input,
+  setInput,
+  handleSend,
+  handleNewChat,
+  chat,
+  quickPrompts,
+  bottomRef,
+}: {
+  messages: ServerMessage[];
+  visibleMessages: ServerMessage[];
+  isThinking: boolean;
+  isLoading: boolean;
+  error: string | null;
+  input: string;
+  setInput: (v: string) => void;
+  handleSend: (text: string) => void;
+  handleNewChat: () => void;
+  chat: ChatRecord | null;
+  quickPrompts: string[];
+  bottomRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  return (
+    <>
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="space-y-2.5 px-3 py-3">
+          {visibleMessages.length === 0 && !isLoading && (
+            <MessageBubble role="assistant">
+              <AssistantTextBubble text="Halo! Saya WarungOS AI. Saya bisa cek stok, hitung untung, atau jalankan aksi. Coba: 'untung minggu ini berapa?'" />
+            </MessageBubble>
+          )}
+          {visibleMessages.map((m) => {
+            if (m.role === "user") return <MessageBubble key={m.id} role="user"><div className="rounded-xl rounded-br-md bg-primary px-3 py-2 text-xs text-primary-foreground">{m.content}</div></MessageBubble>;
+            if (m.role === "assistant" && m.content.trim()) return <MessageBubble key={m.id} role="assistant"><AssistantTextBubble text={m.content} /></MessageBubble>;
+            if (m.role === "tool") return <MessageBubble key={m.id} role="assistant"><ToolCard message={m} /></MessageBubble>;
+            return null;
+          })}
+          {isThinking && (
+            <MessageBubble role="assistant">
+              <div className="inline-flex items-center gap-1 rounded-xl rounded-bl-md border border-border bg-card px-3 py-2">
+                <span className="size-1 animate-bounce rounded-full bg-primary [animation-delay:-0.2s]" />
+                <span className="size-1 animate-bounce rounded-full bg-primary [animation-delay:-0.1s]" />
+                <span className="size-1 animate-bounce rounded-full bg-primary" />
+              </div>
+            </MessageBubble>
+          )}
+          {error && <div className="rounded-md bg-destructive/10 px-2.5 py-1.5 text-[10px] text-destructive">{error}</div>}
+          <div ref={bottomRef} aria-hidden className="h-px" />
+        </div>
+      </div>
+
+      <div className="border-t border-border bg-muted/30 px-2.5 py-2.5 shrink-0">
+        <div className="mb-1.5 flex flex-wrap gap-1">
+          {quickPrompts.map((q) => (
+            <button
+              key={q}
+              type="button"
+              onClick={() => handleSend(q)}
+              disabled={isThinking || !chat}
+              className="inline-flex items-center gap-0.5 rounded-md bg-card border border-border px-2 py-0.5 text-[9px] font-medium text-muted-foreground transition-colors hover:bg-primary/5 hover:text-primary disabled:opacity-50"
+            >
+              <ArrowRight className="size-2.5" />{q}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-end gap-1.5">
+          <Textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(input); } }}
+            placeholder="Tanya stok, untung, atau perintah..."
+            className="max-h-24 min-h-8 flex-1 resize-none rounded-lg border-border bg-card py-1.5 text-xs"
+            rows={1}
+            disabled={!chat}
+          />
+          <Button variant="outline" size="icon-sm" className="size-8 rounded-md" onClick={() => toast.info("Voice belum tersedia.")} aria-label="Rekam">
+            <Mic className="size-3" />
+          </Button>
+          <Button size="icon-sm" className="size-8 rounded-md" onClick={() => handleSend(input)} disabled={!input.trim() || isThinking || !chat} aria-label="Kirim">
+            <Send className="size-3" />
+          </Button>
+        </div>
+        <p className="mt-1 text-[8px] text-muted-foreground">Aksi langsung tertulis ke database.</p>
+      </div>
+    </>
+  );
+}
+
+/* ─── Main component ─── */
+
 export function AIAssistantPanel({ open, onOpenChange }: { open: boolean; onOpenChange: (next: boolean) => void }) {
   const [chat, setChat] = useState<ChatRecord | null>(null);
   const [messages, setMessages] = useState<ServerMessage[]>([]);
@@ -346,107 +445,122 @@ export function AIAssistantPanel({ open, onOpenChange }: { open: boolean; onOpen
   const visibleMessages = messages.filter((m) => m.role !== "system");
 
   return (
-    <aside
-      className={cn(
-        "flex h-full shrink-0 flex-col overflow-hidden rounded-2xl border border-border bg-card transition-[width] duration-200 ease-out",
-        open ? "w-[360px] xl:w-[400px]" : "w-[56px]"
-      )}
-      aria-label="Asisten AI"
-    >
-      {!open ? (
+    <>
+      {/* ── Desktop: sidebar rail + panel ── */}
+      <aside
+        className={cn(
+          "hidden lg:flex h-full shrink-0 flex-col overflow-hidden rounded-2xl border border-border bg-card transition-[width] duration-200 ease-out",
+          open ? "w-[360px] xl:w-[400px]" : "w-[56px]"
+        )}
+        aria-label="Asisten AI"
+      >
+        {!open ? (
+          <button
+            type="button"
+            onClick={() => onOpenChange(true)}
+            className="group/rail flex h-full w-full flex-col items-center justify-center gap-2 px-2 py-4 text-muted-foreground transition-colors hover:bg-muted"
+            aria-label="Buka asisten AI"
+          >
+            <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover/rail:scale-105">
+              <Sparkles className="size-3.5" />
+            </span>
+            <span className="text-[9px] font-medium tracking-wide" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>
+              Asisten AI
+            </span>
+          </button>
+        ) : (
+          <>
+            <header className="flex items-center gap-2 border-b border-border px-3 py-2.5 shrink-0">
+              <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <Sparkles className="size-3" />
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="font-heading text-xs font-semibold truncate">{chat?.title ?? "AI"}</p>
+                <p className="text-[9px] text-muted-foreground">OpenRouter · Tool calling</p>
+              </div>
+              <Button variant="ghost" size="icon-sm" onClick={handleNewChat} disabled={isLoading || isThinking} className="size-7 rounded-md">
+                <ArrowRight className="size-3" />
+              </Button>
+              <Button variant="ghost" size="icon-sm" onClick={() => onOpenChange(false)} className="size-7 rounded-md">
+                <X className="size-3" />
+              </Button>
+            </header>
+            <ChatContent
+              messages={messages}
+              visibleMessages={visibleMessages}
+              isThinking={isThinking}
+              isLoading={isLoading}
+              error={error}
+              input={input}
+              setInput={setInput}
+              handleSend={handleSend}
+              handleNewChat={handleNewChat}
+              chat={chat}
+              quickPrompts={quickPrompts}
+              bottomRef={bottomRef}
+            />
+          </>
+        )}
+      </aside>
+
+      {/* ── Mobile: floating button ── */}
+      {!open && (
         <button
           type="button"
           onClick={() => onOpenChange(true)}
-          className="group/rail flex h-full w-full flex-col items-center justify-center gap-2 px-2 py-4 text-muted-foreground transition-colors hover:bg-muted"
+          className="fixed bottom-5 right-5 z-40 flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 lg:hidden"
           aria-label="Buka asisten AI"
         >
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover/rail:scale-105">
-            <Sparkles className="size-3.5" />
-          </span>
-          <span className="text-[9px] font-medium tracking-wide" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>
-            Asisten AI
-          </span>
+          <Sparkles className="size-5" />
         </button>
-      ) : (
-        <>
-          <header className="flex items-center gap-2 border-b border-border px-3 py-2.5">
-            <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Sparkles className="size-3" />
-            </span>
-            <div className="flex-1 min-w-0">
-              <p className="font-heading text-xs font-semibold truncate">{chat?.title ?? "AI"}</p>
-              <p className="text-[9px] text-muted-foreground">OpenRouter · Tool calling</p>
-            </div>
-            <Button variant="ghost" size="icon-sm" onClick={handleNewChat} disabled={isLoading || isThinking} className="size-7 rounded-md">
-              <ArrowRight className="size-3" />
-            </Button>
-            <Button variant="ghost" size="icon-sm" onClick={() => onOpenChange(false)} className="size-7 rounded-md">
-              <X className="size-3" />
-            </Button>
-          </header>
-
-          <div className="flex-1 min-h-0 overflow-y-auto">
-            <div className="space-y-2.5 px-3 py-3">
-              {visibleMessages.length === 0 && !isLoading && (
-                <MessageBubble role="assistant">
-                  <AssistantTextBubble text="Halo! Saya WarungOS AI. Saya bisa cek stok, hitung untung, atau jalankan aksi. Coba: 'untung minggu ini berapa?'" />
-                </MessageBubble>
-              )}
-              {visibleMessages.map((m) => {
-                if (m.role === "user") return <MessageBubble key={m.id} role="user"><div className="rounded-xl rounded-br-md bg-primary px-3 py-2 text-xs text-primary-foreground">{m.content}</div></MessageBubble>;
-                if (m.role === "assistant" && m.content.trim()) return <MessageBubble key={m.id} role="assistant"><AssistantTextBubble text={m.content} /></MessageBubble>;
-                if (m.role === "tool") return <MessageBubble key={m.id} role="assistant"><ToolCard message={m} /></MessageBubble>;
-                return null;
-              })}
-              {isThinking && (
-                <MessageBubble role="assistant">
-                  <div className="inline-flex items-center gap-1 rounded-xl rounded-bl-md border border-border bg-card px-3 py-2">
-                    <span className="size-1 animate-bounce rounded-full bg-primary [animation-delay:-0.2s]" />
-                    <span className="size-1 animate-bounce rounded-full bg-primary [animation-delay:-0.1s]" />
-                    <span className="size-1 animate-bounce rounded-full bg-primary" />
-                  </div>
-                </MessageBubble>
-              )}
-              {error && <div className="rounded-md bg-destructive/10 px-2.5 py-1.5 text-[10px] text-destructive">{error}</div>}
-              <div ref={bottomRef} aria-hidden className="h-px" />
-            </div>
-          </div>
-
-          <div className="border-t border-border bg-muted/30 px-2.5 py-2.5">
-            <div className="mb-1.5 flex flex-wrap gap-1">
-              {quickPrompts.map((q) => (
-                <button
-                  key={q}
-                  type="button"
-                  onClick={() => handleSend(q)}
-                  disabled={isThinking || !chat}
-                  className="inline-flex items-center gap-0.5 rounded-md bg-card border border-border px-2 py-0.5 text-[9px] font-medium text-muted-foreground transition-colors hover:bg-primary/5 hover:text-primary disabled:opacity-50"
-                >
-                  <ArrowRight className="size-2.5" />{q}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-end gap-1.5">
-              <Textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(input); } }}
-                placeholder="Tanya stok, untung, atau perintah..."
-                className="max-h-24 min-h-8 flex-1 resize-none rounded-lg border-border bg-card py-1.5 text-xs"
-                rows={1}
-                disabled={!chat}
-              />
-              <Button variant="outline" size="icon-sm" className="size-8 rounded-md" onClick={() => toast.info("Voice belum tersedia.")} aria-label="Rekam">
-                <Mic className="size-3" />
-              </Button>
-              <Button size="icon-sm" className="size-8 rounded-md" onClick={() => handleSend(input)} disabled={!input.trim() || isThinking || !chat} aria-label="Kirim">
-                <Send className="size-3" />
-              </Button>
-            </div>
-            <p className="mt-1 text-[8px] text-muted-foreground">Aksi langsung tertulis ke database.</p>
-          </div>
-        </>
       )}
-    </aside>
+
+      {/* ── Mobile: bottom sheet ── */}
+      {open && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+            onClick={() => onOpenChange(false)}
+          />
+          {/* Sheet */}
+          <div className="absolute bottom-0 left-0 right-0 flex flex-col max-h-[85vh] rounded-t-2xl border border-border bg-card shadow-2xl animate-in slide-in-from-bottom duration-200">
+            {/* Handle */}
+            <div className="flex justify-center pt-2 pb-1">
+              <div className="h-1 w-8 rounded-full bg-muted-foreground/30" />
+            </div>
+            <header className="flex items-center gap-2 border-b border-border px-3 py-2.5 shrink-0">
+              <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <Sparkles className="size-3" />
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="font-heading text-xs font-semibold truncate">{chat?.title ?? "AI"}</p>
+                <p className="text-[9px] text-muted-foreground">OpenRouter · Tool calling</p>
+              </div>
+              <Button variant="ghost" size="icon-sm" onClick={handleNewChat} disabled={isLoading || isThinking} className="size-7 rounded-md">
+                <ArrowRight className="size-3" />
+              </Button>
+              <Button variant="ghost" size="icon-sm" onClick={() => onOpenChange(false)} className="size-7 rounded-md">
+                <X className="size-3" />
+              </Button>
+            </header>
+            <ChatContent
+              messages={messages}
+              visibleMessages={visibleMessages}
+              isThinking={isThinking}
+              isLoading={isLoading}
+              error={error}
+              input={input}
+              setInput={setInput}
+              handleSend={handleSend}
+              handleNewChat={handleNewChat}
+              chat={chat}
+              quickPrompts={quickPrompts}
+              bottomRef={bottomRef}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }
