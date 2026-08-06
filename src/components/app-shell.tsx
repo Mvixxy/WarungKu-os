@@ -273,8 +273,8 @@ export function AppShell({
                     <div className={cn(
                       "flex h-full items-center gap-1.5 rounded-xl px-3.5 transition-colors",
                       isActive
-                        ? "bg-primary/10 text-primary"
-                        : "text-primary",
+                        ? "bg-primary/15 text-primary font-semibold"
+                        : "bg-muted text-muted-foreground",
                     )}>
                       <Icon className="size-4" strokeWidth={isActive ? 2.2 : 1.8} />
                       <span className={cn(
