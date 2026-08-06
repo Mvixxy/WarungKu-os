@@ -259,7 +259,7 @@ function DesktopCart({
           <Button
             type="button"
             size="lg"
-            className="mt-2.5 h-10 w-full rounded-lg bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90"
+            className="mt-2.5 h-11 w-full rounded-xl bg-white text-primary font-semibold shadow-sm hover:bg-white/90 dark:bg-foreground dark:text-background dark:hover:bg-foreground/90"
             onClick={handleCheckout}
             disabled={checkingOut}
           >
@@ -736,13 +736,15 @@ export function KasirView() {
       )}
       <div
         className={cn(
-          "fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl border-t border-border bg-card shadow-lg transition-transform duration-300",
-          debtFormOpen ? "translate-y-0" : "translate-y-full"
+          "fixed bottom-0 left-0 right-0 z-50 max-h-[90vh] overflow-y-auto rounded-t-2xl border-t border-border bg-card shadow-lg transition-all duration-300 sm:bottom-auto sm:max-h-[80vh] sm:max-w-sm sm:rounded-2xl sm:border sm:border-border sm:shadow-2xl",
+          debtFormOpen
+            ? "translate-y-0 sm:mx-auto sm:translate-y-[-50%] sm:top-1/2 sm:opacity-100 sm:scale-100"
+            : "translate-y-full sm:mx-auto sm:translate-y-[-50%] sm:top-1/2 sm:opacity-0 sm:scale-95 sm:pointer-events-none"
         )}
       >
-        <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-muted-foreground/30" />
+        <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-muted-foreground/30 sm:mt-3" />
         <div className="p-4 pt-3">
-          <p className="text-sm font-semibold">Data pelanggan hutang</p>
+          <p className="text-sm sm:text-base font-semibold">Data pelanggan hutang</p>
           <p className="mt-0.5 text-[11px] text-muted-foreground">
             Isi data di bawah untuk mencatat hutang.
           </p>
