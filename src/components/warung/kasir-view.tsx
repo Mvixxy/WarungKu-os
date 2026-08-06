@@ -27,27 +27,14 @@ const defaultCategoryLabels: Array<{ value: ProductCategory; label: string }> = 
 ];
 
 function ProductCategoryIcon({ category }: { category: ProductCategory }) {
-  if (category === "Minuman") {
-    return <Coffee className="size-3.5 sm:size-4" />;
-  }
-  if (category === "Sembako") {
-    return <Wheat className="size-3.5 sm:size-4" />;
-  }
-  if (category === "Kebutuhan Harian") {
-    return <Sparkles className="size-3.5 sm:size-4" />;
-  }
+  if (category === "Minuman") return <Coffee className="size-3.5 sm:size-4" />;
+  if (category === "Sembako") return <Wheat className="size-3.5 sm:size-4" />;
+  if (category === "Kebutuhan Harian") return <Sparkles className="size-3.5 sm:size-4" />;
   return <ShoppingBasket className="size-3.5 sm:size-4" />;
 }
 
-function ProductCard({
-  product,
-  onAdd,
-}: {
-  product: Product;
-  onAdd: () => void;
-}) {
+function ProductCard({ product, onAdd }: { product: Product; onAdd: () => void }) {
   const lowStock = product.stock <= product.minimumStock;
-
   return (
     <button
       type="button"
@@ -62,19 +49,14 @@ function ProductCard({
         <div className="flex size-7 items-center justify-center rounded-md bg-muted text-muted-foreground sm:size-9 sm:rounded-lg">
           <ProductCategoryIcon category={product.category} />
         </div>
-        <Badge
-          variant={lowStock ? "destructive" : "secondary"}
-          className="rounded-full px-1.5 py-0 text-[9px] sm:px-2 sm:text-[10px]"
-        >
+        <Badge variant={lowStock ? "destructive" : "secondary"} className="rounded-full px-1.5 py-0 text-[9px] sm:px-2 sm:text-[10px]">
           {product.stock} stok
         </Badge>
       </div>
-
       <div className="mt-1.5 space-y-0.5 sm:mt-2 sm:space-y-1">
         <p className="font-heading text-xs font-semibold leading-tight sm:text-sm">{product.name}</p>
         <p className="text-[10px] text-muted-foreground sm:text-xs">{product.category}</p>
       </div>
-
       <div className="mt-1.5 flex items-end justify-between gap-2 sm:mt-2">
         <p className="font-heading text-sm font-semibold sm:text-base">{formatCurrency(product.sellPrice)}</p>
         <span className="rounded-md bg-primary px-2 py-1 text-[10px] font-medium text-primary-foreground opacity-100 transition sm:rounded-lg sm:px-3 sm:py-1.5 sm:text-xs sm:opacity-0 sm:group-hover:opacity-100">
@@ -82,6 +64,123 @@ function ProductCard({
         </span>
       </div>
     </button>
+  );
+}
+
+function CartPanel({
+  cartLines,
+  cartTotal,
+  paymentMethod,
+  settings,
+  updateCartQuantity,
+  removeFromCart,
+  setPaymentMethod,
+  handleCheckout,
+  className,
+}: {
+  cartLines: any[];
+  cartTotal: number;
+  paymentMethod: PaymentMethod;
+  settings: any;
+  updateCartQuantity: (id: string, qty: number) => void;
+  removeFromCart: (id: string) => void;
+  setPaymentMethod: (m: PaymentMethod) => void;
+  handleCheckout: () => void;
+  className?: string;
+}) {
+  return (
+    <Card className={className}>
+      <CardHeader className="pb-3 sm:pb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="font-heading text-base sm:text-lg">Keranjang</CardTitle>
+            <CardDescription>Item yang sudah ditap.</CardDescription>
+          </div>
+          <Badge variant="secondary" className="rounded-full text-xs">{cartLines.length} item</Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <ScrollArea className="h-[200px] rounded-lg border border-border bg-muted/30 p-2.5 sm:h-[260px]">
+          {cartLines.length > 0 ? (
+            <div className="space-y-2">
+              {cartLines.map((line) => (
+                <div key={line.product.id} className="rounded-lg border border-border bg-card p-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-medium">{line.product.name}</p>
+                      <p className="text-xs text-muted-foreground">{formatCurrency(line.product.sellPrice)} / item</p>
+                    </div>
+                    <button type="button" onClick={() => removeFromCart(line.product.id)} className="rounded p-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground" aria-label={`Hapus ${line.product.name}`}>
+                      <X className="size-3.5" />
+                    </button>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <div className="inline-flex items-center gap-1 rounded-lg bg-muted px-1.5 py-0.5">
+                      <Button type="button" size="icon-sm" variant="ghost" className="size-6 rounded-md" onClick={() => updateCartQuantity(line.product.id, line.quantity - 1)}>
+                        <Minus className="size-3" />
+                      </Button>
+                      <span className="min-w-5 text-center text-xs font-semibold">{line.quantity}</span>
+                      <Button type="button" size="icon-sm" variant="ghost" className="size-6 rounded-md" onClick={() => updateCartQuantity(line.product.id, line.quantity + 1)}>
+                        <Plus className="size-3" />
+                      </Button>
+                    </div>
+                    <p className="text-sm font-semibold">{formatCurrency(line.lineTotal)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex h-full min-h-[150px] flex-col items-center justify-center text-center sm:min-h-[200px]">
+              <ReceiptText className="size-7 text-muted-foreground sm:size-8" />
+              <p className="mt-2 font-heading text-xs font-semibold sm:text-sm">Belum ada item</p>
+              <p className="mt-1 max-w-[180px] text-[10px] text-muted-foreground sm:text-xs">
+                Tap produk untuk mulai transaksi.
+              </p>
+            </div>
+          )}
+        </ScrollArea>
+
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Metode bayar</p>
+          <div className="grid grid-cols-3 gap-1.5">
+            {settings.enabledPayments.map((method: PaymentMethod) => (
+              <Button
+                key={method}
+                type="button"
+                variant={paymentMethod === method ? "default" : "outline"}
+                size="sm"
+                className="h-9 rounded-lg text-xs"
+                onClick={() => setPaymentMethod(method)}
+              >
+                {method === "Tunai" ? <BanknoteArrowDown className="size-3.5" /> : <CreditCard className="size-3.5" />}
+                {paymentLabels[method]}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-xl bg-primary p-3.5 text-primary-foreground">
+          <div className="flex items-center justify-between text-xs text-primary-foreground/60">
+            <span>Total</span>
+            <span>{cartLines.reduce((sum: number, line: any) => sum + line.quantity, 0)} pcs</span>
+          </div>
+          <p className="mt-2 font-heading text-2xl font-semibold tracking-tight">
+            {formatCurrency(cartTotal)}
+          </p>
+          <Button
+            type="button"
+            size="lg"
+            className="mt-2.5 h-10 w-full rounded-lg bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90"
+            onClick={handleCheckout}
+          >
+            Bayar sekarang
+          </Button>
+          <p className="mt-2 text-[10px] text-primary-foreground/50">
+            Stok akan otomatis berkurang setelah transaksi.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -141,46 +240,27 @@ export function KasirView() {
   }
 
   return (
-    <div className="grid gap-3 xl:grid-cols-[1.7fr_0.95fr]">
-      <div>
+    <div className="flex h-full flex-col gap-3 xl:h-auto xl:grid xl:grid-cols-[1.7fr_0.95fr] xl:gap-3">
+      {/* Products — scrollable on mobile */}
+      <div className="min-h-0 flex-1 overflow-y-auto xl:overflow-visible">
         <Card>
           <CardHeader className="space-y-2.5 p-3 sm:p-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <CardTitle className="font-heading text-base sm:text-lg">Produk siap jual</CardTitle>
-                <CardDescription className="text-xs">
-                  Cari produk, tap item, lalu lanjut ke keranjang.
-                </CardDescription>
+                <CardDescription className="text-xs">Cari produk, tap item, lalu lanjut ke keranjang.</CardDescription>
               </div>
               <div className="relative shrink-0 sm:min-w-[200px]">
                 <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Cari produk..."
-                  className="h-8 rounded-lg border-border bg-muted/50 pl-8 text-xs sm:h-9 sm:text-sm"
-                />
+                <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cari produk..." className="h-8 rounded-lg border-border bg-muted/50 pl-8 text-xs sm:h-9 sm:text-sm" />
               </div>
             </div>
             <div className="flex gap-1 overflow-x-auto scrollbar-none">
-              <Button
-                type="button"
-                variant={category === "Semua" ? "default" : "ghost"}
-                size="sm"
-                className="shrink-0 rounded-full px-3 py-1 text-[10px] sm:text-xs"
-                onClick={() => setCategory("Semua")}
-              >
+              <Button type="button" variant={category === "Semua" ? "default" : "ghost"} size="sm" className="shrink-0 rounded-full px-3 py-1 text-[10px] sm:text-xs" onClick={() => setCategory("Semua")}>
                 Semua
               </Button>
               {allCategories.map((cat) => (
-                <Button
-                  key={cat}
-                  type="button"
-                  variant={category === cat ? "default" : "ghost"}
-                  size="sm"
-                  className="shrink-0 rounded-full px-3 py-1 text-[10px] sm:text-xs"
-                  onClick={() => setCategory(cat)}
-                >
+                <Button key={cat} type="button" variant={category === cat ? "default" : "ghost"} size="sm" className="shrink-0 rounded-full px-3 py-1 text-[10px] sm:text-xs" onClick={() => setCategory(cat)}>
                   {cat}
                 </Button>
               ))}
@@ -195,9 +275,7 @@ export function KasirView() {
                     product={product}
                     onAdd={() => {
                       addToCart(product.id);
-                      toast.success(`${product.name} ditambahkan.`, {
-                        description: `Stok: ${product.stock} pcs.`,
-                      });
+                      toast.success(`${product.name} ditambahkan.`, { description: `Stok: ${product.stock} pcs.` });
                     }}
                   />
                 ))}
@@ -206,131 +284,41 @@ export function KasirView() {
               <div className="flex min-h-[150px] flex-col items-center justify-center rounded-xl border border-dashed border-border text-center sm:min-h-[200px]">
                 <PackageSearch className="size-6 text-muted-foreground sm:size-8" />
                 <p className="mt-2 font-heading text-sm font-semibold sm:mt-3 sm:text-base">Produk tidak ditemukan</p>
-                <p className="mt-1 max-w-sm text-[10px] text-muted-foreground sm:text-xs">
-                  Coba kata kunci lain atau pilih kategori yang berbeda.
-                </p>
+                <p className="mt-1 max-w-sm text-[10px] text-muted-foreground sm:text-xs">Coba kata kunci lain atau pilih kategori yang berbeda.</p>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      <div>
-        <Card className="sticky top-3">
-          <CardHeader className="pb-3 sm:pb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="font-heading text-base sm:text-lg">Keranjang</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">Item yang sudah ditap.</CardDescription>
-              </div>
-              <Badge variant="secondary" className="rounded-full text-[10px] sm:text-xs">{cartLines.length} item</Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2.5 sm:space-y-3">
-            <ScrollArea className="h-[200px] rounded-lg border border-border bg-muted/30 p-2 sm:h-[260px] sm:p-2.5">
-              {cartLines.length > 0 ? (
-                <div className="space-y-1.5 sm:space-y-2">
-                  {cartLines.map((line) => (
-                    <div
-                      key={line.product.id}
-                      className="rounded-lg border border-border bg-card p-2 sm:p-2.5"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="text-xs sm:text-sm font-medium">{line.product.name}</p>
-                          <p className="text-[10px] sm:text-xs text-muted-foreground">
-                            {formatCurrency(line.product.sellPrice)} / item
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeFromCart(line.product.id)}
-                          className="rounded p-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                          aria-label={`Hapus ${line.product.name}`}
-                        >
-                          <X className="size-3.5" />
-                        </button>
-                      </div>
+      {/* Desktop: sticky cart on right side */}
+      <div className="hidden xl:block">
+        <CartPanel
+          className="sticky top-3"
+          cartLines={cartLines}
+          cartTotal={cartTotal}
+          paymentMethod={paymentMethod}
+          settings={settings}
+          updateCartQuantity={updateCartQuantity}
+          removeFromCart={removeFromCart}
+          setPaymentMethod={setPaymentMethod}
+          handleCheckout={() => void handleCheckout()}
+        />
+      </div>
 
-                      <div className="mt-1.5 flex items-center justify-between gap-2 sm:mt-2">
-                        <div className="inline-flex items-center gap-0.5 rounded-lg bg-muted px-1 py-0.5 sm:gap-1 sm:px-1.5">
-                          <Button
-                            type="button"
-                            size="icon-sm"
-                            variant="ghost"
-                            className="size-5 rounded-md sm:size-6"
-                            onClick={() => updateCartQuantity(line.product.id, line.quantity - 1)}
-                          >
-                            <Minus className="size-2.5 sm:size-3" />
-                          </Button>
-                          <span className="min-w-4 text-center text-[10px] font-semibold sm:min-w-5 sm:text-xs">{line.quantity}</span>
-                          <Button
-                            type="button"
-                            size="icon-sm"
-                            variant="ghost"
-                            className="size-5 rounded-md sm:size-6"
-                            onClick={() => updateCartQuantity(line.product.id, line.quantity + 1)}
-                          >
-                            <Plus className="size-2.5 sm:size-3" />
-                          </Button>
-                        </div>
-                        <p className="text-xs sm:text-sm font-semibold">{formatCurrency(line.lineTotal)}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex h-full min-h-[150px] flex-col items-center justify-center text-center sm:min-h-[200px]">
-                  <ReceiptText className="size-6 text-muted-foreground sm:size-8" />
-                  <p className="mt-2 font-heading text-xs font-semibold sm:mt-3 sm:text-sm">Belum ada item</p>
-                  <p className="mt-1 max-w-[180px] text-[10px] text-muted-foreground sm:max-w-[200px] sm:text-xs">
-                    Tap produk dari sisi kiri untuk mulai transaksi.
-                  </p>
-                </div>
-              )}
-            </ScrollArea>
-
-            <div className="space-y-1.5 sm:space-y-2">
-              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wide">Metode bayar</p>
-              <div className="grid grid-cols-3 gap-1 sm:gap-1.5">
-                {settings.enabledPayments.map((method) => (
-                  <Button
-                    key={method}
-                    type="button"
-                    variant={paymentMethod === method ? "default" : "outline"}
-                    size="sm"
-                    className="h-8 rounded-lg text-[10px] sm:h-9 sm:text-xs"
-                    onClick={() => setPaymentMethod(method)}
-                  >
-                    {method === "Tunai" ? <BanknoteArrowDown className="size-3 sm:size-3.5" /> : <CreditCard className="size-3 sm:size-3.5" />}
-                    {paymentLabels[method]}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-xl bg-primary p-3 text-primary-foreground sm:p-3.5">
-              <div className="flex items-center justify-between text-[10px] sm:text-xs text-primary-foreground/60">
-                <span>Total</span>
-                <span>{cartLines.reduce((sum, line) => sum + line.quantity, 0)} pcs</span>
-              </div>
-              <p className="mt-1.5 font-heading text-xl sm:mt-2 sm:text-2xl font-semibold tracking-tight">
-                {formatCurrency(cartTotal)}
-              </p>
-              <Button
-                type="button"
-                size="lg"
-                className="mt-2 h-9 w-full rounded-lg bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 sm:mt-2.5 sm:h-10"
-                onClick={() => void handleCheckout()}
-              >
-                Bayar sekarang
-              </Button>
-              <p className="mt-1.5 text-[9px] text-primary-foreground/50 sm:mt-2 sm:text-[10px]">
-                Stok akan otomatis berkurang setelah transaksi.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Mobile: fixed cart at bottom */}
+      <div className="border-t border-border bg-card p-3 xl:hidden">
+        <CartPanel
+          className="border-0 shadow-none"
+          cartLines={cartLines}
+          cartTotal={cartTotal}
+          paymentMethod={paymentMethod}
+          settings={settings}
+          updateCartQuantity={updateCartQuantity}
+          removeFromCart={removeFromCart}
+          setPaymentMethod={setPaymentMethod}
+          handleCheckout={() => void handleCheckout()}
+        />
       </div>
     </div>
   );

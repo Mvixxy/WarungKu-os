@@ -10,6 +10,7 @@ import {
   Menu,
   Package2,
   ScrollText,
+  LogOut,
   Settings2,
   ShoppingBasket,
   Store,
@@ -28,6 +29,7 @@ import { AccountPanel } from "@/components/auth/account-panel";
 import { AIAssistantPanel } from "@/components/warung/ai-assistant-panel";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
+import { signOut } from "@/lib/auth-client";
 import { useAppState } from "@/components/providers/app-state-provider";
 
 const navigation = [
@@ -234,16 +236,17 @@ export function AppShell({
                       </Link>
                     );
                   })}
-                  <Link
-                    href="/pengaturan"
+                  <button
+                    type="button"
+                    onClick={async () => { await signOut(); window.location.href = "/auth"; }}
                     className={cn(
-                      buttonVariants({ size: "lg" }),
-                      "mt-2 h-10 w-full rounded-xl",
+                      buttonVariants({ variant: "ghost", size: "lg" }),
+                      "mt-2 h-10 w-full justify-start rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive",
                     )}
                   >
-                    <Settings2 className="size-4" />
-                    Pengaturan
-                  </Link>
+                    <LogOut className="size-4" />
+                    Keluar akun
+                  </button>
                   <ThemeToggle className="mt-4" />
                 </div>
               </SheetContent>
