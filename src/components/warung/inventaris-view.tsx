@@ -38,11 +38,13 @@ const emptyDraft: ProductDraft = {
 
 function ProductForm({
   draft,
-  onChange,
+  onFieldChange,
+  onCategoryChange,
   categories,
 }: {
   draft: ProductDraft;
-  onChange: (draft: ProductDraft) => void;
+  onFieldChange: (fields: Partial<ProductDraft>) => void;
+  onCategoryChange: (category: ProductCategory) => void;
   categories: string[];
 }) {
   const [addingCategory, setAddingCategory] = useState(false);
@@ -55,7 +57,7 @@ function ProductForm({
       toast.error("Kategori ini sudah ada.");
       return;
     }
-    onChange({ ...draft, category: trimmed as ProductCategory });
+    onCategoryChange(trimmed as ProductCategory);
     setNewCategory("");
     setAddingCategory(false);
   }
@@ -67,7 +69,7 @@ function ProductForm({
         <Input
           id="product-name"
           value={draft.name}
-          onChange={(event) => onChange({ ...draft, name: event.target.value })}
+          onChange={(event) => onFieldChange({ name: event.target.value })}
           placeholder="Contoh: Mi Instan Goreng"
           className="h-9 rounded-lg text-sm"
         />
@@ -100,7 +102,7 @@ function ProductForm({
                 variant="ghost"
                 size="icon-sm"
                 className="shrink-0 rounded-lg"
-                onClick={() => handleAddCategory()}
+                onClick={handleAddCategory}
               >
                 <Plus className="size-3.5" />
               </Button>
@@ -118,7 +120,7 @@ function ProductForm({
             <div className="flex items-center gap-1">
               <select
                 value={draft.category}
-                onChange={(event) => onChange({ ...draft, category: event.target.value as ProductCategory })}
+                onChange={(event) => onCategoryChange(event.target.value as ProductCategory)}
                 className="h-9 w-full rounded-lg border border-input bg-card px-3 text-sm"
               >
                 {categories.map((cat) => (
@@ -145,7 +147,7 @@ function ProductForm({
             type="number"
             min={0}
             value={draft.stock}
-            onChange={(event) => onChange({ ...draft, stock: Number(event.target.value) })}
+            onChange={(event) => onFieldChange({ stock: Number(event.target.value) })}
             className="h-9 rounded-lg text-sm"
           />
         </div>
@@ -159,7 +161,7 @@ function ProductForm({
             type="number"
             min={0}
             value={draft.buyPrice}
-            onChange={(event) => onChange({ ...draft, buyPrice: Number(event.target.value) })}
+            onChange={(event) => onFieldChange({ buyPrice: Number(event.target.value) })}
             className="h-9 rounded-lg text-sm"
           />
         </div>
@@ -170,7 +172,7 @@ function ProductForm({
             type="number"
             min={0}
             value={draft.sellPrice}
-            onChange={(event) => onChange({ ...draft, sellPrice: Number(event.target.value) })}
+            onChange={(event) => onFieldChange({ sellPrice: Number(event.target.value) })}
             className="h-9 rounded-lg text-sm"
           />
         </div>
@@ -183,7 +185,7 @@ function ProductForm({
           type="number"
           min={0}
           value={draft.minimumStock}
-          onChange={(event) => onChange({ ...draft, minimumStock: Number(event.target.value) })}
+          onChange={(event) => onFieldChange({ minimumStock: Number(event.target.value) })}
           className="h-9 rounded-lg text-sm"
         />
       </div>
@@ -193,7 +195,7 @@ function ProductForm({
         <Input
           id="product-description"
           value={draft.description}
-          onChange={(event) => onChange({ ...draft, description: event.target.value })}
+          onChange={(event) => onFieldChange({ description: event.target.value })}
           placeholder="Penempatan rak, paket laris, atau info kasir"
           className="h-9 rounded-lg text-sm"
         />
@@ -212,12 +214,8 @@ export function InventarisView() {
   const [restockTarget, setRestockTarget] = useState<Product | null>(null);
   const [restockAmount, setRestockAmount] = useState(12);
 
-  // Collect all unique categories from products + defaults
   const categories = Array.from(
-    new Set([
-      ...defaultCategories,
-      ...products.map((p) => p.category),
-    ])
+    new Set([...defaultCategories, ...products.map((p) => p.category)])
   );
 
   const filteredProducts = products.filter((product) => {
@@ -291,34 +289,17 @@ export function InventarisView() {
   return (
     <div className="space-y-3">
       <section className="grid gap-3 md:grid-cols-3">
-        <StatCard
-          title="Total SKU"
-          value={`${products.length} produk`}
-          description="Produk aktif di warung."
-        />
-        <StatCard
-          title="Stok menipis"
-          value={`${lowStockProducts.length} item`}
-          description="Perlu restok sebelum kehabisan."
-          tone="warn"
-        />
-        <StatCard
-          title="Nilai stok"
-          value={formatCurrency(totalInventoryValue)}
-          description="Total modal di inventaris."
-          tone="accent"
-        />
+        <StatCard title="Total SKU" value={`${products.length} produk`} description="Produk aktif di warung." />
+        <StatCard title="Stok menipis" value={`${lowStockProducts.length} item`} description="Perlu restok sebelum kehabisan." tone="warn" />
+        <StatCard title="Nilai stok" value={formatCurrency(totalInventoryValue)} description="Total modal di inventaris." tone="accent" />
       </section>
 
       <Card>
         <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <CardTitle className="font-heading text-lg">Inventaris barang</CardTitle>
-            <CardDescription>
-              Kelola produk, stok, dan harga jual.
-            </CardDescription>
+            <CardDescription>Kelola produk, stok, dan harga jual.</CardDescription>
           </div>
-
           <div className="flex flex-col gap-2 md:flex-row md:items-center">
             <div className="relative min-w-[220px]">
               <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -330,23 +311,22 @@ export function InventarisView() {
               />
             </div>
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-              <DialogTrigger
-                render={<Button size="sm" className="h-9 rounded-lg" />}
-              >
+              <DialogTrigger render={<Button size="sm" className="h-9 rounded-lg" />}>
                 <PackagePlus className="size-3.5" />
                 Tambah barang
               </DialogTrigger>
-              <DialogContent className="max-w-md rounded-xl p-0">
-                <DialogHeader className="p-4 pb-0">
-                  <DialogTitle className="font-heading text-base">Tambah produk baru</DialogTitle>
-                  <DialogDescription className="text-xs">
-                    Isi data supaya kasir bisa langsung menjual barang ini.
-                  </DialogDescription>
+              <DialogContent className="max-w-md" showCloseButton>
+                <DialogHeader>
+                  <DialogTitle>Tambah produk baru</DialogTitle>
+                  <DialogDescription>Isi data supaya kasir bisa langsung menjual barang ini.</DialogDescription>
                 </DialogHeader>
-                <div className="p-4 pt-3">
-                  <ProductForm draft={draft} onChange={setDraft} categories={categories} />
-                </div>
-                <DialogFooter className="rounded-b-xl border-t border-border px-4 py-3" showCloseButton>
+                <ProductForm
+                  draft={draft}
+                  categories={categories}
+                  onFieldChange={(fields) => setDraft((prev) => ({ ...prev, ...fields }))}
+                  onCategoryChange={(category) => setDraft((prev) => ({ ...prev, category }))}
+                />
+                <DialogFooter>
                   <Button type="button" size="sm" className="rounded-lg px-4" onClick={() => void handleCreateProduct()}>
                     Simpan
                   </Button>
@@ -376,9 +356,7 @@ export function InventarisView() {
                     <TableCell className="min-w-[200px]">
                       <div>
                         <p className="text-sm font-medium">{product.name}</p>
-                        {product.description && (
-                          <p className="text-xs text-muted-foreground">{product.description}</p>
-                        )}
+                        {product.description && <p className="text-xs text-muted-foreground">{product.description}</p>}
                       </div>
                     </TableCell>
                     <TableCell className="text-xs">{product.category}</TableCell>
@@ -386,45 +364,20 @@ export function InventarisView() {
                     <TableCell className="text-xs font-medium">{formatCurrency(product.sellPrice)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5">
-                        <Badge
-                          variant={lowStock ? "destructive" : "secondary"}
-                          className="rounded-full text-[10px] px-2 py-0.5"
-                        >
-                          {product.stock}
-                        </Badge>
+                        <Badge variant={lowStock ? "destructive" : "secondary"} className="rounded-full text-[10px] px-2 py-0.5">{product.stock}</Badge>
                         {lowStock && <AlertTriangle className="size-3 text-destructive" />}
                       </div>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">{product.minimumStock}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 rounded-md text-xs"
-                          onClick={() => {
-                            setEditingProduct(product);
-                            setEditDraft({
-                              name: product.name,
-                              category: product.category,
-                              buyPrice: product.buyPrice,
-                              sellPrice: product.sellPrice,
-                              stock: product.stock,
-                              minimumStock: product.minimumStock,
-                              description: product.description,
-                            });
-                          }}
-                        >
+                        <Button type="button" variant="ghost" size="sm" className="h-7 rounded-md text-xs" onClick={() => {
+                          setEditingProduct(product);
+                          setEditDraft({ name: product.name, category: product.category, buyPrice: product.buyPrice, sellPrice: product.sellPrice, stock: product.stock, minimumStock: product.minimumStock, description: product.description });
+                        }}>
                           <PencilLine className="size-3" />
                         </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 rounded-md text-xs"
-                          onClick={() => setRestockTarget(product)}
-                        >
+                        <Button type="button" variant="ghost" size="sm" className="h-7 rounded-md text-xs" onClick={() => setRestockTarget(product)}>
                           <Warehouse className="size-3" />
                         </Button>
                       </div>
@@ -438,15 +391,18 @@ export function InventarisView() {
       </Card>
 
       <Dialog open={Boolean(editingProduct)} onOpenChange={(open) => !open && setEditingProduct(null)}>
-        <DialogContent className="max-w-md rounded-xl p-0">
-          <DialogHeader className="p-4 pb-0">
-            <DialogTitle className="font-heading text-base">Edit produk</DialogTitle>
-            <DialogDescription className="text-xs">Perbarui data produk.</DialogDescription>
+        <DialogContent className="max-w-md" showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Edit produk</DialogTitle>
+            <DialogDescription>Perbarui data produk.</DialogDescription>
           </DialogHeader>
-          <div className="p-4 pt-3">
-            <ProductForm draft={editDraft} onChange={setEditDraft} categories={categories} />
-          </div>
-          <DialogFooter className="rounded-b-xl border-t border-border px-4 py-3" showCloseButton>
+          <ProductForm
+            draft={editDraft}
+            categories={categories}
+            onFieldChange={(fields) => setEditDraft((prev) => ({ ...prev, ...fields }))}
+            onCategoryChange={(category) => setEditDraft((prev) => ({ ...prev, category }))}
+          />
+          <DialogFooter>
             <Button type="button" size="sm" className="rounded-lg px-4" onClick={() => void handleUpdateProduct()}>
               Simpan
             </Button>
@@ -455,33 +411,22 @@ export function InventarisView() {
       </Dialog>
 
       <Dialog open={Boolean(restockTarget)} onOpenChange={(open) => !open && setRestockTarget(null)}>
-        <DialogContent className="max-w-sm rounded-xl p-0">
-          <DialogHeader className="p-4 pb-0">
-            <DialogTitle className="font-heading text-base">Restok</DialogTitle>
-            <DialogDescription className="text-xs">
-              Tambah stok untuk {restockTarget?.name ?? "produk"}.
-            </DialogDescription>
+        <DialogContent className="max-w-sm" showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Restok</DialogTitle>
+            <DialogDescription>Tambah stok untuk {restockTarget?.name ?? "produk"}.</DialogDescription>
           </DialogHeader>
-          <div className="space-y-3 p-4 pt-3">
+          <div className="space-y-3">
             <div className="rounded-lg border border-border bg-muted/30 p-3">
               <p className="text-xs text-muted-foreground">Stok sekarang</p>
-              <p className="mt-1 font-heading text-xl font-semibold">
-                {restockTarget?.stock ?? 0} pcs
-              </p>
+              <p className="mt-1 font-heading text-xl font-semibold">{restockTarget?.stock ?? 0} pcs</p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="restock-amount" className="text-xs font-medium">Jumlah tambahan</Label>
-              <Input
-                id="restock-amount"
-                type="number"
-                min={1}
-                value={restockAmount}
-                onChange={(event) => setRestockAmount(Number(event.target.value))}
-                className="h-9 rounded-lg text-sm"
-              />
+              <Input id="restock-amount" type="number" min={1} value={restockAmount} onChange={(event) => setRestockAmount(Number(event.target.value))} className="h-9 rounded-lg text-sm" />
             </div>
           </div>
-          <DialogFooter className="rounded-b-xl border-t border-border px-4 py-3" showCloseButton>
+          <DialogFooter>
             <Button type="button" size="sm" className="rounded-lg px-4" onClick={() => void handleRestock()}>
               Simpan
             </Button>
