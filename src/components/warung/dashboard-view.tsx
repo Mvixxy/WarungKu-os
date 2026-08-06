@@ -62,8 +62,8 @@ export function DashboardView() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="rounded-xl bg-sidebar p-4 text-sidebar-foreground">
-              <div className="flex items-center gap-2 text-sidebar-foreground/70">
+            <div className="rounded-xl bg-foreground p-4 text-background">
+              <div className="flex items-center gap-2 text-background/70">
                 <ReceiptText className="size-3.5 text-sidebar-primary" />
                 <p className="text-xs font-medium uppercase tracking-wide">Transaksi terakhir</p>
               </div>
@@ -73,7 +73,7 @@ export function DashboardView() {
                   <p className="mt-3 font-heading text-3xl font-semibold">
                     {formatCurrency(latestTransaction.total)}
                   </p>
-                  <p className="mt-1.5 text-xs text-sidebar-foreground/60">
+                  <p className="mt-1.5 text-xs text-background/60">
                     {latestTransaction.paymentMethod} • {formatTime(latestTransaction.createdAt)}
                   </p>
                   <div className="mt-4 space-y-2">
@@ -82,7 +82,7 @@ export function DashboardView() {
                         key={`${latestTransaction.id}-${item.productId}`}
                         className="flex items-center justify-between text-xs"
                       >
-                        <span className="text-sidebar-foreground/80">
+                        <span className="text-background/80">
                           {item.productName} x{item.quantity}
                         </span>
                         <span className="font-medium">
@@ -93,7 +93,7 @@ export function DashboardView() {
                   </div>
                 </>
               ) : (
-                <p className="mt-3 text-xs text-sidebar-foreground/60">
+                <p className="mt-3 text-xs text-background/60">
                   Belum ada transaksi yang tersimpan.
                 </p>
               )}

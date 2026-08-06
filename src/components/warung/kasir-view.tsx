@@ -301,8 +301,8 @@ export function KasirView() {
               </div>
             </div>
 
-            <div className="rounded-xl bg-sidebar p-3.5 text-sidebar-foreground">
-              <div className="flex items-center justify-between text-xs text-sidebar-foreground/60">
+            <div className="rounded-xl bg-foreground p-3.5 text-background">
+              <div className="flex items-center justify-between text-xs text-background/60">
                 <span>Total</span>
                 <span>{cartLines.reduce((sum, line) => sum + line.quantity, 0)} pcs</span>
               </div>
@@ -317,7 +317,7 @@ export function KasirView() {
               >
                 Bayar sekarang
               </Button>
-              <p className="mt-2 text-[10px] text-sidebar-foreground/50">
+              <p className="mt-2 text-[10px] text-background/50">
                 Stok akan otomatis berkurang setelah transaksi.
               </p>
             </div>

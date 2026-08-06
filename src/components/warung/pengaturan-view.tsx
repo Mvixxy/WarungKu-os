@@ -279,16 +279,16 @@ export function PengaturanView() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2.5">
-            <div className="rounded-xl bg-sidebar p-3.5 text-sidebar-foreground">
-              <div className="flex items-center gap-1.5 text-sidebar-foreground/60">
+            <div className="rounded-xl bg-foreground p-3.5 text-background">
+              <div className="flex items-center gap-1.5 text-background/60">
                 <Store className="size-3 text-sidebar-primary" />
                 <p className="text-[10px] font-medium uppercase tracking-wide">Warung aktif</p>
               </div>
               <p className="mt-2 font-heading text-lg font-semibold">{form.storeName || "Nama warung"}</p>
-              <p className="text-xs text-sidebar-foreground/60">
+              <p className="text-xs text-background/60">
                 {form.storeTagline || "Tagline"}
               </p>
-              <div className="mt-2 space-y-0.5 text-[10px] text-sidebar-foreground/50">
+              <div className="mt-2 space-y-0.5 text-[10px] text-background/50">
                 <p>{form.city || "Kota"} · {form.storeAddress || "Alamat"}</p>
                 <p>Pemilik: {form.ownerName || "-"} · {form.ownerWhatsapp || "-"}</p>
               </div>
