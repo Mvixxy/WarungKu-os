@@ -87,6 +87,7 @@ function CartPanel({
   setPaymentMethod: (m: PaymentMethod) => void;
   handleCheckout: () => void;
   className?: string;
+  showCheckoutButton?: boolean;
 }) {
   return (
     <Card className={className}>
@@ -159,24 +160,13 @@ function CartPanel({
           </div>
         </div>
 
-        <div className="rounded-xl bg-primary p-3.5 text-primary-foreground">
+        <div className="rounded-xl bg-primary p-3 text-primary-foreground sm:p-3.5">
           <div className="flex items-center justify-between text-xs text-primary-foreground/60">
             <span>Total</span>
             <span>{cartLines.reduce((sum: number, line: any) => sum + line.quantity, 0)} pcs</span>
           </div>
-          <p className="mt-2 font-heading text-2xl font-semibold tracking-tight">
+          <p className="mt-1.5 font-heading text-xl font-semibold tracking-tight sm:mt-2 sm:text-2xl">
             {formatCurrency(cartTotal)}
-          </p>
-          <Button
-            type="button"
-            size="lg"
-            className="mt-2.5 h-10 w-full rounded-lg bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90"
-            onClick={handleCheckout}
-          >
-            Bayar sekarang
-          </Button>
-          <p className="mt-2 text-[10px] text-primary-foreground/50">
-            Stok akan otomatis berkurang setelah transaksi.
           </p>
         </div>
       </CardContent>
@@ -310,6 +300,7 @@ export function KasirView() {
       <div className="border-t border-border bg-card p-3 xl:hidden">
         <CartPanel
           className="border-0 shadow-none"
+          showCheckoutButton={false}
           cartLines={cartLines}
           cartTotal={cartTotal}
           paymentMethod={paymentMethod}
@@ -319,6 +310,14 @@ export function KasirView() {
           setPaymentMethod={setPaymentMethod}
           handleCheckout={() => void handleCheckout()}
         />
+        <Button
+          type="button"
+          size="lg"
+          className="mt-2 h-11 w-full rounded-xl bg-primary text-primary-foreground text-sm font-semibold shadow-md"
+          onClick={() => void handleCheckout()}
+        >
+          Bayar sekarang — {formatCurrency(cartTotal)}
+        </Button>
       </div>
     </div>
   );
