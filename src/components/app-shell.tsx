@@ -273,7 +273,7 @@ export function AppShell({
                     <div className={cn(
                       "flex size-11 items-center justify-center rounded-full shadow-md transition-colors",
                       isActive
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-card border-2 border-primary text-primary"
                         : "bg-card border border-border text-primary",
                     )}>
                       <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.8} />
