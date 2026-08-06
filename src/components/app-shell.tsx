@@ -268,22 +268,22 @@ export function AppShell({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="flex flex-col items-center gap-0.5 -mt-3"
+                    className="-mt-3"
                   >
                     <div className={cn(
-                      "flex size-11 items-center justify-center rounded-full shadow-md transition-colors",
+                      "flex h-10 items-center gap-1.5 rounded-xl px-3 shadow-md transition-colors",
                       isActive
                         ? "bg-card border-2 border-primary text-primary"
                         : "bg-card border border-border text-primary",
                     )}>
-                      <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.8} />
+                      <Icon className="size-4" strokeWidth={isActive ? 2.2 : 1.8} />
+                      <span className={cn(
+                        "text-[11px] leading-tight",
+                        isActive ? "font-semibold" : "font-medium",
+                      )}>
+                        {item.label}
+                      </span>
                     </div>
-                    <span className={cn(
-                      "text-[10px] leading-tight",
-                      isActive ? "font-semibold text-primary" : "font-medium text-muted-foreground",
-                    )}>
-                      {item.label}
-                    </span>
                   </Link>
                 );
               }
