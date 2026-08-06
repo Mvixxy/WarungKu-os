@@ -212,15 +212,17 @@ export function InventarisView() {
   const [editDraft, setEditDraft] = useState<ProductDraft>(emptyDraft);
   const [restockTarget, setRestockTarget] = useState<Product | null>(null);
   const [restockAmount, setRestockAmount] = useState(12);
+  const [localCategories, setLocalCategories] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
 
   const categories = Array.from(
-    new Set([...defaultCategories, ...products.map((p) => p.category)])
+    new Set([...defaultCategories, ...localCategories, ...products.map((p) => p.category)])
   );
 
   function addCategory(name: string) {
-    // Categories are derived from products + defaults.
-    // When user creates a product with a new category, it'll appear automatically.
-    // No-op here — the category is saved with the product on submit.
+    setLocalCategories((prev) =>
+      prev.some((c) => c.toLowerCase() === name.toLowerCase()) ? prev : [...prev, name]
+    );
   }
 
   const filteredProducts = products.filter((product) => {
@@ -242,37 +244,49 @@ export function InventarisView() {
   }
 
   async function handleCreateProduct() {
+    if (saving) return;
     try {
       if (!validateProduct(draft)) { toast.error("Lengkapi data produk lebih dulu."); return; }
+      setSaving(true);
       await addProduct(draft);
       setDraft(emptyDraft);
       setCreateOpen(false);
       toast.success("Produk baru berhasil ditambahkan.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Gagal menambah produk.");
+    } finally {
+      setSaving(false);
     }
   }
 
   async function handleUpdateProduct() {
+    if (saving) return;
     try {
       if (!editingProduct || !validateProduct(editDraft)) { toast.error("Periksa kembali data yang ingin diperbarui."); return; }
+      setSaving(true);
       await updateProduct(editingProduct.id, editDraft);
       setEditingProduct(null);
       toast.success(`${editDraft.name} berhasil diperbarui.`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Gagal memperbarui produk.");
+    } finally {
+      setSaving(false);
     }
   }
 
   async function handleRestock() {
+    if (saving) return;
     try {
       if (!restockTarget || restockAmount <= 0) { toast.error("Masukkan jumlah restok yang valid."); return; }
+      setSaving(true);
       await restockProduct(restockTarget.id, restockAmount);
       toast.success(`${restockTarget.name} ditambah ${restockAmount} stok.`);
       setRestockTarget(null);
       setRestockAmount(12);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Gagal menambah stok.");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -295,7 +309,7 @@ export function InventarisView() {
               <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari produk..." className="h-9 rounded-lg border-border bg-muted/50 pl-8 text-sm" />
             </div>
-            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+            <Dialog open={createOpen} onOpenChange={(o) => { setCreateOpen(o); if (!o) setSaving(false); }}>
               <DialogTrigger render={<Button size="sm" className="h-9 rounded-lg" />}>
                 <PackagePlus className="size-3.5" />
                 Tambah barang
@@ -307,7 +321,7 @@ export function InventarisView() {
                 </DialogHeader>
                 <ProductForm draft={draft} onDraftChange={setDraft} categories={categories} onAddCategory={addCategory} />
                 <DialogFooter>
-                  <Button type="button" size="sm" className="rounded-lg px-4" onClick={() => void handleCreateProduct()}>Simpan</Button>
+                  <Button type="button" size="sm" className="rounded-lg px-4" disabled={saving} onClick={() => void handleCreateProduct()}>{saving ? "Menyimpan..." : "Simpan"}</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -368,7 +382,7 @@ export function InventarisView() {
         </CardContent>
       </Card>
 
-      <Dialog open={Boolean(editingProduct)} onOpenChange={(o) => !o && setEditingProduct(null)}>
+      <Dialog open={Boolean(editingProduct)} onOpenChange={(o) => { if (!o) { setEditingProduct(null); setSaving(false); } }}>
         <DialogContent className="max-w-md" showCloseButton>
           <DialogHeader>
             <DialogTitle>Edit produk</DialogTitle>
@@ -376,12 +390,12 @@ export function InventarisView() {
           </DialogHeader>
           <ProductForm draft={editDraft} onDraftChange={setEditDraft} categories={categories} onAddCategory={addCategory} />
           <DialogFooter>
-            <Button type="button" size="sm" className="rounded-lg px-4" onClick={() => void handleUpdateProduct()}>Simpan</Button>
+            <Button type="button" size="sm" className="rounded-lg px-4" disabled={saving} onClick={() => void handleUpdateProduct()}>{saving ? "Menyimpan..." : "Simpan"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={Boolean(restockTarget)} onOpenChange={(o) => !o && setRestockTarget(null)}>
+      <Dialog open={Boolean(restockTarget)} onOpenChange={(o) => { if (!o) { setRestockTarget(null); setSaving(false); } }}>
         <DialogContent className="max-w-sm" showCloseButton>
           <DialogHeader>
             <DialogTitle>Restok</DialogTitle>
@@ -398,7 +412,7 @@ export function InventarisView() {
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" size="sm" className="rounded-lg px-4" onClick={() => void handleRestock()}>Simpan</Button>
+            <Button type="button" size="sm" className="rounded-lg px-4" disabled={saving} onClick={() => void handleRestock()}>{saving ? "Menyimpan..." : "Simpan"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
