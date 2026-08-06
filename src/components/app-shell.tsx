@@ -212,7 +212,7 @@ export function AppShell({
                     {activePage.title}
                   </SheetDescription>
                 </SheetHeader>
-                <div className="space-y-1 px-4 pb-6">
+                <div className="flex flex-1 flex-col space-y-1 px-4 pb-6">
                   {navigation.map((item) => {
                     const Icon = item.icon;
                     const isActive = pathname === item.href;
@@ -236,18 +236,18 @@ export function AppShell({
                       </Link>
                     );
                   })}
-                  <button
-                    type="button"
-                    onClick={async () => { await signOut(); window.location.href = "/auth"; }}
-                    className={cn(
-                      buttonVariants({ variant: "ghost", size: "lg" }),
-                      "mt-2 h-10 w-full justify-start rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive",
-                    )}
-                  >
-                    <LogOut className="size-4" />
-                    Keluar akun
-                  </button>
-                  <ThemeToggle className="mt-4" />
+                  <div className="mt-auto pt-4">
+                    <div className="mb-3 border-t border-sidebar-border" />
+                    <button
+                      type="button"
+                      onClick={async () => { await signOut(); window.location.href = "/auth"; }}
+                      className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-destructive/20 bg-destructive/5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+                    >
+                      <LogOut className="size-4" />
+                      Keluar akun
+                    </button>
+                  </div>
+                  <ThemeToggle className="mt-3" />
                 </div>
               </SheetContent>
             </Sheet>
