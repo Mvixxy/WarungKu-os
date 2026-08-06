@@ -22,7 +22,7 @@ export function StatCard({
     <CardContent className="space-y-1 p-3 sm:space-y-1.5 sm:p-4">
       <div className="flex items-center justify-between">
         <p className={cn(
-          "text-[9px] font-medium uppercase tracking-wider sm:text-[10px]",
+          "text-[8px] font-medium uppercase tracking-wider sm:text-[10px]",
           tone === "accent" && "text-accent",
           tone === "warn" && "text-primary",
           tone === "default" && "text-muted-foreground"
@@ -35,11 +35,11 @@ export function StatCard({
         )} />
       </div>
       <p className={cn(
-        "font-heading text-xl font-semibold tracking-tight sm:text-2xl",
+        "font-heading text-base font-semibold tracking-tight sm:text-2xl",
         tone === "accent" && "text-accent-foreground dark:text-accent",
         tone === "warn" && "text-primary"
       )}>{value}</p>
-      <p className="text-[10px] text-muted-foreground leading-relaxed sm:text-[11px]">{description}</p>
+      <p className="text-[9px] text-muted-foreground leading-snug sm:text-[11px]">{description}</p>
     </CardContent>
   );
 
