@@ -179,8 +179,8 @@ export function LaporanView() {
                   </p>
                   <p className="text-[10px] text-muted-foreground">{settings.storeAddress}</p>
                 </div>
-                <div className="rounded-lg bg-foreground px-3 py-2 text-right text-background">
-                  <p className="text-[9px] uppercase tracking-wider text-background/60">{rangeLabel}</p>
+                <div className="rounded-lg bg-primary px-3 py-2 text-right text-primary-foreground">
+                  <p className="text-[9px] uppercase tracking-wider text-primary-foreground/60">{rangeLabel}</p>
                   <p className="mt-0.5 font-heading text-base font-semibold">{formatCurrency(summary.netProfit)}</p>
                 </div>
               </div>

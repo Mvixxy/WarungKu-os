@@ -19,17 +19,31 @@ export function StatCard({
     <Card
       className={cn(
         "border-border bg-card",
-        tone === "accent" && "bg-accent text-accent-foreground border-accent/30",
-        tone === "warn" && "bg-primary/8 text-primary border-primary/20"
+        tone === "accent" && "border-accent/25 bg-accent/8",
+        tone === "warn" && "border-primary/20 bg-primary/5"
       )}
     >
-      <CardContent className="space-y-2 p-4">
+      <CardContent className="space-y-1.5 p-4">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{title}</p>
-          <ArrowUpRight className="size-3.5 text-muted-foreground" />
+          <p className={cn(
+            "text-[10px] font-medium uppercase tracking-wider",
+            tone === "accent" && "text-accent",
+            tone === "warn" && "text-primary",
+            tone === "default" && "text-muted-foreground"
+          )}>{title}</p>
+          <ArrowUpRight className={cn(
+            "size-3",
+            tone === "accent" && "text-accent",
+            tone === "warn" && "text-primary",
+            tone === "default" && "text-muted-foreground"
+          )} />
         </div>
-        <p className="font-heading text-2xl font-semibold tracking-tight">{value}</p>
-        <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
+        <p className={cn(
+          "font-heading text-2xl font-semibold tracking-tight",
+          tone === "accent" && "text-accent-foreground dark:text-accent",
+          tone === "warn" && "text-primary"
+        )}>{value}</p>
+        <p className="text-[11px] text-muted-foreground leading-relaxed">{description}</p>
       </CardContent>
     </Card>
   );

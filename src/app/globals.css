@@ -55,32 +55,32 @@
   --card-foreground: #1C1917;
   --popover: #FFFFFF;
   --popover-foreground: #1C1917;
-  --primary: #B8652E;
-  --primary-foreground: #FFFBF5;
+  --primary: #A05A28;
+  --primary-foreground: #FFF9F0;
   --secondary: #F1EDE6;
   --secondary-foreground: #44403C;
   --muted: #F5F3EF;
   --muted-foreground: #78716C;
-  --accent: #6D8B5C;
-  --accent-foreground: #FAFFF5;
+  --accent: #5E8A50;
+  --accent-foreground: #1A3D14;
   --destructive: #DC3545;
   --border: #E7E5E4;
   --input: #F5F3EF;
-  --ring: rgba(184, 101, 46, 0.3);
-  --chart-1: #B8652E;
-  --chart-2: #6D8B5C;
-  --chart-3: #D4914E;
-  --chart-4: #9A3F2B;
+  --ring: rgba(160, 90, 40, 0.25);
+  --chart-1: #A05A28;
+  --chart-2: #5E8A50;
+  --chart-3: #C48540;
+  --chart-4: #8A3A28;
   --chart-5: #4A7C8C;
   --radius: 0.875rem;
   --sidebar: #F1EDE6;
   --sidebar-foreground: #292524;
-  --sidebar-primary: #B8652E;
-  --sidebar-primary-foreground: #FFFBF5;
-  --sidebar-accent: rgba(184, 101, 46, 0.08);
+  --sidebar-primary: #A05A28;
+  --sidebar-primary-foreground: #FFF9F0;
+  --sidebar-accent: rgba(160, 90, 40, 0.08);
   --sidebar-accent-foreground: #292524;
   --sidebar-border: rgba(28, 25, 23, 0.08);
-  --sidebar-ring: rgba(184, 101, 46, 0.25);
+  --sidebar-ring: rgba(160, 90, 40, 0.2);
 }
 
 .dark {
@@ -96,14 +96,14 @@
   --secondary-foreground: #F5F5F4;
   --muted: #1C1917;
   --muted-foreground: #A8A29E;
-  --accent: #3D5A34;
-  --accent-foreground: #F0FFF0;
+  --accent: #6B9E5A;
+  --accent-foreground: #E8FFE0;
   --destructive: #EF6B6B;
   --border: #292524;
   --input: #292524;
-  --ring: rgba(212, 145, 78, 0.35);
+  --ring: rgba(212, 145, 78, 0.3);
   --chart-1: #D4914E;
-  --chart-2: #84A96E;
+  --chart-2: #6B9E5A;
   --chart-3: #E5A56B;
   --chart-4: #EF7A58;
   --chart-5: #75B5DA;
@@ -115,7 +115,7 @@
   --sidebar-accent: rgba(212, 145, 78, 0.1);
   --sidebar-accent-foreground: #F5F5F4;
   --sidebar-border: rgba(245, 245, 244, 0.06);
-  --sidebar-ring: rgba(212, 145, 78, 0.35);
+  --sidebar-ring: rgba(212, 145, 78, 0.3);
 }
 
 @layer base {
@@ -133,7 +133,7 @@
   }
 
   ::selection {
-    background: rgba(184, 101, 46, 0.15);
+    background: rgba(160, 90, 40, 0.15);
   }
 
   .dark ::selection {
