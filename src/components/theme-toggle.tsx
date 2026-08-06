@@ -1,17 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 
-type Mode = "light" | "dark" | "system";
+type Mode = "light" | "dark";
 type Variant = "sidebar" | "default";
 
 const options: { value: Mode; label: string; icon: typeof Sun }[] = [
   { value: "light", label: "Terang", icon: Sun },
   { value: "dark", label: "Gelap", icon: Moon },
-  { value: "system", label: "Sistem", icon: Monitor },
 ];
 
 const styles: Record<Variant, { container: string; active: string; inactive: string }> = {
