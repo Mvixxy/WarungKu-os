@@ -13,7 +13,7 @@ import { formatCurrency } from "@/lib/format";
 import { PaymentMethod, Settings } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const paymentMethods: PaymentMethod[] = ["Tunai", "QRIS", "Transfer"];
+const paymentMethods: PaymentMethod[] = ["Tunai", "QRIS", "Hutang"];
 
 export function PengaturanView() {
   const { settings, lowStockProducts, resetWorkspace, updateSettings, products } = useAppState();

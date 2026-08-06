@@ -1,4 +1,4 @@
-export type PaymentMethod = "Tunai" | "QRIS" | "Transfer";
+export type PaymentMethod = "Tunai" | "QRIS" | "Hutang";
 
 export type ProductCategory =
   | "Makanan"

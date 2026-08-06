@@ -124,7 +124,7 @@ export const toolDefinitions: OpenRouterToolDef[] = [
       parameters: {
         type: "object",
         properties: {
-          paymentMethod: { type: "string", enum: ["Tunai", "QRIS", "Transfer"] },
+          paymentMethod: { type: "string", enum: ["Tunai", "QRIS", "Hutang"] },
           items: {
             type: "array",
             items: {
@@ -368,7 +368,7 @@ async function execRestockProduct(
 async function execRecordSale(
   userId: string,
   args: {
-    paymentMethod: "Tunai" | "QRIS" | "Transfer";
+    paymentMethod: "Tunai" | "QRIS" | "Hutang";
     items: Array<{ productId: string; quantity: number }>;
   }
 ): Promise<ToolResult> {

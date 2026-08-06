@@ -206,7 +206,7 @@ const transactions: Transaction[] = [
   },
   {
     id: "trx_003",
-    paymentMethod: "Transfer",
+    paymentMethod: "Hutang",
     total: 91500,
     createdAt: daysAgo(1, 17, 5),
     items: [
@@ -311,7 +311,7 @@ const settings: Settings = {
   city: "Jakarta Selatan",
   businessNotes: "Buka setiap hari, fokus ke produk cepat habis dan pelanggan sekitar rumah.",
   stockAlertThreshold: 8,
-  enabledPayments: ["Tunai", "QRIS", "Transfer"],
+  enabledPayments: ["Tunai", "QRIS", "Hutang"],
 };
 
 export const seedState: AppState = {

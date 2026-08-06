@@ -14,7 +14,7 @@ import { auth } from "@/lib/auth";
 import { AppState, DebtDraft, PaymentMethod, ProductDraft, Settings, Transaction } from "@/lib/types";
 
 let initializationPromise: Promise<void> | null = null;
-const supportedPaymentMethods: PaymentMethod[] = ["Tunai", "QRIS", "Transfer"];
+const supportedPaymentMethods: PaymentMethod[] = ["Tunai", "QRIS", "Hutang"];
 
 type SessionHint = {
   user?: {
@@ -169,7 +169,7 @@ async function ensureWorkspace(userId: string, session?: SessionHint) {
     city: "Indonesia",
     businessNotes: "",
     stockAlertThreshold: 8,
-    enabledPayments: ["Tunai", "QRIS", "Transfer"],
+    enabledPayments: ["Tunai", "QRIS", "Hutang"],
     createdAt: timestamp,
     updatedAt: timestamp,
   });

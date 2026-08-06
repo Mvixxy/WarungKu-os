@@ -16,6 +16,6 @@ export const emptyAppState: AppState = {
     city: "",
     businessNotes: "",
     stockAlertThreshold: 5,
-    enabledPayments: ["Tunai", "QRIS", "Transfer"],
+    enabledPayments: ["Tunai", "QRIS", "Hutang"],
   },
 };

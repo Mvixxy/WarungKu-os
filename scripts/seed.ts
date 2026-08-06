@@ -123,7 +123,7 @@ function generateTransactionsFor(
   const paymentChoices: Array<{ value: PaymentMethod; weight: number }> = [
     { value: "Tunai", weight: 5 },
     { value: "QRIS", weight: 4 },
-    { value: "Transfer", weight: 1 },
+    { value: "Hutang", weight: 1 },
   ];
 
   const txRows: Array<{
