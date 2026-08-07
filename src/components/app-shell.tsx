@@ -346,7 +346,7 @@ export function AppShell({
         </nav>
 
         {/* Main Content — padded for mobile header + bottom nav */}
-        <main className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto pt-12 pb-16 lg:pt-0 lg:pb-0">
+        <main className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto pt-[60px] pb-16 lg:pt-0 lg:pb-0">
           {children}
         </main>
 
