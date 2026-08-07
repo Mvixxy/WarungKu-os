@@ -10,6 +10,7 @@ interface StatCardProps {
   tone?: "default" | "accent" | "warn";
   href?: string;
   className?: string;
+  hint?: string;
 }
 
 export function StatCard({
@@ -19,6 +20,7 @@ export function StatCard({
   tone = "default",
   href,
   className,
+  hint,
 }: StatCardProps) {
   const content = (
     <CardContent className="space-y-1 p-3 sm:space-y-1.5 sm:p-4">
@@ -42,6 +44,7 @@ export function StatCard({
         tone === "warn" && "text-primary"
       )}>{value}</p>
       <p className="text-[9px] text-muted-foreground leading-snug sm:text-[11px]">{description}</p>
+      {hint && <p className="text-[8px] text-muted-foreground/50 pt-1">{hint}</p>}
     </CardContent>
   );
 

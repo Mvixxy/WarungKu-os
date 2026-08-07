@@ -68,8 +68,8 @@ export function LaporanView() {
             title="Pengeluaran"
             value={formatCompactCurrency(summary.expenseTotal)}
             description="Biaya operasional periode ini."
+            hint="Ketuk untuk menambah pengeluaran"
           />
-          <p className="mt-1 text-center text-[10px] text-muted-foreground/60">Ketuk untuk menambah pengeluaran</p>
         </div>
         <StatCard
           title="Laba bersih"
