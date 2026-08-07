@@ -90,12 +90,14 @@ export function BukuHutangView() {
           description="Pelanggan yang sudah menyelesaikan pembayaran."
           tone="accent"
         />
-        <StatCard
-          title="Pengingat terkirim"
-          value={`${reminderCount} kali`}
-          description="Notifikasi WA yang sudah dipicu."
-          tone="warn"
-        />
+        <div className="col-span-2 sm:col-span-1">
+          <StatCard
+            title="Pengingat terkirim"
+            value={`${reminderCount} kali`}
+            description="Notifikasi WA yang sudah dipicu."
+            tone="warn"
+          />
+        </div>
       </section>
 
       <Card>
