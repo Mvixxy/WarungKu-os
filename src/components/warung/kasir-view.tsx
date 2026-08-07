@@ -551,6 +551,10 @@ export function KasirView() {
       setDebtFormOpen(true);
       return;
     }
+    if (paymentMethod === "Tunai" && Number(cashGiven) < cartTotal) {
+      toast.error("Uang diterima kurang dari total belanja.");
+      return;
+    }
     setCheckingOut(true);
     try {
       const transaction = await checkout();
