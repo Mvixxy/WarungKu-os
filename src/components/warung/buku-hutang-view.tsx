@@ -105,20 +105,20 @@ export function BukuHutangView() {
             </CardDescription>
           </div>
 
-          <div className="flex flex-col gap-2 md:flex-row md:items-center">
-            <div className="relative w-full flex-1 sm:w-auto sm:flex-none">
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
               <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Cari nama atau WA..."
-                className="h-9 rounded-lg border-border bg-muted/50 pl-8 text-sm"
+                className="h-9 w-full rounded-lg border-border bg-muted/50 pl-8 text-sm"
               />
             </div>
 
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
               <DialogTrigger
-                render={<Button size="sm" className="h-9 rounded-lg" />}
+                render={<Button size="sm" className="h-9 shrink-0 rounded-lg whitespace-nowrap" />}
               >
                 <WalletCards className="size-3.5 sm:size-4" />
                 Tambah kasbon

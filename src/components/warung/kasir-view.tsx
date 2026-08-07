@@ -662,7 +662,7 @@ export function KasirView() {
                   Cari produk, tap item, lalu lanjut ke keranjang.
                 </CardDescription>
               </div>
-              <div className="relative shrink-0 sm:min-w-[200px]">
+              <div className="relative flex-1 sm:shrink-0 sm:min-w-[200px]">
                 <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   value={query}
