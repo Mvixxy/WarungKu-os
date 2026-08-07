@@ -84,7 +84,7 @@ export function LaporanView() {
 
               <div className="mt-4 h-48 sm:h-56">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={series} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                  <AreaChart data={series} margin={{ top: 8, right: 8, left: 10, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#8B5E3C" stopOpacity={0.25}/>
@@ -103,7 +103,7 @@ export function LaporanView() {
                       tick={{ fontSize: 11, fontWeight: 500, fill: "hsl(var(--muted-foreground))" }}
                       axisLine={false}
                       tickLine={false}
-                      width={55}
+                      width={65}
                     />
                     <Tooltip
                       formatter={(value) => [formatCurrency(Number(value)), "Omzet"]}
