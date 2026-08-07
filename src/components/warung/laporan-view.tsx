@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Download, Printer, TrendingUp } from "lucide-react";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
 import { StatCard } from "@/components/stat-card";
@@ -20,7 +21,6 @@ export function LaporanView() {
   const topVelocity = estimateProductVelocity(products, transactions)
     .sort((left, right) => right.sold - left.sold)
     .slice(0, 4);
-  const highestValue = Math.max(...series.map((item) => item.revenue), 1);
 
   const rangeLabel =
     range === "harian" ? "Hari ini" : range === "mingguan" ? "Minggu ini" : "Bulan ini";
@@ -82,25 +82,46 @@ export function LaporanView() {
                 </span>
               </div>
 
-              <div className="mt-4 flex h-40 items-end gap-2">
-                {series.map((item) => (
-                  <div key={item.label} className="flex flex-1 flex-col items-center gap-2">
-                    <div className="flex w-full flex-1 items-end">
-                      <div
-                        className="w-full rounded-t-md bg-primary/80"
-                        style={{
-                          height: `${Math.max(12, (item.revenue / highestValue) * 100)}%`,
-                        }}
-                      />
-                    </div>
-                    <div className="text-center">
-                      <p className="text-[10px] sm:text-xs font-medium">{item.label}</p>
-                      <p className="text-[9px] sm:text-[10px] text-muted-foreground">
-                        {formatCompactCurrency(item.revenue)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+              <div className="mt-4 h-48 sm:h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={series} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tickFormatter={(v) => formatCompactCurrency(v)}
+                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      formatter={(value) => [formatCurrency(Number(value)), "Omzet"]}
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                        fontSize: "12px",
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2.5}
+                      fill="url(#colorRevenue)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
