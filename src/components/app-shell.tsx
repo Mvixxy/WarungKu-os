@@ -218,6 +218,7 @@ export function AppShell({
                       <Link
                         key={item.href}
                         href={item.href}
+                        onClick={() => setMenuOpen(false)}
                         className={cn(
                           buttonVariants({
                             variant: isActive ? "secondary" : "ghost",
