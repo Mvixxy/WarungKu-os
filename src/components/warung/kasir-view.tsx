@@ -111,6 +111,8 @@ function DesktopCart({
   setPaymentMethod,
   handleCheckout,
   checkingOut,
+  cashGiven,
+  setCashGiven,
 }: {
   cartLines: any[];
   cartTotal: number;
@@ -121,6 +123,8 @@ function DesktopCart({
   setPaymentMethod: (m: PaymentMethod) => void;
   handleCheckout: () => void;
   checkingOut: boolean;
+  cashGiven: string;
+  setCashGiven: (v: string) => void;
 }) {
   return (
     <Card className="sticky top-3">
@@ -242,6 +246,29 @@ function DesktopCart({
           </div>
         </div>
 
+        {paymentMethod === "Tunai" && cartTotal > 0 && (
+          <div className="space-y-2">
+            <div className="space-y-1.5">
+              <label className="text-xs sm:text-sm font-medium text-muted-foreground">Uang diterima</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={cashGiven}
+                onChange={(e) => setCashGiven(e.target.value.replace(/[^0-9]/g, ""))}
+                placeholder="0"
+                className="h-10 w-full rounded-lg border border-input bg-card px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            {Number(cashGiven) > 0 && (
+              <div className={"flex items-center justify-between rounded-lg px-3 py-2 " + (Number(cashGiven) >= cartTotal ? "bg-green-500/10 text-green-600 dark:text-green-400" : "bg-red-500/10 text-red-500")}>
+                <span className="text-xs sm:text-sm font-medium">{Number(cashGiven) >= cartTotal ? "Kembalian" : "Kurang"}</span>
+                <span className="text-sm sm:text-base font-bold">{formatCurrency(Math.abs(Number(cashGiven) - cartTotal))}</span>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="rounded-xl bg-primary p-3.5 text-primary-foreground">
           <div className="flex items-center justify-between text-xs sm:text-sm text-primary-foreground/60">
             <span>Total</span>
@@ -286,6 +313,8 @@ function MobileCartSheet({
   setPaymentMethod,
   handleCheckout,
   checkingOut,
+  cashGiven,
+  setCashGiven,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -298,6 +327,8 @@ function MobileCartSheet({
   setPaymentMethod: (m: PaymentMethod) => void;
   handleCheckout: () => void;
   checkingOut: boolean;
+  cashGiven: string;
+  setCashGiven: (v: string) => void;
 }) {
   return (
     <>
@@ -415,6 +446,27 @@ function MobileCartSheet({
             </div>
           </div>
 
+          {paymentMethod === "Tunai" && cartTotal > 0 && (
+            <div className="mt-4 space-y-2">
+              <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Uang diterima</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={cashGiven}
+                onChange={(e) => setCashGiven(e.target.value.replace(/[^0-9]/g, ""))}
+                placeholder="0"
+                className="h-10 w-full rounded-lg border border-input bg-card px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              {Number(cashGiven) > 0 && (
+                <div className={"flex items-center justify-between rounded-lg px-3 py-2 " + (Number(cashGiven) >= cartTotal ? "bg-green-500/10 text-green-600 dark:text-green-400" : "bg-red-500/10 text-red-500")}>
+                  <span className="text-[10px] font-medium">{Number(cashGiven) >= cartTotal ? "Kembalian" : "Kurang"}</span>
+                  <span className="text-sm font-bold">{formatCurrency(Math.abs(Number(cashGiven) - cartTotal))}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="mt-4 rounded-xl bg-primary p-3 text-primary-foreground">
             <div className="flex items-center justify-between text-[10px] text-primary-foreground/60">
               <span>Total</span>
@@ -472,6 +524,7 @@ export function KasirView() {
     whatsapp: "",
     dueDate: "",
   });
+  const [cashGiven, setCashGiven] = useState("");
   const [checkingOut, setCheckingOut] = useState(false);
   const [receiptTransaction, setReceiptTransaction] = useState<{
     transaction: Transaction;
@@ -519,12 +572,13 @@ export function KasirView() {
         []
       );
       if (transaction.paymentMethod !== "Hutang") {
-        setReceiptTransaction({ transaction });
+        setReceiptTransaction({ transaction, cashGiven: Number(cashGiven) || undefined });
       } else {
         toast.success("Transaksi berhasil disimpan.", {
           description: `${transaction.items.length} produk masuk ke penjualan ${paymentLabels[transaction.paymentMethod]}.`,
         });
       }
+      setCashGiven("");
       if (lowProducts.length > 0) {
         toast.warning("Ada produk yang mendekati stok minimum.", {
           description: `Siapkan restok untuk ${lowProducts
@@ -667,6 +721,8 @@ export function KasirView() {
           setPaymentMethod={setPaymentMethod}
           handleCheckout={() => void handleCheckout(false)}
           checkingOut={checkingOut}
+          cashGiven={cashGiven}
+          setCashGiven={setCashGiven}
         />
       </div>
 
@@ -725,6 +781,8 @@ export function KasirView() {
         setPaymentMethod={setPaymentMethod}
         handleCheckout={() => void handleCheckout(false)}
         checkingOut={checkingOut}
+        cashGiven={cashGiven}
+        setCashGiven={setCashGiven}
       />
 
       {/* Debt form popup */}
