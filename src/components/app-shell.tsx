@@ -94,6 +94,7 @@ export function AppShell({
   const [aiOpen, setAiOpen] = useState(false);
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (aiOpen) setLeftCollapsed(true);
@@ -188,7 +189,7 @@ export function AppShell({
         </aside>
 
         {/* Mobile Header */}
-        <div className="fixed top-0 left-0 right-0 z-40 flex h-12 items-center justify-between border-b border-border bg-card/95 px-3 backdrop-blur-sm lg:hidden">
+        <div className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center justify-between border-b border-border bg-card/95 px-4 backdrop-blur-sm lg:hidden">
           <div className="flex items-center gap-2.5">
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger
@@ -248,7 +249,7 @@ export function AppShell({
                     <div className="mb-3 border-t border-sidebar-border" />
                     <button
                       type="button"
-                      onClick={async () => { await signOut(); window.location.href = "/auth"; }}
+                      onClick={() => { setMenuOpen(false); setLogoutConfirmOpen(true); }}
                       className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-destructive/20 bg-destructive/5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
                     >
                       <LogOut className="size-4" />
@@ -267,6 +268,39 @@ export function AppShell({
           </div>
           <ThemeToggle />
         </div>
+
+        {/* Logout Confirmation Dialog */}
+        {logoutConfirmOpen && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm lg:hidden">
+            <div className="mx-4 w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-2xl">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-destructive/10">
+                  <LogOut className="size-5 text-destructive" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">Keluar akun?</p>
+                  <p className="text-xs text-muted-foreground">Kamu akan kembali ke halaman login.</p>
+                </div>
+              </div>
+              <div className="mt-5 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setLogoutConfirmOpen(false)}
+                  className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => { await signOut(); window.location.href = "/auth"; }}
+                  className="flex-1 rounded-xl bg-destructive px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-destructive/90"
+                >
+                  Keluar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Mobile Bottom Navigation */}
         <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur-sm lg:hidden">

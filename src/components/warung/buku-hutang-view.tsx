@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, MessageSquareShare, Search, WalletCards } from "lucide-react";
+import { CheckCircle2, MessageSquareShare, Search, Trash2, WalletCards } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
 import { StatCard } from "@/components/stat-card";
@@ -31,11 +31,12 @@ const emptyDraft: DebtDraft = {
 };
 
 export function BukuHutangView() {
-  const { debts, addDebt, markDebtPaid, sendDebtReminder } = useAppState();
+  const { debts, addDebt, markDebtPaid, sendDebtReminder, deleteDebt } = useAppState();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"semua" | "belum" | "lunas">("semua");
   const [createOpen, setCreateOpen] = useState(false);
   const [draft, setDraft] = useState<DebtDraft>(emptyDraft);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const filteredDebts = debts.filter((debt) => {
     const keyword = query.toLowerCase();
@@ -270,6 +271,17 @@ export function BukuHutangView() {
                         Lunas
                       </Button>
                     )}
+                    {debt.isPaid && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 rounded-md text-xs text-destructive hover:text-destructive"
+                        onClick={() => setDeleteTarget(debt.id)}
+                      >
+                        <Trash2 className="size-3" />
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -277,6 +289,53 @@ export function BukuHutangView() {
           </div>
         </CardContent>
       </Card>
+      {/* Delete Confirmation */}
+      {deleteTarget && debts.find((d) => d.id === deleteTarget) && (() => {
+        const debt = debts.find((d) => d.id === deleteTarget)!;
+        return (
+          <div key="delete-confirm" className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="mx-4 w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-2xl">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-destructive/10">
+                  <Trash2 className="size-5 text-destructive" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">Hapus kasbon?</p>
+                  <p className="text-xs text-muted-foreground">
+                    {debt.isPaid
+                      ? `Kasbon ${debt.borrowerName} sudah lunas dan akan dihapus.`
+                      : `Kasbon ${debt.borrowerName} belum lunas (${formatCurrency(debt.amount)}). Yakin ingin menghapus?`}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-5 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDeleteTarget(null)}
+                  className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await deleteDebt(deleteTarget);
+                      setDeleteTarget(null);
+                      toast.success("Kasbon berhasil dihapus.");
+                    } catch (error) {
+                      toast.error(error instanceof Error ? error.message : "Gagal menghapus kasbon.");
+                    }
+                  }}
+                  className="flex-1 rounded-xl bg-destructive px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-destructive/90"
+                >
+                  Hapus
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

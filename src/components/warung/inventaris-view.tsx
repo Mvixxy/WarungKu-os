@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, Loader2, PackagePlus, PencilLine, Plus, Search, Trash2, Warehouse, X } from "lucide-react";
+import { AlertTriangle, Loader2, PackagePlus, PencilLine, Plus, Search, Settings2, Trash2, Warehouse, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
 import { StatCard } from "@/components/stat-card";
@@ -215,6 +215,10 @@ export function InventarisView() {
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [localCategories, setLocalCategories] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState("Semua");
+  const [sortOrder, setSortOrder] = useState<"az" | "za">("az");
+  const [categoryManageOpen, setCategoryManageOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
 
   const categories = Array.from(
     new Set([...defaultCategories, ...localCategories, ...products.map((p) => p.category)])
@@ -226,14 +230,17 @@ export function InventarisView() {
     );
   }
 
-  const filteredProducts = products.filter((product) => {
-    const keyword = query.toLowerCase();
-    return (
-      product.name.toLowerCase().includes(keyword) ||
-      product.category.toLowerCase().includes(keyword) ||
-      product.description.toLowerCase().includes(keyword)
-    );
-  });
+  const filteredProducts = products
+    .filter((product) => {
+      const keyword = query.toLowerCase();
+      const matchQuery =
+        product.name.toLowerCase().includes(keyword) ||
+        product.category.toLowerCase().includes(keyword) ||
+        product.description.toLowerCase().includes(keyword);
+      const matchCategory = categoryFilter === "Semua" || product.category === categoryFilter;
+      return matchQuery && matchCategory;
+    })
+    .sort((a, b) => sortOrder === "az" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
 
   const totalInventoryValue = products.reduce(
     (sum, product) => sum + product.buyPrice * product.stock,
@@ -310,7 +317,9 @@ export function InventarisView() {
       <section className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3">
         <StatCard title="Total SKU" value={`${products.length} produk`} description="Produk aktif di warung." />
         <StatCard title="Stok menipis" value={`${lowStockProducts.length} item`} description="Perlu restok sebelum kehabisan." tone="warn" />
-        <StatCard title="Nilai stok" value={formatCurrency(totalInventoryValue)} description="Total modal di inventaris." tone="accent" />
+        <div className="col-span-2 sm:col-span-1">
+          <StatCard title="Nilai stok" value={formatCurrency(totalInventoryValue)} description="Total modal di inventaris." tone="accent" />
+        </div>
       </section>
 
       <Card>
@@ -319,10 +328,38 @@ export function InventarisView() {
             <CardTitle className="font-heading text-lg">Inventaris barang</CardTitle>
             <CardDescription>Kelola produk, stok, dan harga jual.</CardDescription>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari produk..." className="h-9 w-full rounded-lg border-border bg-muted/50 pl-8 text-sm" />
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari produk..." className="h-9 w-full rounded-lg border-border bg-muted/50 pl-8 text-sm" />
+              </div>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="h-9 shrink-0 rounded-lg border border-border bg-card px-2 text-xs"
+              >
+                <option value="Semua">Semua kategori</option>
+                {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-9 shrink-0 rounded-lg px-2 text-xs"
+                onClick={() => setSortOrder(sortOrder === "az" ? "za" : "az")}
+              >
+                {sortOrder === "az" ? "A→Z" : "Z→A"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-9 shrink-0 rounded-lg px-2 text-xs"
+                onClick={() => setCategoryManageOpen(true)}
+              >
+                <Settings2 className="size-3.5" />
+              </Button>
             </div>
             <Dialog open={createOpen} onOpenChange={(o) => { setCreateOpen(o); if (!o) setSaving(false); }}>
               <DialogTrigger render={<Button size="sm" className="h-9 shrink-0 rounded-lg whitespace-nowrap" />}>

@@ -605,6 +605,24 @@ export async function createDebt(userId: string, draft: DebtDraft) {
   };
 }
 
+export async function deleteDebt(userId: string, debtId: string) {
+  const [existing] = await db
+    .select()
+    .from(debts)
+    .where(and(eq(debts.id, debtId), eq(debts.userId, userId)))
+    .limit(1);
+
+  if (!existing) {
+    throw new Error("Kasbon tidak ditemukan.");
+  }
+
+  await db
+    .delete(debts)
+    .where(and(eq(debts.id, debtId), eq(debts.userId, userId)));
+
+  return { id: debtId };
+}
+
 export async function markDebtPaid(userId: string, debtId: string) {
   const [updated] = await db
     .update(debts)
