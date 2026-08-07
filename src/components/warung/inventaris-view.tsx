@@ -477,6 +477,34 @@ export function InventarisView() {
         </DialogContent>
       </Dialog>
 
+      {/* ── Duplicate confirmation ── */}
+      {duplicateTarget && (
+        <Dialog open onOpenChange={() => setDuplicateTarget(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="font-heading text-lg">
+                {duplicateTarget.isExact ? "Produk sudah ada" : "Mirip dengan produk lain"}
+              </DialogTitle>
+              <DialogDescription>
+                {duplicateTarget.isExact ? (
+                  <>Nama <strong>{duplicateTarget.name}</strong> sudah terdaftar.</>
+                ) : (
+                  <>Nama <strong>{duplicateTarget.name}</strong> mirip dengan <strong>{duplicateTarget.existing?.name}</strong>.</>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-2 pt-2">
+              <Button type="button" size="sm" className="rounded-lg" onClick={() => setDuplicateTarget(null)}>
+                Batal
+              </Button>
+              <Button type="button" size="sm" variant="outline" className="rounded-lg" disabled={saving} onClick={() => void handleCreateProduct(true)}>
+                {saving ? <><Loader2 className="mr-1.5 size-3.5 animate-spin" />Menyimpan...</> : "Tetap tambahkan"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
       <Dialog open={Boolean(restockTarget)} onOpenChange={(o) => { if (!o) { setRestockTarget(null); setSaving(false); } }}>
         <DialogContent className="max-w-sm" showCloseButton>
           <DialogHeader>
