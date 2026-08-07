@@ -220,6 +220,7 @@ export function InventarisView() {
   const [sortOrder, setSortOrder] = useState<"az" | "za">("az");
   const [categoryManageOpen, setCategoryManageOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [categoryLoading, setCategoryLoading] = useState(false);
   const [deleteDefaultConfirm, setDeleteDefaultConfirm] = useState<string | null>(null);
   const [reassignTarget, setReassignTarget] = useState<{ category: string; count: number } | null>(null);
   const [reassignTo, setReassignTo] = useState("");
@@ -243,24 +244,30 @@ export function InventarisView() {
       setReassignTarget({ category: name, count: productsInCategory.length });
       return;
     }
+    // Empty category - still show confirmation
     if (defaultCategories.includes(name)) {
       setDeleteDefaultConfirm(name);
-      return;
+    } else {
+      setDeleteDefaultConfirm(name);
     }
-    setLocalCategories((prev) => prev.filter((c) => c !== name));
   }
 
   async function handleReassign() {
     if (!reassignTarget || !reassignTo) return;
-    const productsToMove = products.filter((p) => p.category === reassignTarget.category);
-    for (const p of productsToMove) {
-      await updateProduct(p.id, { name: p.name, buyPrice: p.buyPrice, sellPrice: p.sellPrice, stock: p.stock, minimumStock: p.minimumStock, description: p.description, category: reassignTo });
+    setCategoryLoading(true);
+    try {
+      const productsToMove = products.filter((p) => p.category === reassignTarget.category);
+      for (const p of productsToMove) {
+        await updateProduct(p.id, { name: p.name, buyPrice: p.buyPrice, sellPrice: p.sellPrice, stock: p.stock, minimumStock: p.minimumStock, description: p.description, category: reassignTo });
+      }
+      if (!defaultCategories.includes(reassignTarget.category)) {
+        setLocalCategories((prev) => prev.filter((c) => c !== reassignTarget.category));
+      }
+      setReassignTarget(null);
+      toast.success(`${productsToMove.length} produk dipindah ke ${reassignTo}.`);
+    } finally {
+      setCategoryLoading(false);
     }
-    if (!defaultCategories.includes(reassignTarget.category)) {
-      setLocalCategories((prev) => prev.filter((c) => c !== reassignTarget.category));
-    }
-    setReassignTarget(null);
-    toast.success(`${productsToMove.length} produk dipindah ke ${reassignTo}.`);
   }
 
   const filteredProducts = products
@@ -582,11 +589,16 @@ export function InventarisView() {
                 ))}
               </select>
               <div className="flex gap-2">
-                <Button type="button" size="sm" className="rounded-lg flex-1" onClick={() => setReassignTarget(null)}>
+                <Button type="button" size="sm" className="rounded-lg flex-1" disabled={categoryLoading} onClick={() => { setReassignTarget(null); setCategoryLoading(false); }}>
                   Batal
                 </Button>
-                <Button type="button" size="sm" variant="destructive" className="rounded-lg flex-1" disabled={!reassignTo} onClick={() => void handleReassign()}>
-                  Pindahkan & Hapus
+                <Button type="button" size="sm" variant="destructive" className="rounded-lg flex-1" disabled={!reassignTo || categoryLoading} onClick={() => void handleReassign()}>
+                  {categoryLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="size-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      Memindahkan...
+                    </span>
+                  ) : "Pindahkan & Hapus"}
                 </Button>
               </div>
             </div>
@@ -594,18 +606,24 @@ export function InventarisView() {
         </Dialog>
       )}
 
-      {/* ── Delete default category confirmation ── */}
+      {/* ── Delete category confirmation ── */}
       {deleteDefaultConfirm && (
-        <Dialog open onOpenChange={() => setDeleteDefaultConfirm(null)}>
+        <Dialog open onOpenChange={() => { setDeleteDefaultConfirm(null); setCategoryLoading(false); }}>
           <DialogContent className="max-w-sm">
             <DialogHeader>
-              <DialogTitle className="font-heading text-lg">Hapus kategori default?</DialogTitle>
+              <DialogTitle className="font-heading text-lg">
+                {defaultCategories.includes(deleteDefaultConfirm) ? "Hapus kategori default?" : "Hapus kategori?"}
+              </DialogTitle>
               <DialogDescription>
-                <strong>{deleteDefaultConfirm}</strong> adalah kategori default. Yakin ingin menghapusnya?
+                {defaultCategories.includes(deleteDefaultConfirm) ? (
+                  <><strong>{deleteDefaultConfirm}</strong> adalah kategori default. Yakin ingin menghapusnya?</>
+                ) : (
+                  <>Yakin ingin menghapus kategori <strong>{deleteDefaultConfirm}</strong>?</>
+                )}
               </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-2 pt-2">
-              <Button type="button" size="sm" className="rounded-lg" onClick={() => setDeleteDefaultConfirm(null)}>
+              <Button type="button" size="sm" className="rounded-lg" disabled={categoryLoading} onClick={() => { setDeleteDefaultConfirm(null); setCategoryLoading(false); }}>
                 Batal
               </Button>
               <Button
@@ -613,12 +631,22 @@ export function InventarisView() {
                 size="sm"
                 variant="destructive"
                 className="rounded-lg"
-                onClick={() => {
+                disabled={categoryLoading}
+                onClick={async () => {
+                  setCategoryLoading(true);
                   setLocalCategories((prev) => prev.filter((c) => c !== deleteDefaultConfirm));
+                  await new Promise((r) => setTimeout(r, 300));
                   setDeleteDefaultConfirm(null);
+                  setCategoryLoading(false);
+                  toast.success("Kategori berhasil dihapus.");
                 }}
               >
-                Hapus
+                {categoryLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="size-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    Menghapus...
+                  </span>
+                ) : "Hapus"}
               </Button>
             </div>
           </DialogContent>
