@@ -320,7 +320,7 @@ export function InventarisView() {
             <CardDescription>Kelola produk, stok, dan harga jual.</CardDescription>
           </div>
           <div className="flex flex-col gap-2 md:flex-row md:items-center">
-            <div className="relative w-full sm:w-auto">
+            <div className="relative w-full flex-1 sm:w-auto sm:flex-none">
               <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari produk..." className="h-9 rounded-lg border-border bg-muted/50 pl-8 text-sm" />
             </div>
