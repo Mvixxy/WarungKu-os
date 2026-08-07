@@ -271,18 +271,12 @@ export function AppShell({
                     className="flex h-full items-center"
                   >
                     <div className={cn(
-                      "flex h-full items-center gap-1.5 rounded-xl px-3.5 transition-colors",
+                      "flex h-full items-center justify-center rounded-xl px-4 transition-colors",
                       isActive
                         ? "bg-primary/15 text-primary font-semibold"
                         : "bg-muted text-muted-foreground",
                     )}>
-                      <Icon className="size-4" strokeWidth={isActive ? 2.2 : 1.8} />
-                      <span className={cn(
-                        "text-[11px] leading-tight",
-                        isActive ? "font-semibold" : "font-medium",
-                      )}>
-                        {item.label}
-                      </span>
+                      <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.8} />
                     </div>
                   </Link>
                 );
@@ -292,19 +286,13 @@ export function AppShell({
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex flex-col items-center gap-0.5 rounded-lg px-2.5 py-1.5 transition-colors",
+                    "flex items-center justify-center rounded-lg px-3 py-2 transition-colors",
                     isActive
                       ? "text-primary"
                       : "text-muted-foreground",
                   )}
                 >
                   <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.8} />
-                  <span className={cn(
-                    "text-[10px] leading-tight",
-                    isActive ? "font-semibold" : "font-medium",
-                  )}>
-                    {item.label}
-                  </span>
                 </Link>
               );
             })}
