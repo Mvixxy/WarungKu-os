@@ -53,9 +53,8 @@ export function AccountPanel() {
         </div>
         <Button
           type="button"
-          variant="ghost"
           size="sm"
-          className="mt-2 h-7 w-full rounded-md text-xs text-muted-foreground hover:text-foreground"
+          className="mt-2 h-7 w-full rounded-md text-xs bg-destructive/10 text-destructive hover:bg-destructive/20"
           onClick={() => setConfirmOpen(true)}
         >
           <LogOut className="size-3" />
