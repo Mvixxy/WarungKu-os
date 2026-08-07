@@ -113,8 +113,9 @@ export function LaporanView() {
                         borderRadius: "10px",
                         fontSize: "13px",
                         fontWeight: 600,
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                        padding: "8px 12px",
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10)",
+                        padding: "10px 14px",
+                        zIndex: 10,
                       }}
                       labelStyle={{ fontWeight: 700, marginBottom: 4 }}
                     />
