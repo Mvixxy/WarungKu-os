@@ -84,41 +84,48 @@ export function LaporanView() {
 
               <div className="mt-4 h-48 sm:h-56">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={series} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
+                  <AreaChart data={series} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#8B5E3C" stopOpacity={0.25}/>
+                        <stop offset="95%" stopColor="#8B5E3C" stopOpacity={0.02}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <CartesianGrid strokeDasharray="4 4" stroke="hsl(var(--border))" vertical={false} />
                     <XAxis
                       dataKey="label"
-                      tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-                      axisLine={false}
+                      tick={{ fontSize: 12, fontWeight: 600, fill: "hsl(var(--foreground))" }}
+                      axisLine={{ stroke: "hsl(var(--border))" }}
                       tickLine={false}
                     />
                     <YAxis
                       tickFormatter={(v) => formatCompactCurrency(v)}
-                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                      tick={{ fontSize: 11, fontWeight: 500, fill: "hsl(var(--muted-foreground))" }}
                       axisLine={false}
                       tickLine={false}
+                      width={55}
                     />
                     <Tooltip
                       formatter={(value) => [formatCurrency(Number(value)), "Omzet"]}
                       contentStyle={{
                         backgroundColor: "hsl(var(--card))",
                         border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                        fontSize: "12px",
+                        borderRadius: "10px",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                        padding: "8px 12px",
                       }}
+                      labelStyle={{ fontWeight: 700, marginBottom: 4 }}
                     />
                     <Area
-                      type="monotone"
+                      type="linear"
                       dataKey="revenue"
-                      stroke="hsl(var(--primary))"
+                      stroke="#8B5E3C"
                       strokeWidth={2.5}
                       fill="url(#colorRevenue)"
+                      dot={{ r: 4, fill: "#8B5E3C", strokeWidth: 2, stroke: "hsl(var(--card))" }}
+                      activeDot={{ r: 6, fill: "#8B5E3C", stroke: "hsl(var(--card))", strokeWidth: 2 }}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
