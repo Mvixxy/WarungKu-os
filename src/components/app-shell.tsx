@@ -95,6 +95,7 @@ export function AppShell({
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
     if (aiOpen) setLeftCollapsed(true);
@@ -285,17 +286,28 @@ export function AppShell({
               <div className="mt-5 flex gap-2">
                 <button
                   type="button"
-                  onClick={() => setLogoutConfirmOpen(false)}
-                  className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted"
+                  onClick={() => { setLogoutConfirmOpen(false); setLogoutLoading(false); }}
+                  disabled={logoutLoading}
+                  className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50"
                 >
                   Batal
                 </button>
                 <button
                   type="button"
-                  onClick={async () => { await signOut(); window.location.href = "/auth"; }}
-                  className="flex-1 rounded-xl bg-destructive px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-destructive/90"
+                  onClick={async () => {
+                    setLogoutLoading(true);
+                    await signOut();
+                    window.location.href = "/auth";
+                  }}
+                  disabled={logoutLoading}
+                  className="flex-1 rounded-xl bg-destructive px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-destructive/90 disabled:opacity-50"
                 >
-                  Keluar
+                  {logoutLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="size-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      Keluar...
+                    </span>
+                  ) : "Keluar"}
                 </button>
               </div>
             </div>
