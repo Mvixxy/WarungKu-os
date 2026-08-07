@@ -278,6 +278,59 @@ export function LaporanView() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Expense Dialog */}
+      {expenseOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-2xl">
+            <p className="text-sm font-semibold">Catat Pengeluaran</p>
+            <div className="mt-4 space-y-3">
+              <input
+                type="text"
+                placeholder="Judul (contoh: Listrik bulanan)"
+                value={expenseDraft.title}
+                onChange={(e) => setExpenseDraft({ ...expenseDraft, title: e.target.value })}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm"
+              />
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="Nominal (Rp)"
+                value={expenseDraft.amount}
+                onChange={(e) => setExpenseDraft({ ...expenseDraft, amount: e.target.value.replace(/[^0-9]/g, "") })}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm"
+              />
+              <select
+                value={expenseDraft.category}
+                onChange={(e) => setExpenseDraft({ ...expenseDraft, category: e.target.value as typeof expenseDraft.category })}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm"
+              >
+                <option value="Operasional">Operasional</option>
+                <option value="Belanja">Belanja</option>
+                <option value="Utilitas">Utilitas</option>
+              </select>
+            </div>
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setExpenseOpen(false)}
+                className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleAddExpense()}
+                disabled={!expenseDraft.title.trim() || !expenseDraft.amount}
+                className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+              >
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
