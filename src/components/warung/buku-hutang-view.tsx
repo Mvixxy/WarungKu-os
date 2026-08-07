@@ -76,7 +76,7 @@ export function BukuHutangView() {
 
   return (
     <div className="space-y-3">
-      <section className="grid grid-cols-2 gap-2 sm:gap-3">
+      <section className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3">
         <StatCard
           title="Kasbon aktif"
           value={formatCurrency(outstandingTotal)}

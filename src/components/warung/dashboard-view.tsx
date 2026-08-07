@@ -30,7 +30,7 @@ export function DashboardView() {
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      <section className="grid grid-cols-2 gap-2 sm:gap-3">
+      <section className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
         <StatCard
           title="Omzet hari ini"
           value={formatCurrency(todaySales)}
