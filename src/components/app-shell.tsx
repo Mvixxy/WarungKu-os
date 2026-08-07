@@ -272,7 +272,7 @@ export function AppShell({
 
         {/* Logout Confirmation Dialog */}
         {logoutConfirmOpen && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm lg:hidden">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm">
             <div className="mx-4 w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-2xl">
               <div className="flex items-center gap-3">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-destructive/10">
