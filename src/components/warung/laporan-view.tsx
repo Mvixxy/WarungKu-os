@@ -16,6 +16,7 @@ export function LaporanView() {
   const { transactions, expenses, products, settings, addExpense } = useAppState();
   const [range, setRange] = useState<ReportRange>("harian");
   const [expenseOpen, setExpenseOpen] = useState(false);
+  const [expenseLoading, setExpenseLoading] = useState(false);
   const [expenseDraft, setExpenseDraft] = useState<{ title: string; amount: string; category: "Operasional" | "Belanja" | "Utilitas" }>({ title: "", amount: "", category: "Operasional" });
 
   const summary = summarizeReport(range, transactions, expenses);
@@ -29,6 +30,7 @@ export function LaporanView() {
 
   const handleAddExpense = async () => {
     if (!expenseDraft.title.trim() || !expenseDraft.amount) return;
+    setExpenseLoading(true);
     try {
       await addExpense({ title: expenseDraft.title.trim(), amount: Number(expenseDraft.amount), category: expenseDraft.category });
       setExpenseDraft({ title: "", amount: "", category: "Operasional" });
@@ -36,6 +38,8 @@ export function LaporanView() {
       toast.success("Pengeluaran tercatat.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Gagal mencatat pengeluaran.");
+    } finally {
+      setExpenseLoading(false);
     }
   };
 
@@ -314,18 +318,24 @@ export function LaporanView() {
             <div className="mt-5 flex gap-2">
               <button
                 type="button"
-                onClick={() => setExpenseOpen(false)}
-                className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted"
+                onClick={() => { setExpenseOpen(false); setExpenseLoading(false); }}
+                disabled={expenseLoading}
+                className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={() => void handleAddExpense()}
-                disabled={!expenseDraft.title.trim() || !expenseDraft.amount}
+                disabled={!expenseDraft.title.trim() || !expenseDraft.amount || expenseLoading}
                 className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
               >
-                Simpan
+                {expenseLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="size-3.5 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
+                    Menyimpan...
+                  </span>
+                ) : "Simpan"}
               </button>
             </div>
           </div>
