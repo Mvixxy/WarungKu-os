@@ -37,6 +37,7 @@ export function BukuHutangView() {
   const [createOpen, setCreateOpen] = useState(false);
   const [draft, setDraft] = useState<DebtDraft>(emptyDraft);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const filteredDebts = debts.filter((debt) => {
     const keyword = query.toLowerCase();
@@ -311,25 +312,35 @@ export function BukuHutangView() {
               <div className="mt-5 flex gap-2">
                 <button
                   type="button"
-                  onClick={() => setDeleteTarget(null)}
-                  className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted"
+                  onClick={() => { setDeleteTarget(null); setDeleteLoading(false); }}
+                  disabled={deleteLoading}
+                  className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50"
                 >
                   Batal
                 </button>
                 <button
                   type="button"
                   onClick={async () => {
+                    setDeleteLoading(true);
                     try {
                       await deleteDebt(deleteTarget);
                       setDeleteTarget(null);
                       toast.success("Kasbon berhasil dihapus.");
                     } catch (error) {
                       toast.error(error instanceof Error ? error.message : "Gagal menghapus kasbon.");
+                    } finally {
+                      setDeleteLoading(false);
                     }
                   }}
-                  className="flex-1 rounded-xl bg-destructive px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-destructive/90"
+                  disabled={deleteLoading}
+                  className="flex-1 rounded-xl bg-destructive px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-destructive/90 disabled:opacity-50"
                 >
-                  Hapus
+                  {deleteLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="size-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      Menghapus...
+                    </span>
+                  ) : "Hapus"}
                 </button>
               </div>
             </div>
