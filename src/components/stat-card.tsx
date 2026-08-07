@@ -11,6 +11,7 @@ interface StatCardProps {
   href?: string;
   className?: string;
   hint?: string;
+  onClick?: () => void;
 }
 
 export function StatCard({
@@ -21,6 +22,7 @@ export function StatCard({
   href,
   className,
   hint,
+  onClick,
 }: StatCardProps) {
   const content = (
     <CardContent className="space-y-1 p-3 sm:space-y-1.5 sm:p-4">
@@ -44,7 +46,6 @@ export function StatCard({
         tone === "warn" && "text-primary"
       )}>{value}</p>
       <p className="text-[9px] text-muted-foreground leading-snug sm:text-[11px]">{description}</p>
-      {hint && <p className="text-[8px] text-muted-foreground/50 pt-1">{hint}</p>}
     </CardContent>
   );
 
@@ -63,11 +64,15 @@ export function StatCard({
   }
 
   return (
-    <Card className={cn(
-      "border-border bg-card",
-      tone === "accent" && "border-accent/25 bg-accent/8",
-      tone === "warn" && "border-primary/20 bg-primary/5"
-    )}>
+    <Card
+      {...(onClick ? { onClick, role: "button", tabIndex: 0, onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") onClick(); } } : {})}
+      className={cn(
+        "border-border bg-card",
+        onClick && "cursor-pointer transition-colors hover:bg-muted/30",
+        tone === "accent" && "border-accent/25 bg-accent/8",
+        tone === "warn" && "border-primary/20 bg-primary/5"
+      )}
+    >
       {content}
     </Card>
   );

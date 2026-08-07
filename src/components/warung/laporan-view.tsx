@@ -57,20 +57,12 @@ export function LaporanView() {
           description="Penjualan dikurangi modal barang."
           tone="accent"
         />
-        <div
-          role="button"
-          tabIndex={0}
+        <StatCard
+          title="Pengeluaran"
+          value={formatCompactCurrency(summary.expenseTotal)}
+          description="Biaya operasional periode ini."
           onClick={() => setExpenseOpen(true)}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setExpenseOpen(true); }}
-          className="cursor-pointer"
-        >
-          <StatCard
-            title="Pengeluaran"
-            value={formatCompactCurrency(summary.expenseTotal)}
-            description="Biaya operasional periode ini."
-            hint="Ketuk untuk menambah pengeluaran"
-          />
-        </div>
+        />
         <StatCard
           title="Laba bersih"
           value={formatCompactCurrency(summary.netProfit)}
