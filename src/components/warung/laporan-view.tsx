@@ -62,16 +62,14 @@ export function LaporanView() {
           tabIndex={0}
           onClick={() => setExpenseOpen(true)}
           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setExpenseOpen(true); }}
-          className="group relative cursor-pointer rounded-xl border border-transparent transition-all hover:border-primary/30 hover:shadow-md"
+          className="cursor-pointer"
         >
           <StatCard
             title="Pengeluaran"
             value={formatCompactCurrency(summary.expenseTotal)}
             description="Biaya operasional periode ini."
           />
-          <span className="absolute top-2 right-2 flex size-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary opacity-60 transition-opacity group-hover:opacity-100">
-            +
-          </span>
+          <p className="mt-1 text-center text-[10px] text-muted-foreground/60">Ketuk untuk menambah pengeluaran</p>
         </div>
         <StatCard
           title="Laba bersih"
