@@ -93,6 +93,7 @@ export function AppShell({
   const activePage = pageTitles[pathname] ?? pageTitles["/kasir"];
   const [aiOpen, setAiOpen] = useState(false);
   const [leftCollapsed, setLeftCollapsed] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     if (aiOpen) setLeftCollapsed(true);
@@ -189,7 +190,7 @@ export function AppShell({
         {/* Mobile Header */}
         <div className="fixed top-0 left-0 right-0 z-40 flex h-12 items-center justify-between border-b border-border bg-card/95 px-3 backdrop-blur-sm lg:hidden">
           <div className="flex items-center gap-2.5">
-            <Sheet>
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger
                 render={
                   <Button
@@ -237,11 +238,8 @@ export function AppShell({
                     <div className="mb-3 border-t border-sidebar-border" />
                     <button
                       type="button"
-                      onClick={() => { setAiOpen(true); }}
-                      className={cn(
-                        buttonVariants({ variant: "ghost", size: "lg" }),
-                        "w-full justify-start rounded-xl text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                      )}
+                      onClick={() => { setMenuOpen(false); setAiOpen(true); }}
+                      className="flex h-11 w-full items-center gap-2 rounded-xl bg-primary/10 px-3 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
                     >
                       <Sparkles className="size-4" />
                       AI Asisten
