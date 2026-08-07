@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { emptyAppState } from "@/lib/empty-state";
-import { AppState, Debt, DebtDraft, PaymentMethod, Product, ProductDraft, Settings, Transaction } from "@/lib/types";
+import { AppState, Debt, Expense, DebtDraft, PaymentMethod, Product, ProductDraft, Settings, Transaction } from "@/lib/types";
 
 type CartLine = {
   product: Product;
@@ -27,6 +27,7 @@ type AppStateContextValue = AppState & {
   deleteProduct: (productId: string) => Promise<void>;
   addDebt: (draft: DebtDraft) => Promise<void>;
   deleteDebt: (debtId: string) => Promise<void>;
+  addExpense: (draft: { title: string; amount: number; category: "Operasional" | "Belanja" | "Utilitas" }) => Promise<void>;
   markDebtPaid: (debtId: string) => Promise<void>;
   sendDebtReminder: (debtId: string) => Promise<Debt | null>;
   updateSettings: (settings: Settings) => Promise<void>;
@@ -281,6 +282,15 @@ export function AppStateProvider({
     }));
   }
 
+  async function addExpense(draft: { title: string; amount: number; category: "Operasional" | "Belanja" | "Utilitas" }) {
+    const created = await requestJson<Expense>("/api/expenses", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(draft),
+    });
+    setState((prev) => ({ ...prev, expenses: [created, ...prev.expenses] }));
+  }
+
   async function addDebt(draft: DebtDraft) {
     const response = await requestJson<{ debt: Debt }>("/api/debts", {
       method: "POST",
@@ -368,6 +378,7 @@ export function AppStateProvider({
         deleteProduct,
         addDebt,
     deleteDebt,
+        addExpense,
         markDebtPaid,
         sendDebtReminder,
         updateSettings,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Printer, TrendingUp } from "lucide-react";
+import { Download, Plus, Printer, TrendingUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
@@ -13,8 +13,10 @@ import { formatCompactCurrency, formatCurrency, formatDate } from "@/lib/format"
 import { buildSeries, estimateProductVelocity, ReportRange, summarizeReport } from "@/lib/reporting";
 
 export function LaporanView() {
-  const { transactions, expenses, products, settings } = useAppState();
+  const { transactions, expenses, products, settings, addExpense } = useAppState();
   const [range, setRange] = useState<ReportRange>("harian");
+  const [expenseOpen, setExpenseOpen] = useState(false);
+  const [expenseDraft, setExpenseDraft] = useState<{ title: string; amount: string; category: "Operasional" | "Belanja" | "Utilitas" }>({ title: "", amount: "", category: "Operasional" });
 
   const summary = summarizeReport(range, transactions, expenses);
   const series = buildSeries(range, transactions);
@@ -24,6 +26,18 @@ export function LaporanView() {
 
   const rangeLabel =
     range === "harian" ? "Hari ini" : range === "mingguan" ? "Minggu ini" : "Bulan ini";
+
+  const handleAddExpense = async () => {
+    if (!expenseDraft.title.trim() || !expenseDraft.amount) return;
+    try {
+      await addExpense({ title: expenseDraft.title.trim(), amount: Number(expenseDraft.amount), category: expenseDraft.category });
+      setExpenseDraft({ title: "", amount: "", category: "Operasional" });
+      setExpenseOpen(false);
+      toast.success("Pengeluaran tercatat.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal mencatat pengeluaran.");
+    }
+  };
 
   return (
     <div className="space-y-3">
