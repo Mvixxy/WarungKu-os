@@ -522,6 +522,7 @@ export function KasirView() {
     dueDate: "",
   });
   const [cashGiven, setCashGiven] = useState("");
+  const [partialPayment, setPartialPayment] = useState(0);
   const [checkingOut, setCheckingOut] = useState(false);
   const [receiptTransaction, setReceiptTransaction] = useState<{
     transaction: Transaction;
@@ -551,8 +552,15 @@ export function KasirView() {
       setDebtFormOpen(true);
       return;
     }
-    if (paymentMethod === "Tunai" && Number(cashGiven) < cartTotal) {
-      toast.error("Uang diterima kurang dari total belanja.");
+    if (paymentMethod === "Tunai" && Number(cashGiven) > 0 && Number(cashGiven) < cartTotal) {
+      const sisa = cartTotal - Number(cashGiven);
+      setPartialPayment(sisa);
+      setMobileCartOpen(false);
+      setDebtFormOpen(true);
+      return;
+    }
+    if (paymentMethod === "Tunai" && (cashGiven === "" || Number(cashGiven) <= 0)) {
+      toast.error("Masukkan uang diterima terlebih dahulu.");
       return;
     }
     setCheckingOut(true);
@@ -608,10 +616,11 @@ export function KasirView() {
         toast.error("Keranjang masih kosong.");
         return;
       }
+      const hutangAmount = partialPayment > 0 ? partialPayment : transaction.total;
       await addDebt({
         borrowerName: debtDraft.borrowerName.trim(),
         whatsapp: debtDraft.whatsapp.trim(),
-        amount: transaction.total,
+        amount: hutangAmount,
         dueDate:
           debtDraft.dueDate ||
           new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
@@ -621,9 +630,16 @@ export function KasirView() {
       setDebtFormOpen(false);
       setMobileCartOpen(false);
       setDebtDraft({ borrowerName: "", whatsapp: "", dueDate: "" });
-      toast.success("Transaksi tersimpan sebagai hutang.", {
-        description: `${debtDraft.borrowerName} berhutang ${formatCurrency(transaction.total)}.`,
-      });
+      if (partialPayment > 0) {
+        setReceiptTransaction({ transaction, cashGiven: Number(cashGiven) });
+        toast.success("Transaksi tersimpan.", {
+          description: `Tunai ${formatCurrency(Number(cashGiven))}, hutang ${formatCurrency(partialPayment)}.`,
+        });
+      } else {
+        toast.success("Transaksi tersimpan sebagai hutang.", {
+          description: `${debtDraft.borrowerName} berhutang ${formatCurrency(transaction.total)}.`,
+        });
+      }
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Gagal menyimpan transaksi."
@@ -806,7 +822,7 @@ export function KasirView() {
         <div className="p-5 pt-4 sm:p-6 sm:pt-5">
           <p className="text-sm sm:text-base font-semibold">Data pelanggan hutang</p>
           <p className="mt-0.5 text-[11px] text-muted-foreground">
-            Isi data di bawah untuk mencatat hutang.
+            {partialPayment > 0 ? "Pelanggan kurang bayar, sisa akan dicatat sebagai hutang." : "Isi data di bawah untuk mencatat hutang."}
           </p>
 
           <div className="mt-4 space-y-3">
@@ -869,7 +885,7 @@ export function KasirView() {
                 Total hutang
               </p>
               <p className="font-heading text-xl font-semibold text-primary">
-                {formatCurrency(cartTotal)}
+                {formatCurrency(partialPayment > 0 ? partialPayment : cartTotal)}
               </p>
             </div>
             <div className="flex gap-3">
