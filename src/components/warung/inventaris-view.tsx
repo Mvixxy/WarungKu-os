@@ -25,7 +25,7 @@ import { Product, ProductCategory, ProductDraft } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { fuzzyFindSimilar } from "@/lib/fuzzy";
 
-const defaultCategories = ["Makanan", "Minuman", "Sembako", "Kebutuhan Harian"];
+const defaultCategories = ["Sembako"];
 
 const emptyDraft: ProductDraft = {
   name: "",
@@ -220,6 +220,7 @@ export function InventarisView() {
   const [sortOrder, setSortOrder] = useState<"az" | "za">("az");
   const [categoryManageOpen, setCategoryManageOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [deleteDefaultConfirm, setDeleteDefaultConfirm] = useState<string | null>(null);
   const [duplicateTarget, setDuplicateTarget] = useState<{ name: string; isExact: boolean; existing?: { id: string; name: string } } | null>(null);
 
   const categories = Array.from(
@@ -233,7 +234,10 @@ export function InventarisView() {
   }
 
   function removeCategory(name: string) {
-    if (defaultCategories.includes(name)) return; // can't remove defaults
+    if (defaultCategories.includes(name)) {
+      setDeleteDefaultConfirm(name);
+      return;
+    }
     setLocalCategories((prev) => prev.filter((c) => c !== name));
   }
 
@@ -518,23 +522,53 @@ export function InventarisView() {
               {categories.map((cat) => (
                 <div key={cat} className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
                   <span className="text-sm">{cat}</span>
-                  {defaultCategories.includes(cat) ? (
-                    <span className="text-[10px] text-muted-foreground">Default</span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => removeCategory(cat)}
-                      className="text-muted-foreground transition-colors hover:text-destructive"
-                    >
-                      <Trash2 className="size-3.5" />
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeCategory(cat)}
+                    className={cn(
+                      "transition-colors hover:text-destructive",
+                      defaultCategories.includes(cat) ? "text-muted-foreground/50" : "text-muted-foreground"
+                    )}
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
                 </div>
               ))}
             </div>
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ── Delete default category confirmation ── */}
+      {deleteDefaultConfirm && (
+        <Dialog open onOpenChange={() => setDeleteDefaultConfirm(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="font-heading text-lg">Hapus kategori default?</DialogTitle>
+              <DialogDescription>
+                <strong>{deleteDefaultConfirm}</strong> adalah kategori default. Yakin ingin menghapusnya?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-2 pt-2">
+              <Button type="button" size="sm" className="rounded-lg" onClick={() => setDeleteDefaultConfirm(null)}>
+                Batal
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="destructive"
+                className="rounded-lg"
+                onClick={() => {
+                  setLocalCategories((prev) => prev.filter((c) => c !== deleteDefaultConfirm));
+                  setDeleteDefaultConfirm(null);
+                }}
+              >
+                Hapus
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* ── Duplicate confirmation ── */}
       {duplicateTarget && (
