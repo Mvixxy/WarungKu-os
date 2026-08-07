@@ -255,34 +255,32 @@ export function InventarisView() {
 
   async function handleCreateProduct(forceDuplicate = false) {
     if (saving) return;
-    try {
-      if (!validateProduct(draft)) { toast.error("Lengkapi data produk lebih dulu."); return; }
+    if (!validateProduct(draft)) { toast.error("Lengkapi data produk lebih dulu."); return; }
 
-      // Duplicate detection (hanya saat tambah baru, bukan edit)
-      if (!forceDuplicate) {
-        const searchName = draft.name.toLowerCase().trim();
-        // Cek exact match
-        const existing = products.find(
-          (p) => p.name.toLowerCase().trim() === searchName
+    // Duplicate detection (hanya saat tambah baru)
+    if (!forceDuplicate) {
+      const searchName = draft.name.toLowerCase().trim();
+      const existing = products.find(
+        (p) => p.name.toLowerCase().trim() === searchName
+      );
+      if (existing) {
+        setDuplicateTarget({ name: draft.name, isExact: true, existing: { id: existing.id, name: existing.name } });
+        return;
+      }
+      const existingNames = products.map((p) => p.name);
+      const similar = fuzzyFindSimilar(draft.name, existingNames, 0.7);
+      if (similar) {
+        const similarProduct = products.find(
+          (p) => p.name.toLowerCase().trim() === similar.toLowerCase().trim()
         );
-        if (existing) {
-          setDuplicateTarget({ name: draft.name, isExact: true, existing: { id: existing.id, name: existing.name } });
+        if (similarProduct) {
+          setDuplicateTarget({ name: draft.name, isExact: false, existing: { id: similarProduct.id, name: similarProduct.name } });
           return;
         }
-        // Cek fuzzy match
-        const existingNames = products.map((p) => p.name);
-        const similar = fuzzyFindSimilar(draft.name, existingNames, 0.7);
-        if (similar) {
-          const similarProduct = products.find(
-            (p) => p.name.toLowerCase().trim() === similar.toLowerCase().trim()
-          );
-          if (similarProduct) {
-            setDuplicateTarget({ name: draft.name, isExact: false, existing: { id: similarProduct.id, name: similarProduct.name } });
-            return;
-          }
-        }
       }
+    }
 
+    try {
       setSaving(true);
       setDuplicateTarget(null);
       await addProduct(draft);
