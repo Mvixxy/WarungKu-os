@@ -23,6 +23,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatCurrency } from "@/lib/format";
 import { Product, ProductCategory, ProductDraft } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { fuzzyFindSimilar } from "@/lib/fuzzy";
 
 const defaultCategories = ["Makanan", "Minuman", "Sembako", "Kebutuhan Harian"];
 
@@ -219,6 +220,7 @@ export function InventarisView() {
   const [sortOrder, setSortOrder] = useState<"az" | "za">("az");
   const [categoryManageOpen, setCategoryManageOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [duplicateTarget, setDuplicateTarget] = useState<{ name: string; isExact: boolean; existing?: { id: string; name: string } } | null>(null);
 
   const categories = Array.from(
     new Set([...defaultCategories, ...localCategories, ...products.map((p) => p.category)])
@@ -251,11 +253,38 @@ export function InventarisView() {
     return d.name.trim().length > 0 && d.sellPrice > 0 && d.buyPrice >= 0 && d.stock >= 0 && d.minimumStock >= 0;
   }
 
-  async function handleCreateProduct() {
+  async function handleCreateProduct(forceDuplicate = false) {
     if (saving) return;
     try {
       if (!validateProduct(draft)) { toast.error("Lengkapi data produk lebih dulu."); return; }
+
+      // Duplicate detection (hanya saat tambah baru, bukan edit)
+      if (!forceDuplicate) {
+        const searchName = draft.name.toLowerCase().trim();
+        // Cek exact match
+        const existing = products.find(
+          (p) => p.name.toLowerCase().trim() === searchName
+        );
+        if (existing) {
+          setDuplicateTarget({ name: draft.name, isExact: true, existing: { id: existing.id, name: existing.name } });
+          return;
+        }
+        // Cek fuzzy match
+        const existingNames = products.map((p) => p.name);
+        const similar = fuzzyFindSimilar(draft.name, existingNames, 0.7);
+        if (similar) {
+          const similarProduct = products.find(
+            (p) => p.name.toLowerCase().trim() === similar.toLowerCase().trim()
+          );
+          if (similarProduct) {
+            setDuplicateTarget({ name: draft.name, isExact: false, existing: { id: similarProduct.id, name: similarProduct.name } });
+            return;
+          }
+        }
+      }
+
       setSaving(true);
+      setDuplicateTarget(null);
       await addProduct(draft);
       setDraft(emptyDraft);
       setCreateOpen(false);
