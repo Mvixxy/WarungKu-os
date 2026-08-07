@@ -221,6 +221,8 @@ export function InventarisView() {
   const [categoryManageOpen, setCategoryManageOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [deleteDefaultConfirm, setDeleteDefaultConfirm] = useState<string | null>(null);
+  const [reassignTarget, setReassignTarget] = useState<{ category: string; count: number } | null>(null);
+  const [reassignTo, setReassignTo] = useState("");
   const [duplicateTarget, setDuplicateTarget] = useState<{ name: string; isExact: boolean; existing?: { id: string; name: string } } | null>(null);
 
   const categories = Array.from(
@@ -234,11 +236,31 @@ export function InventarisView() {
   }
 
   function removeCategory(name: string) {
+    const productsInCategory = products.filter((p) => p.category === name);
+    if (productsInCategory.length > 0) {
+      const otherCategories = categories.filter((c) => c !== name);
+      setReassignTo(otherCategories[0] ?? "");
+      setReassignTarget({ category: name, count: productsInCategory.length });
+      return;
+    }
     if (defaultCategories.includes(name)) {
       setDeleteDefaultConfirm(name);
       return;
     }
     setLocalCategories((prev) => prev.filter((c) => c !== name));
+  }
+
+  async function handleReassign() {
+    if (!reassignTarget || !reassignTo) return;
+    const productsToMove = products.filter((p) => p.category === reassignTarget.category);
+    for (const p of productsToMove) {
+      await updateProduct(p.id, { name: p.name, buyPrice: p.buyPrice, sellPrice: p.sellPrice, stock: p.stock, minimumStock: p.minimumStock, description: p.description, category: reassignTo });
+    }
+    if (!defaultCategories.includes(reassignTarget.category)) {
+      setLocalCategories((prev) => prev.filter((c) => c !== reassignTarget.category));
+    }
+    setReassignTarget(null);
+    toast.success(`${productsToMove.length} produk dipindah ke ${reassignTo}.`);
   }
 
   const filteredProducts = products
@@ -538,6 +560,39 @@ export function InventarisView() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ── Reassign products dialog ── */}
+      {reassignTarget && (
+        <Dialog open onOpenChange={() => setReassignTarget(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="font-heading text-lg">Pindahkan produk?</DialogTitle>
+              <DialogDescription>
+                Ada <strong>{reassignTarget.count} produk</strong> pakai kategori <strong>{reassignTarget.category}</strong>. Pindahkan ke kategori lain sebelum menghapus.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 pt-2">
+              <select
+                value={reassignTo}
+                onChange={(e) => setReassignTo(e.target.value)}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm"
+              >
+                {categories.filter((c) => c !== reassignTarget.category).map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+              <div className="flex gap-2">
+                <Button type="button" size="sm" className="rounded-lg flex-1" onClick={() => setReassignTarget(null)}>
+                  Batal
+                </Button>
+                <Button type="button" size="sm" variant="destructive" className="rounded-lg flex-1" disabled={!reassignTo} onClick={() => void handleReassign()}>
+                  Pindahkan & Hapus
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* ── Delete default category confirmation ── */}
       {deleteDefaultConfirm && (
