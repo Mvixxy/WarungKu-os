@@ -503,18 +503,6 @@ export function AIAssistantPanel({ open, onOpenChange }: { open: boolean; onOpen
         )}
       </aside>
 
-      {/* ── Mobile: floating button ── */}
-      {!open && (
-        <button
-          type="button"
-          onClick={() => onOpenChange(true)}
-          className="fixed bottom-[148px] right-4 z-40 flex size-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 lg:hidden"
-          aria-label="Buka asisten AI"
-        >
-          <Sparkles className="size-5" />
-        </button>
-      )}
-
       {/* ── Mobile: bottom sheet ── */}
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">

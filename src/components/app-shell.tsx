@@ -13,6 +13,7 @@ import {
   LogOut,
   Settings2,
   ShoppingBasket,
+  Sparkles,
   Store,
   Wallet,
 } from "lucide-react";
@@ -233,6 +234,18 @@ export function AppShell({
                     );
                   })}
                   <div className="mt-auto pt-4">
+                    <div className="mb-3 border-t border-sidebar-border" />
+                    <button
+                      type="button"
+                      onClick={() => { setAiOpen(true); }}
+                      className={cn(
+                        buttonVariants({ variant: "ghost", size: "lg" }),
+                        "w-full justify-start rounded-xl text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                      )}
+                    >
+                      <Sparkles className="size-4" />
+                      AI Asisten
+                    </button>
                     <div className="mb-3 border-t border-sidebar-border" />
                     <button
                       type="button"
