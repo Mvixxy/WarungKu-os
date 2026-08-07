@@ -307,7 +307,7 @@ export function InventarisView() {
 
   return (
     <div className="space-y-3">
-      <section className="grid gap-3 md:grid-cols-3">
+      <section className="grid grid-cols-2 gap-2 sm:gap-3">
         <StatCard title="Total SKU" value={`${products.length} produk`} description="Produk aktif di warung." />
         <StatCard title="Stok menipis" value={`${lowStockProducts.length} item`} description="Perlu restok sebelum kehabisan." tone="warn" />
         <StatCard title="Nilai stok" value={formatCurrency(totalInventoryValue)} description="Total modal di inventaris." tone="accent" />
