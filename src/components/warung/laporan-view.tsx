@@ -108,12 +108,12 @@ export function LaporanView() {
                     <Tooltip
                       formatter={(value) => [formatCurrency(Number(value)), "Omzet"]}
                       contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
+                        backgroundColor: "#fff",
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "10px",
                         fontSize: "13px",
                         fontWeight: 600,
-                        boxShadow: "0 8px 24px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10)",
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.20), 0 2px 8px rgba(0,0,0,0.12)",
                         padding: "10px 14px",
                         zIndex: 10,
                       }}
