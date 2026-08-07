@@ -232,6 +232,11 @@ export function InventarisView() {
     );
   }
 
+  function removeCategory(name: string) {
+    if (defaultCategories.includes(name)) return; // can't remove defaults
+    setLocalCategories((prev) => prev.filter((c) => c !== name));
+  }
+
   const filteredProducts = products
     .filter((product) => {
       const keyword = query.toLowerCase();
@@ -474,6 +479,60 @@ export function InventarisView() {
           <DialogFooter>
             <Button type="button" size="sm" className="rounded-lg px-4" disabled={saving} onClick={() => void handleUpdateProduct()}>{saving ? (<><Loader2 className="mr-1.5 size-3.5 animate-spin" />Menyimpan...</>) : "Simpan"}</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Category management dialog ── */}
+      <Dialog open={categoryManageOpen} onOpenChange={setCategoryManageOpen}>
+        <DialogContent className="max-w-sm" showCloseButton>
+          <DialogHeader>
+            <DialogTitle className="font-heading text-lg">Kelola Kategori</DialogTitle>
+            <DialogDescription>Tambah atau hapus kategori produk.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Nama kategori baru"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && newCategoryName.trim()) {
+                    addCategory(newCategoryName.trim());
+                    setNewCategoryName("");
+                  }
+                }}
+                className="flex-1 rounded-xl border border-border bg-background px-3 py-2.5 text-sm"
+              />
+              <Button
+                type="button"
+                size="sm"
+                className="rounded-lg px-3"
+                disabled={!newCategoryName.trim()}
+                onClick={() => { addCategory(newCategoryName.trim()); setNewCategoryName(""); }}
+              >
+                <Plus className="size-3.5" />
+              </Button>
+            </div>
+            <div className="max-h-48 space-y-1.5 overflow-y-auto">
+              {categories.map((cat) => (
+                <div key={cat} className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                  <span className="text-sm">{cat}</span>
+                  {defaultCategories.includes(cat) ? (
+                    <span className="text-[10px] text-muted-foreground">Default</span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => removeCategory(cat)}
+                      className="text-muted-foreground transition-colors hover:text-destructive"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
