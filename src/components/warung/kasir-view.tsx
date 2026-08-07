@@ -486,10 +486,7 @@ function MobileCartSheet({
             type="button"
             size="lg"
             className="mt-2 h-11 w-full rounded-xl bg-primary text-primary-foreground text-sm font-semibold shadow-md"
-            onClick={() => {
-              handleCheckout();
-              onOpenChange(false);
-            }}
+            onClick={() => void handleCheckout()}
             disabled={checkingOut}
           >
             {checkingOut ? (<><Loader2 className="mr-2 size-4 animate-spin" />Memproses...</>) : `Bayar sekarang — ${formatCurrency(cartTotal)}`}
@@ -618,6 +615,7 @@ export function KasirView() {
             .split("T")[0],
       });
       setDebtFormOpen(false);
+      setMobileCartOpen(false);
       setDebtDraft({ borrowerName: "", whatsapp: "", dueDate: "" });
       toast.success("Transaksi tersimpan sebagai hutang.", {
         description: `${debtDraft.borrowerName} berhutang ${formatCurrency(transaction.total)}.`,
