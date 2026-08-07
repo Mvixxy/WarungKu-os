@@ -53,20 +53,18 @@ export function LaporanView() {
           description="Penjualan dikurangi modal barang."
           tone="accent"
         />
-        <div className="flex items-start gap-2">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setExpenseOpen(true)}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setExpenseOpen(true); }}
+          className="cursor-pointer"
+        >
           <StatCard
             title="Pengeluaran"
             value={formatCompactCurrency(summary.expenseTotal)}
             description="Biaya operasional periode ini."
-            className="flex-1"
           />
-          <button
-            type="button"
-            onClick={() => setExpenseOpen(true)}
-            className="mt-2 flex size-8 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:bg-muted"
-          >
-            <Plus className="size-3.5" />
-          </button>
         </div>
         <StatCard
           title="Laba bersih"
