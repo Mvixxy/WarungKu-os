@@ -540,11 +540,11 @@ export function InventarisView() {
               <Button
                 type="button"
                 size="sm"
-                className="rounded-lg px-3"
+                className="h-10 rounded-xl px-3"
                 disabled={!newCategoryName.trim()}
                 onClick={() => { addCategory(newCategoryName.trim()); setNewCategoryName(""); }}
               >
-                <Plus className="size-3.5" />
+                <Plus className="size-4" />
               </Button>
             </div>
             <div className="max-h-48 space-y-1.5 overflow-y-auto">
@@ -589,10 +589,10 @@ export function InventarisView() {
                 ))}
               </select>
               <div className="flex gap-2">
-                <Button type="button" size="sm" className="rounded-lg flex-1" disabled={categoryLoading} onClick={() => { setReassignTarget(null); setCategoryLoading(false); }}>
+                <Button type="button" className="rounded-xl flex-1 py-2.5 text-sm" disabled={categoryLoading} onClick={() => { setReassignTarget(null); setCategoryLoading(false); }}>
                   Batal
                 </Button>
-                <Button type="button" size="sm" variant="destructive" className="rounded-lg flex-1" disabled={!reassignTo || categoryLoading} onClick={() => void handleReassign()}>
+                <Button type="button" variant="destructive" className="rounded-xl flex-1 py-2.5 text-sm" disabled={!reassignTo || categoryLoading} onClick={() => void handleReassign()}>
                   {categoryLoading ? (
                     <span className="flex items-center justify-center gap-2">
                       <span className="size-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
