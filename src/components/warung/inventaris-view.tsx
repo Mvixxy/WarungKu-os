@@ -35,6 +35,7 @@ const emptyDraft: ProductDraft = {
   stock: 0,
   minimumStock: 0,
   description: "",
+  imageUrl: "",
 };
 
 function NumberInput({
@@ -257,7 +258,7 @@ export function InventarisView() {
     try {
       const productsToMove = products.filter((p) => p.category === reassignTarget.category);
       for (const p of productsToMove) {
-        await updateProduct(p.id, { name: p.name, buyPrice: p.buyPrice, sellPrice: p.sellPrice, stock: p.stock, minimumStock: p.minimumStock, description: p.description, category: reassignTo });
+        await updateProduct(p.id, { name: p.name, buyPrice: p.buyPrice, sellPrice: p.sellPrice, stock: p.stock, minimumStock: p.minimumStock, description: p.description, imageUrl: p.imageUrl, category: reassignTo });
       }
       if (!defaultCategories.includes(reassignTarget.category)) {
         const updatedCategories = (settings.categories ?? []).filter((c) => c !== reassignTarget.category);

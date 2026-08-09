@@ -398,6 +398,7 @@ export async function getBootstrapState(userId: string, pagination?: PaginationP
       stock: product.stock,
       minimumStock: product.minimumStock,
       description: product.description,
+      imageUrl: product.imageUrl ?? undefined,
     })),
     cart: [],
     paymentMethod: (profile.enabledPayments[0] ?? "Tunai") as PaymentMethod,
