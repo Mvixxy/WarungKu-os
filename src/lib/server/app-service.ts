@@ -478,6 +478,7 @@ export async function updateProduct(userId: string, productId: string, draft: Pr
       stock: draft.stock,
       minimumStock: draft.minimumStock,
       description: draft.description,
+      imageUrl: draft.imageUrl ?? null,
       updatedAt: nowIso(),
     })
     .where(and(eq(products.id, productId), eq(products.userId, userId)))
