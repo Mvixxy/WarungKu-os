@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatCompactCurrency, formatCurrency, formatDate } from "@/lib/format";
-import { buildSeries, estimateProductVelocity, ReportRange, summarizeReport } from "@/lib/reporting";
+import { buildSeries, estimateProductVelocity, getRangeStart, ReportRange, summarizeReport } from "@/lib/reporting";
 
 export function LaporanView() {
   const { transactions, expenses, products, settings, addExpense, updateExpense, deleteExpense } = useAppState();
@@ -32,6 +32,8 @@ export function LaporanView() {
   const [expenseDraft, setExpenseDraft] = useState<{ title: string; amount: string; category: "Operasional" | "Belanja" | "Utilitas" }>({ title: "", amount: "", category: "Operasional" });
 
   const summary = summarizeReport(range, transactions, expenses);
+  const periodStart = getRangeStart(range);
+  const filteredExpenses = expenses.filter((e) => new Date(e.createdAt) >= periodStart);
   const series = buildSeries(range, transactions);
   const topVelocity = estimateProductVelocity(products, transactions)
     .sort((left, right) => right.sold - left.sold)
@@ -117,7 +119,7 @@ export function LaporanView() {
         />
       </section>
 
-      {expenses.length > 0 && (
+      {filteredExpenses.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="font-heading text-lg">Daftar pengeluaran</CardTitle>
@@ -125,7 +127,7 @@ export function LaporanView() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {expenses.map((expense) => (
+              {filteredExpenses.map((expense) => (
                 <div key={expense.id} className="flex items-center justify-between rounded-xl border border-border p-3">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium truncate">{expense.title}</p>
@@ -477,10 +479,10 @@ export function LaporanView() {
             ))}
           </div>
 
-          {expenses.length > 0 && (
+          {filteredExpenses.length > 0 && (
             <div style={{ marginBottom: "24px" }}>
               <p style={{ fontSize: "13px", fontWeight: 600, marginBottom: "8px" }}>Pengeluaran</p>
-              {expenses.map((expense) => (
+              {filteredExpenses.map((expense) => (
                 <div key={expense.id} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #E7E5E4" }}>
                   <span style={{ fontSize: "12px" }}>{expense.title} ({expense.category})</span>
                   <span style={{ fontSize: "12px", fontWeight: 600 }}>{formatCurrency(expense.amount)}</span>
