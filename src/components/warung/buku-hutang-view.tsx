@@ -288,7 +288,15 @@ export function BukuHutangView() {
                             phone = "62" + phone;
                           }
                           const message = encodeURIComponent(text);
-                          window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${message}`, "_blank");
+                          // Use anchor element to avoid popup blocker
+                          const url = `https://api.whatsapp.com/send?phone=${phone}&text=${message}`;
+                          const anchor = document.createElement("a");
+                          anchor.href = url;
+                          anchor.target = "_blank";
+                          anchor.rel = "noopener noreferrer";
+                          document.body.appendChild(anchor);
+                          anchor.click();
+                          document.body.removeChild(anchor);
                           toast.success("Pengingat terkirim.", {
                             description: `Pesan untuk ${debt.borrowerName}.`,
                           });
