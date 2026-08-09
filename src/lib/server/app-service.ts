@@ -190,7 +190,11 @@ async function ensureWorkspace(userId: string, session?: SessionHint) {
 
 export async function ensureAppReady() {
   if (!initializationPromise) {
-    initializationPromise = ensureTables();
+    initializationPromise = ensureTables().catch((err) => {
+      // Reset so next request retries
+      initializationPromise = null;
+      console.error("ensureTables migration failed:", err);
+    });
   }
 
   await initializationPromise;
