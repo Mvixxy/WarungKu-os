@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowRightLeft, Ban, Loader2, Package2, ReceiptText, ShoppingBasket, WalletCards } from "lucide-react";
+import { AlertTriangle, ArrowRightLeft, Ban, Loader2, Package2, ReceiptText, Search, ShoppingBasket, WalletCards } from "lucide-react";
 import { useAppState } from "@/components/providers/app-state-provider";
 import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
@@ -30,10 +30,17 @@ export function DashboardView() {
   const outstandingDebt = debts
     .filter((debt) => !debt.isPaid)
     .reduce((sum, debt) => sum + debt.amount, 0);
-  const latestTransaction = transactions[0] ?? null;
+  const [searchQuery, setSearchQuery] = useState("");
   const [voidTarget, setVoidTarget] = useState<string | null>(null);
   const [voidReason, setVoidReason] = useState("");
   const [voidLoading, setVoidLoading] = useState(false);
+  const filteredTransactions = searchQuery
+    ? transactions.filter((t) =>
+        t.items?.some((i) => i.productName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        t.paymentMethod.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : transactions;
+  const latestTransaction = transactions[0] ?? null;
 
   async function handleVoid() {
     if (!voidTarget) return;
@@ -138,11 +145,23 @@ export function DashboardView() {
             <div className="rounded-xl border border-border bg-card p-3 sm:p-4">
               <div className="flex items-center gap-2">
                 <ArrowRightLeft className="size-3 sm:size-3.5 text-primary" />
-                <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide">Timeline transaksi</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide">Timeline transaksi</p>
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder="Cari transaksi..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="h-7 w-36 rounded-lg border border-border bg-background pl-7 pr-2 text-xs"
+                    />
+                  </div>
+                </div>
               </div>
               <div className="mt-3 space-y-1.5 sm:mt-4 sm:space-y-2">
                 {transactions.length > 0 ? (
-                  transactions.slice(0, 5).map((transaction) => (
+                  filteredTransactions.slice(0, 5).map((transaction) => (
                     <div
                       key={transaction.id}
                       className={`flex items-start justify-between gap-2 sm:gap-3 rounded-lg px-2.5 py-2 sm:px-3 sm:py-2.5 ${
@@ -182,7 +201,7 @@ export function DashboardView() {
                   ))
                 ) : (
                   <div className="py-4 text-center text-xs text-muted-foreground">
-                    Belum ada riwayat transaksi.
+                    searchQuery ? "Tidak ada transaksi yang cocok." : "Belum ada riwayat transaksi."
                   </div>
                 )}
                 {transactions.length > 5 && (
