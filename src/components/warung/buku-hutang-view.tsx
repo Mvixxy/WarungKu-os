@@ -31,7 +31,7 @@ const emptyDraft: DebtDraft = {
 };
 
 export function BukuHutangView() {
-  const { debts, addDebt, markDebtPaid, sendDebtReminder, deleteDebt, partialPayDebt } = useAppState();
+  const { debts, addDebt, markDebtPaid, sendDebtReminder, deleteDebt, partialPayDebt, settings } = useAppState();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"semua" | "belum" | "lunas">("semua");
   const [createOpen, setCreateOpen] = useState(false);
@@ -268,12 +268,23 @@ export function BukuHutangView() {
                       className="h-7 rounded-md text-xs"
                       onClick={async () => {
                         try {
-                          const reminded = await sendDebtReminder(debt.id);
-                          if (reminded) {
-                            toast.success("Pengingat terkirim.", {
-                              description: `Pesan untuk ${reminded.borrowerName}.`,
-                            });
-                          }
+                          // Update reminder timestamp in DB
+                          await sendDebtReminder(debt.id);
+                          // Build WhatsApp message
+                          const remaining = debt.amount - debt.paidAmount;
+                          const dueDate = formatDate(debt.dueDate);
+                          const storeName = settings.storeName || "WarungKu";
+                          const message = encodeURIComponent(
+                            `Halo ${debt.borrowerName},\n\n` +
+                            `Ini pengingat dari *${storeName}* bahwa Anda memiliki hutang sebesar *Rp ${remaining.toLocaleString("id-ID")}*.\n\n` +
+                            `Jatuh tempo: ${dueDate}\n\n` +
+                            `Mohon segera melakukan pembayaran. Terima kasih.`
+                          );
+                          const phone = debt.whatsapp.replace(/[^0-9]/g, "");
+                          window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+                          toast.success("Pengingat terkirim.", {
+                            description: `Pesan untuk ${debt.borrowerName}.`,
+                          });
                         } catch (error) {
                           toast.error(error instanceof Error ? error.message : "Gagal kirim pengingat.");
                         }
