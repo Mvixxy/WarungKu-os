@@ -23,9 +23,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatCompactCurrency, formatCurrency, formatDate } from "@/lib/format";
 import { buildSeries, estimateProductVelocity, getRangeStart, ReportRange, summarizeReport } from "@/lib/reporting";
+import { exportTransactionsCSV, exportExpensesCSV, exportDebtsCSV } from "@/lib/export-csv";
 
 export function LaporanView() {
-  const { transactions, expenses, products, settings, addExpense, updateExpense, deleteExpense } = useAppState();
+  const { transactions, expenses, debts, products, settings, addExpense, updateExpense, deleteExpense } = useAppState();
   const [range, setRange] = useState<ReportRange>("harian");
   const [expenseOpen, setExpenseOpen] = useState(false);
   const [expenseLoading, setExpenseLoading] = useState(false);
@@ -321,6 +322,16 @@ export function LaporanView() {
               >
                 <Download className="size-3 sm:size-3.5" />
                 PDF
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 rounded-lg text-xs no-print"
+                onClick={() => { exportTransactionsCSV(transactions); exportExpensesCSV(expenses); toast.success("CSV terdownload!"); }}
+              >
+                <Download className="size-3 sm:size-3.5" />
+                CSV
               </Button>
             </div>
           </CardHeader>
