@@ -29,6 +29,7 @@ export function PengaturanView() {
   const [isSaving, setIsSaving] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [confirmResetOpen, setConfirmResetOpen] = useState(false);
+  const [resetConfirmText, setResetConfirmText] = useState("");
 
   useEffect(() => {
     setForm(settings);
@@ -350,7 +351,7 @@ export function PengaturanView() {
           </CardContent>
         </Card>
       </div>
-      <Dialog open={confirmResetOpen} onOpenChange={setConfirmResetOpen}>
+      <Dialog open={confirmResetOpen} onOpenChange={(open) => { setConfirmResetOpen(open); if (!open) setResetConfirmText(""); }}>
         <DialogContent className="max-w-sm" showCloseButton>
           <DialogHeader>
             <DialogTitle className="text-destructive">Reset Workspace?</DialogTitle>
@@ -359,6 +360,19 @@ export function PengaturanView() {
               Tindakan ini tidak bisa dibatalkan.
             </DialogDescription>
           </DialogHeader>
+          <div className="space-y-1.5">
+            <Label htmlFor="reset-confirm" className="text-[10px]">
+              Ketik <span className="font-mono font-semibold text-destructive">RESET</span> untuk konfirmasi
+            </Label>
+            <Input
+              id="reset-confirm"
+              value={resetConfirmText}
+              onChange={(e) => setResetConfirmText(e.target.value)}
+              placeholder="Ketik RESET"
+              className="h-8 rounded-lg text-sm font-mono"
+              autoComplete="off"
+            />
+          </div>
           <DialogFooter>
             <Button
               variant="outline"
@@ -374,7 +388,7 @@ export function PengaturanView() {
               size="sm"
               className="rounded-lg"
               onClick={() => void handleWorkspaceReset()}
-              disabled={isResetting}
+              disabled={isResetting || resetConfirmText !== "RESET"}
             >
               {isResetting ? (
                 <><Loader2 className="mr-1.5 size-3.5 animate-spin" />Mereset...</>
