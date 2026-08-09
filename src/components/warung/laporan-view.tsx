@@ -47,6 +47,7 @@ export function LaporanView() {
   const [editLoading, setEditLoading] = useState(false);
   const [deleteExpenseTarget, setDeleteExpenseTarget] = useState<Expense | null>(null);
   const [deleteExpenseLoading, setDeleteExpenseLoading] = useState(false);
+  const [expenseRange, setExpenseRange] = useState<ReportRange | "semua">("semua");
 
   const handleAddExpense = async () => {
     if (!expenseDraft.title.trim() || !expenseDraft.amount) return;
@@ -119,23 +120,43 @@ export function LaporanView() {
       </section>
 
       <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle className="font-heading text-lg">Daftar pengeluaran</CardTitle>
-              <CardDescription className="text-xs">Semua pengeluaran tercatat. Klik ikon untuk edit atau hapus.</CardDescription>
+              <CardDescription className="text-xs">Klik ikon untuk edit atau hapus.</CardDescription>
             </div>
-            <Button
-              type="button"
-              size="sm"
-              className="h-8 rounded-lg text-xs no-print shrink-0"
-              onClick={() => setExpenseOpen(true)}
-            >
-              + Tambah
-            </Button>
+            <div className="flex items-center gap-2">
+              <Tabs value={expenseRange} onValueChange={(value) => setExpenseRange(value as ReportRange | "semua")}>
+                <TabsList className="rounded-lg p-0.5">
+                  <TabsTrigger value="semua" className="rounded-md px-2.5 text-[10px] sm:text-xs">Semua</TabsTrigger>
+                  <TabsTrigger value="harian" className="rounded-md px-2.5 text-[10px] sm:text-xs">Harian</TabsTrigger>
+                  <TabsTrigger value="mingguan" className="rounded-md px-2.5 text-[10px] sm:text-xs">Mingguan</TabsTrigger>
+                  <TabsTrigger value="bulanan" className="rounded-md px-2.5 text-[10px] sm:text-xs">Bulanan</TabsTrigger>
+                </TabsList>
+              </Tabs>
+              <Button
+                type="button"
+                size="sm"
+                className="h-8 rounded-lg text-xs no-print shrink-0"
+                onClick={() => setExpenseOpen(true)}
+              >
+                + Tambah
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {expenses.map((expense) => (
+            {(() => {
+              const expenseStart = expenseRange === "semua" ? null : getRangeStart(expenseRange);
+              const displayExpenses = expenseStart
+                ? expenses.filter((e) => new Date(e.createdAt) >= expenseStart)
+                : expenses;
+              return displayExpenses.length === 0 ? (
+                <p className="text-center text-xs text-muted-foreground py-6">
+                  {expenseRange === "semua" ? "Belum ada pengeluaran." : "Tidak ada pengeluaran di periode ini."}
+                </p>
+              ) : (
+              <div className="space-y-2">
+              {displayExpenses.map((expense) => (
                 <div key={expense.id} className="flex items-center justify-between rounded-xl border border-border p-3">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium truncate">{expense.title}</p>
@@ -160,7 +181,9 @@ export function LaporanView() {
                   </div>
                 </div>
               ))}
-            </div>
+              </div>
+              );
+            })()}
           </CardContent>
         </Card>
 
