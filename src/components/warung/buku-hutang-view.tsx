@@ -271,17 +271,16 @@ export function BukuHutangView() {
                           // Update reminder timestamp in DB
                           await sendDebtReminder(debt.id);
                           // Build WhatsApp message
-                          const remaining = debt.amount - debt.paidAmount;
+                          const remaining = debt.amount - (debt.paidAmount || 0);
                           const dueDate = formatDate(debt.dueDate);
                           const storeName = settings.storeName || "WarungKu";
-                          const message = encodeURIComponent(
-                            `Halo ${debt.borrowerName},\n\n` +
+                          const text = `Halo ${debt.borrowerName},\n\n` +
                             `Ini pengingat dari *${storeName}* bahwa Anda memiliki hutang sebesar *Rp ${remaining.toLocaleString("id-ID")}*.\n\n` +
                             `Jatuh tempo: ${dueDate}\n\n` +
-                            `Mohon segera melakukan pembayaran. Terima kasih.`
-                          );
+                            `Mohon segera melakukan pembayaran. Terima kasih.`;
                           const phone = debt.whatsapp.replace(/[^0-9]/g, "");
-                          window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+                          const message = encodeURIComponent(text);
+                          window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${message}`, "_blank");
                           toast.success("Pengingat terkirim.", {
                             description: `Pesan untuk ${debt.borrowerName}.`,
                           });
