@@ -150,3 +150,30 @@
     display: none;
   }
 }
+
+
+/* Print styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 24px;
+    background: white;
+    color: #1C1917;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

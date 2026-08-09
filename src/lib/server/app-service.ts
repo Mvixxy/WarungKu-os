@@ -133,6 +133,9 @@ async function ensureTables() {
     -- Migration: add categories column to existing store_profiles
     ALTER TABLE store_profiles ADD COLUMN IF NOT EXISTS categories jsonb NOT NULL DEFAULT '["Sembako"]'::jsonb;
 
+    -- Migration: add paid_amount column to existing debts
+    ALTER TABLE debts ADD COLUMN IF NOT EXISTS paid_amount integer NOT NULL DEFAULT 0;
+
     CREATE TABLE IF NOT EXISTS ai_messages (
       id text PRIMARY KEY,
       chat_id text NOT NULL,
@@ -376,6 +379,7 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
       borrowerName: debt.borrowerName,
       whatsapp: debt.whatsapp,
       amount: debt.amount,
+      paidAmount: debt.paidAmount ?? 0,
       createdAt: debt.createdAt,
       dueDate: debt.dueDate,
       isPaid: debt.isPaid === 1,
@@ -590,6 +594,46 @@ export async function createTransaction(
   };
 }
 
+export async function partialPayDebt(userId: string, debtId: string, payAmount: number) {
+  const [debt] = await db
+    .select()
+    .from(debts)
+    .where(and(eq(debts.id, debtId), eq(debts.userId, userId)))
+    .limit(1);
+
+  if (!debt) {
+    throw new Error("Hutang tidak ditemukan.");
+  }
+
+  if (debt.isPaid) {
+    throw new Error("Hutang sudah lunas.");
+  }
+
+  const newPaidAmount = (debt.paidAmount ?? 0) + payAmount;
+  const isFullyPaid = newPaidAmount >= debt.amount;
+
+  const [updated] = await db
+    .update(debts)
+    .set({
+      paidAmount: Math.min(newPaidAmount, debt.amount),
+      isPaid: isFullyPaid ? 1 : 0,
+    })
+    .where(eq(debts.id, debtId))
+    .returning();
+
+  return {
+    id: updated.id,
+    borrowerName: updated.borrowerName,
+    whatsapp: updated.whatsapp,
+    amount: updated.amount,
+    paidAmount: updated.paidAmount ?? 0,
+    createdAt: updated.createdAt,
+    dueDate: updated.dueDate,
+    isPaid: updated.isPaid === 1,
+    lastReminderAt: updated.lastReminderAt ?? undefined,
+  };
+}
+
 export async function createDebt(userId: string, draft: DebtDraft) {
   const [debt] = await db
     .insert(debts)
@@ -611,6 +655,7 @@ export async function createDebt(userId: string, draft: DebtDraft) {
     borrowerName: debt.borrowerName,
     whatsapp: debt.whatsapp,
     amount: debt.amount,
+    paidAmount: debt.paidAmount ?? 0,
     createdAt: debt.createdAt,
     dueDate: debt.dueDate,
     isPaid: false,
@@ -709,6 +754,45 @@ export async function createExpense(
     category: expense.category as "Operasional" | "Belanja" | "Utilitas",
     createdAt: expense.createdAt,
   };
+}
+
+export async function updateExpense(
+  userId: string,
+  expenseId: string,
+  draft: { title: string; amount: number; category: "Operasional" | "Belanja" | "Utilitas" }
+) {
+  const [updated] = await db
+    .update(expenses)
+    .set({
+      title: draft.title,
+      amount: draft.amount,
+      category: draft.category,
+    })
+    .where(and(eq(expenses.id, expenseId), eq(expenses.userId, userId)))
+    .returning();
+
+  if (!updated) {
+    throw new Error("Pengeluaran tidak ditemukan.");
+  }
+
+  return {
+    id: updated.id,
+    title: updated.title,
+    amount: updated.amount,
+    category: updated.category as "Operasional" | "Belanja" | "Utilitas",
+    createdAt: updated.createdAt,
+  };
+}
+
+export async function deleteExpense(userId: string, expenseId: string) {
+  const [deleted] = await db
+    .delete(expenses)
+    .where(and(eq(expenses.id, expenseId), eq(expenses.userId, userId)))
+    .returning();
+
+  if (!deleted) {
+    throw new Error("Pengeluaran tidak ditemukan.");
+  }
 }
 
 export async function updateStoreSettings(userId: string, settings: Settings) {

@@ -44,6 +44,7 @@ export interface Debt {
   borrowerName: string;
   whatsapp: string;
   amount: number;
+  paidAmount: number;
   createdAt: string;
   dueDate: string;
   isPaid: boolean;

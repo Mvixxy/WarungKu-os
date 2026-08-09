@@ -31,13 +31,33 @@ const emptyDraft: DebtDraft = {
 };
 
 export function BukuHutangView() {
-  const { debts, addDebt, markDebtPaid, sendDebtReminder, deleteDebt } = useAppState();
+  const { debts, addDebt, markDebtPaid, sendDebtReminder, deleteDebt, partialPayDebt } = useAppState();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"semua" | "belum" | "lunas">("semua");
   const [createOpen, setCreateOpen] = useState(false);
   const [draft, setDraft] = useState<DebtDraft>(emptyDraft);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [partialTarget, setPartialTarget] = useState<string | null>(null);
+  const [partialAmount, setPartialAmount] = useState("");
+  const [partialLoading, setPartialLoading] = useState(false);
+
+  async function handlePartialPay() {
+    if (!partialTarget || !partialAmount) return;
+    const amount = Number(partialAmount);
+    if (amount <= 0) return;
+    setPartialLoading(true);
+    try {
+      await partialPayDebt(partialTarget, amount);
+      setPartialTarget(null);
+      setPartialAmount("");
+      toast.success("Pembayaran tercatat.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal mencatat pembayaran.");
+    } finally {
+      setPartialLoading(false);
+    }
+  }
 
   const filteredDebts = debts.filter((debt) => {
     const keyword = query.toLowerCase();
@@ -223,6 +243,9 @@ export function BukuHutangView() {
                     <div className="rounded-lg bg-muted/50 p-2.5">
                       <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">Nominal</p>
                       <p className="mt-0.5 text-sm font-semibold">{formatCurrency(debt.amount)}</p>
+                      {(debt.paidAmount ?? 0) > 0 && !debt.isPaid && (
+                        <p className="text-[10px] text-accent">Dibayar: {formatCurrency(debt.paidAmount)} · Sisa: {formatCurrency(debt.amount - debt.paidAmount)}</p>
+                      )}
                     </div>
                     <div className="rounded-lg bg-muted/50 p-2.5">
                       <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">Jatuh tempo</p>
@@ -257,22 +280,33 @@ export function BukuHutangView() {
                       Kirim
                     </Button>
                     {!debt.isPaid && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="h-7 rounded-md text-xs"
-                        onClick={async () => {
-                          try {
-                            await markDebtPaid(debt.id);
-                            toast.success(`${debt.borrowerName} lunas.`);
-                          } catch (error) {
-                            toast.error(error instanceof Error ? error.message : "Gagal.");
-                          }
-                        }}
-                      >
-                        <CheckCircle2 className="size-3 sm:size-3.5" />
-                        Lunas
-                      </Button>
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-7 rounded-md text-xs"
+                          onClick={() => { setPartialTarget(debt.id); setPartialAmount(""); }}
+                        >
+                          Bayar
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="h-7 rounded-md text-xs"
+                          onClick={async () => {
+                            try {
+                              await markDebtPaid(debt.id);
+                              toast.success(`${debt.borrowerName} lunas.`);
+                            } catch (error) {
+                              toast.error(error instanceof Error ? error.message : "Gagal.");
+                            }
+                          }}
+                        >
+                          <CheckCircle2 className="size-3 sm:size-3.5" />
+                          Lunas
+                        </Button>
+                      </>
                     )}
                     {debt.isPaid && (
                       <Button
@@ -292,6 +326,43 @@ export function BukuHutangView() {
           </div>
         </CardContent>
       </Card>
+      {/* Partial Payment Dialog */}
+      <Dialog open={!!partialTarget} onOpenChange={(open) => { if (!open) { setPartialTarget(null); setPartialLoading(false); } }}>
+        <DialogContent className="max-w-sm" showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Bayar Sebagian</DialogTitle>
+            <DialogDescription>
+              {partialTarget && (() => {
+                const debt = debts.find((d) => d.id === partialTarget);
+                if (!debt) return null;
+                const remaining = debt.amount - (debt.paidAmount ?? 0);
+                return <>Sisa hutang: {formatCurrency(remaining)}</>;
+              })()}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="grid gap-1.5">
+              <Label htmlFor="partial-amount" className="text-[10px]">Nominal bayar (Rp)</Label>
+              <Input
+                id="partial-amount"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="0"
+                value={partialAmount}
+                onChange={(e) => setPartialAmount(e.target.value.replace(/[^0-9]/g, ""))}
+                className="h-9 rounded-lg text-sm"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" className="rounded-lg" onClick={() => setPartialTarget(null)} disabled={partialLoading}>Batal</Button>
+            <Button size="sm" className="rounded-lg" onClick={() => void handlePartialPay()} disabled={!partialAmount || partialLoading}>
+              {partialLoading ? <><Loader2 className="mr-1.5 size-3.5 animate-spin" />Menyimpan...</> : "Bayar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog
         open={!!deleteTarget}
         onOpenChange={(open) => { if (!open) { setDeleteTarget(null); setDeleteLoading(false); } }}

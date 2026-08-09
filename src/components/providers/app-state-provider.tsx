@@ -30,6 +30,9 @@ type AppStateContextValue = AppState & {
   addDebt: (draft: DebtDraft) => Promise<void>;
   deleteDebt: (debtId: string) => Promise<void>;
   addExpense: (draft: { title: string; amount: number; category: "Operasional" | "Belanja" | "Utilitas" }) => Promise<void>;
+  updateExpense: (expenseId: string, draft: { title: string; amount: number; category: "Operasional" | "Belanja" | "Utilitas" }) => Promise<void>;
+  deleteExpense: (expenseId: string) => Promise<void>;
+  partialPayDebt: (debtId: string, amount: number) => Promise<void>;
   markDebtPaid: (debtId: string) => Promise<void>;
   sendDebtReminder: (debtId: string) => Promise<Debt | null>;
   updateSettings: (settings: Settings) => Promise<void>;
@@ -303,6 +306,36 @@ export function AppStateProvider({
     setState((prev) => ({ ...prev, expenses: [created, ...prev.expenses] }));
   }
 
+  async function updateExpense(expenseId: string, draft: { title: string; amount: number; category: "Operasional" | "Belanja" | "Utilitas" }) {
+    const response = await requestJson<{ expense: Expense }>(`/api/expenses/${expenseId}`, {
+      method: "PATCH",
+      body: JSON.stringify(draft),
+    });
+    setState((prev) => ({
+      ...prev,
+      expenses: prev.expenses.map((e) => (e.id === expenseId ? response.expense : e)),
+    }));
+  }
+
+  async function deleteExpense(expenseId: string) {
+    await requestJson(`/api/expenses/${expenseId}`, { method: "DELETE" });
+    setState((prev) => ({
+      ...prev,
+      expenses: prev.expenses.filter((e) => e.id !== expenseId),
+    }));
+  }
+
+  async function partialPayDebt(debtId: string, amount: number) {
+    const response = await requestJson<{ debt: Debt }>(`/api/debts/${debtId}/partial`, {
+      method: "POST",
+      body: JSON.stringify({ amount }),
+    });
+    setState((prev) => ({
+      ...prev,
+      debts: prev.debts.map((d) => (d.id === debtId ? response.debt : d)),
+    }));
+  }
+
   async function addDebt(draft: DebtDraft) {
     const response = await requestJson<{ debt: Debt }>("/api/debts", {
       method: "POST",
@@ -391,8 +424,11 @@ export function AppStateProvider({
         restockProduct,
         deleteProduct,
         addDebt,
-    deleteDebt,
+        deleteDebt,
         addExpense,
+        updateExpense,
+        deleteExpense,
+        partialPayDebt,
         markDebtPaid,
         sendDebtReminder,
         updateSettings,

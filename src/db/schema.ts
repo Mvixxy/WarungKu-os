@@ -55,6 +55,7 @@ export const debts = pgTable("debts", {
   borrowerName: text("borrower_name").notNull(),
   whatsapp: text("whatsapp").notNull(),
   amount: integer("amount").notNull(),
+  paidAmount: integer("paid_amount").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull(),
   dueDate: timestamp("due_date", { withTimezone: true, mode: "string" }).notNull(),
   isPaid: integer("is_paid").notNull(),
@@ -66,6 +67,7 @@ export const expenses = pgTable("expenses", {
   userId: text("user_id").notNull(),
   title: text("title").notNull(),
   amount: integer("amount").notNull(),
+  paidAmount: integer("paid_amount").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull(),
   category: text("category").notNull(),
 });
