@@ -185,6 +185,15 @@ export function DashboardView() {
                     Belum ada riwayat transaksi.
                   </div>
                 )}
+                {transactions.length > 5 && (
+                  <button
+                    type="button"
+                    onClick={() => void loadMoreTransactions()}
+                    className="w-full pt-2 text-xs text-primary hover:underline"
+                  >
+                    Muat lebih banyak transaksi...
+                  </button>
+                )}
               </div>
             </div>
           </CardContent>
