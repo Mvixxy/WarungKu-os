@@ -278,7 +278,15 @@ export function BukuHutangView() {
                             `Ini pengingat dari *${storeName}* bahwa Anda memiliki hutang sebesar *Rp ${remaining.toLocaleString("id-ID")}*.\n\n` +
                             `Jatuh tempo: ${dueDate}\n\n` +
                             `Mohon segera melakukan pembayaran. Terima kasih.`;
-                          const phone = debt.whatsapp.replace(/[^0-9]/g, "");
+                          let phone = debt.whatsapp.replace(/[^0-9]/g, "");
+                          // Convert Indonesian local format to international
+                          if (phone.startsWith("0")) {
+                            phone = "62" + phone.slice(1);
+                          }
+                          // Ensure it starts with country code
+                          if (!phone.startsWith("62") && !phone.startsWith("+")) {
+                            phone = "62" + phone;
+                          }
                           const message = encodeURIComponent(text);
                           window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${message}`, "_blank");
                           toast.success("Pengingat terkirim.", {
