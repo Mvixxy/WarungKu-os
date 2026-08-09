@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRequestUser, getBootstrapState } from "@/lib/server/app-service";
+import { getRequestUser } from "@/lib/server/app-service";
 import { handleRouteError } from "@/lib/server/route-error";
+import { db } from "@/db/client";
+import { debts } from "@/db/schema";
+import { desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 export const runtime = "nodejs";
@@ -19,14 +22,34 @@ export async function GET(request: NextRequest) {
       offset: searchParams.get("offset"),
     });
 
-    const state = await getBootstrapState(userId, {
-      debtLimit: limit,
-      debtOffset: offset,
-    });
+    const where = eq(debts.userId, userId);
+
+    const [{ count: total }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(debts)
+      .where(where);
+
+    const rows = await db
+      .select()
+      .from(debts)
+      .where(where)
+      .orderBy(desc(debts.createdAt))
+      .limit(limit)
+      .offset(offset);
 
     return NextResponse.json({
-      debts: state.debts,
-      pagination: state.pagination?.debts,
+      debts: rows.map((d) => ({
+        id: d.id,
+        borrowerName: d.borrowerName,
+        whatsapp: d.whatsapp,
+        amount: d.amount,
+        paidAmount: d.paidAmount ?? 0,
+        createdAt: d.createdAt,
+        dueDate: d.dueDate,
+        isPaid: d.isPaid === 1,
+        lastReminderAt: d.lastReminderAt ?? undefined,
+      })),
+      pagination: { total, limit, offset },
     });
   } catch (error) {
     return handleRouteError(error, "Gagal memuat hutang.");

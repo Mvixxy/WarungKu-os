@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRequestUser, getBootstrapState } from "@/lib/server/app-service";
+import { getRequestUser } from "@/lib/server/app-service";
 import { handleRouteError } from "@/lib/server/route-error";
+import { db } from "@/db/client";
+import { expenses } from "@/db/schema";
+import { desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 export const runtime = "nodejs";
@@ -19,14 +22,30 @@ export async function GET(request: NextRequest) {
       offset: searchParams.get("offset"),
     });
 
-    const state = await getBootstrapState(userId, {
-      expenseLimit: limit,
-      expenseOffset: offset,
-    });
+    const where = eq(expenses.userId, userId);
+
+    const [{ count: total }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(expenses)
+      .where(where);
+
+    const rows = await db
+      .select()
+      .from(expenses)
+      .where(where)
+      .orderBy(desc(expenses.createdAt))
+      .limit(limit)
+      .offset(offset);
 
     return NextResponse.json({
-      expenses: state.expenses,
-      pagination: state.pagination?.expenses,
+      expenses: rows.map((e) => ({
+        id: e.id,
+        title: e.title,
+        amount: e.amount,
+        createdAt: e.createdAt,
+        category: e.category,
+      })),
+      pagination: { total, limit, offset },
     });
   } catch (error) {
     return handleRouteError(error, "Gagal memuat pengeluaran.");

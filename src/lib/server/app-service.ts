@@ -367,20 +367,6 @@ export async function getBootstrapState(userId: string, pagination?: PaginationP
     .limit(expenseLimit)
     .offset(expenseOffset);
 
-  // Count totals for pagination
-  const [{ count: totalTransactions }] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(transactions)
-    .where(eq(transactions.userId, userId));
-  const [{ count: totalDebts }] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(debts)
-    .where(eq(debts.userId, userId));
-  const [{ count: totalExpenses }] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(expenses)
-    .where(eq(expenses.userId, userId));
-
   const itemsByTransaction = new Map<string, Transaction["items"]>();
   for (const item of itemRows) {
     const existing = itemsByTransaction.get(item.transactionId) ?? [];
@@ -436,11 +422,6 @@ export async function getBootstrapState(userId: string, pagination?: PaginationP
       category: expense.category as AppState["expenses"][number]["category"],
     })),
     settings: mapSettings(profile),
-    pagination: {
-      transactions: { total: totalTransactions, limit: transactionLimit, offset: transactionOffset },
-      debts: { total: totalDebts, limit: debtLimit, offset: debtOffset },
-      expenses: { total: totalExpenses, limit: expenseLimit, offset: expenseOffset },
-    },
   };
 }
 
