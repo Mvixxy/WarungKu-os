@@ -312,6 +312,7 @@ const settings: Settings = {
   businessNotes: "Buka setiap hari, fokus ke produk cepat habis dan pelanggan sekitar rumah.",
   stockAlertThreshold: 8,
   enabledPayments: ["Tunai", "QRIS", "Hutang"],
+  categories: ["Sembako"],
 };
 
 export const seedState: AppState = {

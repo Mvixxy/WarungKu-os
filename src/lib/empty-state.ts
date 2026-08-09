@@ -17,5 +17,6 @@ export const emptyAppState: AppState = {
     businessNotes: "",
     stockAlertThreshold: 5,
     enabledPayments: ["Tunai", "QRIS", "Hutang"],
+    categories: ["Sembako"],
   },
 };

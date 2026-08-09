@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, MessageSquareShare, Search, Trash2, WalletCards } from "lucide-react";
+import { CheckCircle2, Loader2, MessageSquareShare, Search, Trash2, WalletCards } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
 import { StatCard } from "@/components/stat-card";
@@ -27,7 +27,7 @@ const emptyDraft: DebtDraft = {
   borrowerName: "",
   whatsapp: "",
   amount: 0,
-  dueDate: new Date().toISOString().slice(0, 10),
+  dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
 };
 
 export function BukuHutangView() {
@@ -292,63 +292,64 @@ export function BukuHutangView() {
           </div>
         </CardContent>
       </Card>
-      {/* Delete Confirmation */}
-      {deleteTarget && debts.find((d) => d.id === deleteTarget) && (() => {
-        const debt = debts.find((d) => d.id === deleteTarget)!;
-        return (
-          <div key="delete-confirm" className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div className="mx-4 w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-2xl">
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-destructive/10">
-                  <Trash2 className="size-5 text-destructive" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">Hapus kasbon?</p>
-                  <p className="text-xs text-muted-foreground">
+      <Dialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => { if (!open) { setDeleteTarget(null); setDeleteLoading(false); } }}
+      >
+        <DialogContent className="max-w-sm" showCloseButton>
+          {deleteTarget && debts.find((d) => d.id === deleteTarget) && (() => {
+            const debt = debts.find((d) => d.id === deleteTarget)!;
+            return (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <span className="flex size-8 items-center justify-center rounded-lg bg-destructive/10">
+                      <Trash2 className="size-4 text-destructive" />
+                    </span>
+                    Hapus kasbon?
+                  </DialogTitle>
+                  <DialogDescription>
                     {debt.isPaid
                       ? `Kasbon ${debt.borrowerName} sudah lunas dan akan dihapus.`
                       : `Kasbon ${debt.borrowerName} belum lunas (${formatCurrency(debt.amount)}). Yakin ingin menghapus?`}
-                  </p>
-                </div>
-              </div>
-              <div className="mt-5 flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => { setDeleteTarget(null); setDeleteLoading(false); }}
-                  disabled={deleteLoading}
-                  className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50"
-                >
-                  Batal
-                </button>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    setDeleteLoading(true);
-                    try {
-                      await deleteDebt(deleteTarget);
-                      setDeleteTarget(null);
-                      toast.success("Kasbon berhasil dihapus.");
-                    } catch (error) {
-                      toast.error(error instanceof Error ? error.message : "Gagal menghapus kasbon.");
-                    } finally {
-                      setDeleteLoading(false);
-                    }
-                  }}
-                  disabled={deleteLoading}
-                  className="flex-1 rounded-xl bg-destructive px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-destructive/90 disabled:opacity-50"
-                >
-                  {deleteLoading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <span className="size-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      Menghapus...
-                    </span>
-                  ) : "Hapus"}
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-lg"
+                    onClick={() => { setDeleteTarget(null); setDeleteLoading(false); }}
+                    disabled={deleteLoading}
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="rounded-lg"
+                    onClick={async () => {
+                      setDeleteLoading(true);
+                      try {
+                        await deleteDebt(deleteTarget);
+                        setDeleteTarget(null);
+                        toast.success("Kasbon berhasil dihapus.");
+                      } catch (error) {
+                        toast.error(error instanceof Error ? error.message : "Gagal menghapus kasbon.");
+                      } finally {
+                        setDeleteLoading(false);
+                      }
+                    }}
+                    disabled={deleteLoading}
+                  >
+                    {deleteLoading ? <><Loader2 className="mr-1.5 size-3.5 animate-spin" />Menghapus...</> : "Hapus"}
+                  </Button>
+                </DialogFooter>
+              </>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -32,8 +32,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatCurrency } from "@/lib/format";
-import { PaymentMethod, Product, ProductCategory, Transaction } from "@/lib/types";
+import { PaymentMethod, Product, ProductCategory, Settings, Transaction } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+type CartLine = {
+  product: Product;
+  quantity: number;
+  lineTotal: number;
+};
 
 const paymentLabels: Record<PaymentMethod, string> = {
   Tunai: "Tunai",
@@ -114,10 +120,10 @@ function DesktopCart({
   cashGiven,
   setCashGiven,
 }: {
-  cartLines: any[];
+  cartLines: CartLine[];
   cartTotal: number;
   paymentMethod: PaymentMethod;
-  settings: any;
+  settings: Settings;
   updateCartQuantity: (id: string, qty: number) => void;
   removeFromCart: (id: string) => void;
   setPaymentMethod: (m: PaymentMethod) => void;
@@ -274,7 +280,7 @@ function DesktopCart({
             <span>Total</span>
             <span>
               {cartLines.reduce(
-                (sum: number, line: any) => sum + line.quantity,
+                (sum: number, line: CartLine) => sum + line.quantity,
                 0
               )}{" "}
               pcs
@@ -318,10 +324,10 @@ function MobileCartSheet({
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  cartLines: any[];
+  cartLines: CartLine[];
   cartTotal: number;
   paymentMethod: PaymentMethod;
-  settings: any;
+  settings: Settings;
   updateCartQuantity: (id: string, qty: number) => void;
   removeFromCart: (id: string) => void;
   setPaymentMethod: (m: PaymentMethod) => void;
@@ -472,7 +478,7 @@ function MobileCartSheet({
               <span>Total</span>
               <span>
                 {cartLines.reduce(
-                  (sum: number, line: any) => sum + line.quantity,
+                  (sum: number, line: CartLine) => sum + line.quantity,
                   0
                 )}{" "}
                 pcs
@@ -542,7 +548,7 @@ export function KasirView() {
   });
 
   const totalItems = cartLines.reduce(
-    (sum: number, line: any) => sum + line.quantity,
+    (sum: number, line: CartLine) => sum + line.quantity,
     0
   );
 

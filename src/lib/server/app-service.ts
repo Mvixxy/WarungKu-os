@@ -53,6 +53,7 @@ async function ensureTables() {
       business_notes text NOT NULL,
       stock_alert_threshold integer NOT NULL,
       enabled_payments jsonb NOT NULL,
+      categories jsonb NOT NULL DEFAULT '["Sembako"]'::jsonb,
       created_at timestamptz NOT NULL,
       updated_at timestamptz NOT NULL
     );
@@ -129,6 +130,9 @@ async function ensureTables() {
 
     CREATE INDEX IF NOT EXISTS ai_chats_user_idx ON ai_chats(user_id, updated_at DESC);
 
+    -- Migration: add categories column to existing store_profiles
+    ALTER TABLE store_profiles ADD COLUMN IF NOT EXISTS categories jsonb NOT NULL DEFAULT '["Sembako"]'::jsonb;
+
     CREATE TABLE IF NOT EXISTS ai_messages (
       id text PRIMARY KEY,
       chat_id text NOT NULL,
@@ -170,6 +174,7 @@ async function ensureWorkspace(userId: string, session?: SessionHint) {
     businessNotes: "",
     stockAlertThreshold: 8,
     enabledPayments: ["Tunai", "QRIS", "Hutang"],
+    categories: ["Sembako"],
     createdAt: timestamp,
     updatedAt: timestamp,
   });
@@ -256,6 +261,7 @@ function mapSettings(profile: typeof storeProfiles.$inferSelect): Settings {
     enabledPayments: profile.enabledPayments.filter((m): m is PaymentMethod =>
       supportedPaymentMethods.includes(m)
     ),
+    categories: Array.isArray(profile.categories) ? profile.categories : ["Sembako"],
   };
 }
 
@@ -268,6 +274,10 @@ function normalizeSettings(settings: Settings): Settings {
     )
   );
 
+  const categories = Array.isArray(settings.categories) && settings.categories.length > 0
+    ? settings.categories
+    : ["Sembako"];
+
   return {
     storeName: settings.storeName.trim(),
     storeTagline: settings.storeTagline.trim(),
@@ -278,6 +288,7 @@ function normalizeSettings(settings: Settings): Settings {
     businessNotes: settings.businessNotes.trim(),
     stockAlertThreshold: Math.max(1, Math.round(settings.stockAlertThreshold || 0)),
     enabledPayments,
+    categories,
   };
 }
 

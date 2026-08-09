@@ -1,20 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createTransaction, getRequestUser } from "@/lib/server/app-service";
+import { getRequestUser, createTransaction } from "@/lib/server/app-service";
 import { handleRouteError } from "@/lib/server/route-error";
-import { PaymentMethod } from "@/lib/types";
+import { transactionSchema } from "@/lib/validations";
 
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await getRequestUser();
-    const body = (await request.json()) as {
-      paymentMethod: PaymentMethod;
-      items: Array<{ productId: string; quantity: number }>;
-    };
-    const result = await createTransaction(userId, body);
+    const body = await request.json();
+    const payload = transactionSchema.parse(body);
+    const result = await createTransaction(userId, payload);
     return NextResponse.json(result);
   } catch (error) {
-    return handleRouteError(error, "Gagal menyimpan transaksi.");
+    return handleRouteError(error, "Gagal membuat transaksi.");
   }
 }

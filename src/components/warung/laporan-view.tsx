@@ -1,10 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Plus, Printer, TrendingUp } from "lucide-react";
+import { Download, Printer, TrendingUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
 import { StatCard } from "@/components/stat-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -276,64 +287,70 @@ export function LaporanView() {
         </Card>
       </div>
 
-      {/* Expense Dialog */}
-      {expenseOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-2xl">
-            <p className="text-sm font-semibold">Catat Pengeluaran</p>
-            <div className="mt-4 space-y-3">
-              <input
-                type="text"
-                placeholder="Judul (contoh: Listrik bulanan)"
+      <Dialog open={expenseOpen} onOpenChange={(open) => { setExpenseOpen(open); if (!open) setExpenseLoading(false); }}>
+        <DialogContent className="max-w-sm" showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Catat Pengeluaran</DialogTitle>
+            <DialogDescription>Isi detail pengeluaran warung Anda.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="grid gap-1.5">
+              <Label htmlFor="expense-title" className="text-[10px]">Judul</Label>
+              <Input
+                id="expense-title"
+                placeholder="contoh: Listrik bulanan"
                 value={expenseDraft.title}
                 onChange={(e) => setExpenseDraft({ ...expenseDraft, title: e.target.value })}
-                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm"
+                className="h-9 rounded-lg text-sm"
               />
-              <input
-                type="text"
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="expense-amount" className="text-[10px]">Nominal (Rp)</Label>
+              <Input
+                id="expense-amount"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                placeholder="Nominal (Rp)"
+                placeholder="0"
                 value={expenseDraft.amount}
                 onChange={(e) => setExpenseDraft({ ...expenseDraft, amount: e.target.value.replace(/[^0-9]/g, "") })}
-                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm"
+                className="h-9 rounded-lg text-sm"
               />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="expense-category" className="text-[10px]">Kategori</Label>
               <select
+                id="expense-category"
                 value={expenseDraft.category}
                 onChange={(e) => setExpenseDraft({ ...expenseDraft, category: e.target.value as typeof expenseDraft.category })}
-                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm"
+                className="h-9 rounded-lg border border-border bg-background px-3 text-sm"
               >
                 <option value="Operasional">Operasional</option>
                 <option value="Belanja">Belanja</option>
                 <option value="Utilitas">Utilitas</option>
               </select>
             </div>
-            <div className="mt-5 flex gap-2">
-              <button
-                type="button"
-                onClick={() => { setExpenseOpen(false); setExpenseLoading(false); }}
-                disabled={expenseLoading}
-                className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50"
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                onClick={() => void handleAddExpense()}
-                disabled={!expenseDraft.title.trim() || !expenseDraft.amount || expenseLoading}
-                className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-              >
-                {expenseLoading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="size-3.5 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
-                    Menyimpan...
-                  </span>
-                ) : "Simpan"}
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-lg"
+              onClick={() => { setExpenseOpen(false); setExpenseLoading(false); }}
+              disabled={expenseLoading}
+            >
+              Batal
+            </Button>
+            <Button
+              size="sm"
+              className="rounded-lg"
+              onClick={() => void handleAddExpense()}
+              disabled={!expenseDraft.title.trim() || !expenseDraft.amount || expenseLoading}
+            >
+              {expenseLoading ? <><Loader2 className="mr-1.5 size-3.5 animate-spin" />Menyimpan...</> : "Simpan"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

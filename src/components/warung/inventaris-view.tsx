@@ -205,7 +205,7 @@ function ProductForm({
 }
 
 export function InventarisView() {
-  const { products, addProduct, updateProduct, restockProduct, deleteProduct, lowStockProducts } = useAppState();
+  const { products, settings, addProduct, updateProduct, restockProduct, deleteProduct, updateSettings, lowStockProducts } = useAppState();
   const [query, setQuery] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [draft, setDraft] = useState<ProductDraft>(emptyDraft);
@@ -214,7 +214,6 @@ export function InventarisView() {
   const [restockTarget, setRestockTarget] = useState<Product | null>(null);
   const [restockAmount, setRestockAmount] = useState(12);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
-  const [localCategories, setLocalCategories] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState("Semua");
   const [sortOrder, setSortOrder] = useState<"az" | "za">("az");
@@ -227,13 +226,13 @@ export function InventarisView() {
   const [duplicateTarget, setDuplicateTarget] = useState<{ name: string; isExact: boolean; existing?: { id: string; name: string } } | null>(null);
 
   const categories = Array.from(
-    new Set([...defaultCategories, ...localCategories, ...products.map((p) => p.category)])
+    new Set([...defaultCategories, ...(settings.categories ?? []), ...products.map((p) => p.category)])
   );
 
-  function addCategory(name: string) {
-    setLocalCategories((prev) =>
-      prev.some((c) => c.toLowerCase() === name.toLowerCase()) ? prev : [...prev, name]
-    );
+  async function addCategory(name: string) {
+    const current = settings.categories ?? [];
+    if (current.some((c) => c.toLowerCase() === name.toLowerCase())) return;
+    await updateSettings({ ...settings, categories: [...current, name] });
   }
 
   function removeCategory(name: string) {
@@ -261,7 +260,8 @@ export function InventarisView() {
         await updateProduct(p.id, { name: p.name, buyPrice: p.buyPrice, sellPrice: p.sellPrice, stock: p.stock, minimumStock: p.minimumStock, description: p.description, category: reassignTo });
       }
       if (!defaultCategories.includes(reassignTarget.category)) {
-        setLocalCategories((prev) => prev.filter((c) => c !== reassignTarget.category));
+        const updatedCategories = (settings.categories ?? []).filter((c) => c !== reassignTarget.category);
+        await updateSettings({ ...settings, categories: updatedCategories });
       }
       setReassignTarget(null);
       toast.success(`${productsToMove.length} produk dipindah ke ${reassignTo}.`);
@@ -634,7 +634,8 @@ export function InventarisView() {
                 disabled={categoryLoading}
                 onClick={async () => {
                   setCategoryLoading(true);
-                  setLocalCategories((prev) => prev.filter((c) => c !== deleteDefaultConfirm));
+                  const updatedCategories = (settings.categories ?? []).filter((c) => c !== deleteDefaultConfirm);
+                  await updateSettings({ ...settings, categories: updatedCategories });
                   await new Promise((r) => setTimeout(r, 300));
                   setDeleteDefaultConfirm(null);
                   setCategoryLoading(false);

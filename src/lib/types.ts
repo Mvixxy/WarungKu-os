@@ -68,6 +68,7 @@ export interface Settings {
   businessNotes: string;
   stockAlertThreshold: number;
   enabledPayments: PaymentMethod[];
+  categories: string[];
 }
 
 export interface AppState {

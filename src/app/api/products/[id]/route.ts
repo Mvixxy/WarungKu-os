@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestUser, updateProduct, deleteProduct } from "@/lib/server/app-service";
 import { handleRouteError } from "@/lib/server/route-error";
-import { ProductDraft } from "@/lib/types";
+import { productDraftSchema } from "@/lib/validations";
 
 export const runtime = "nodejs";
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await getRequestUser();
-    const { id } = await context.params;
-    const draft = (await request.json()) as ProductDraft;
+    const { id } = await params;
+    const body = await request.json();
+    const draft = productDraftSchema.parse(body);
     const product = await updateProduct(userId, id, draft);
     return NextResponse.json({ product });
   } catch (error) {
@@ -22,13 +23,13 @@ export async function PATCH(
 
 export async function DELETE(
   _request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await getRequestUser();
-    const { id } = await context.params;
-    const result = await deleteProduct(userId, id);
-    return NextResponse.json(result);
+    const { id } = await params;
+    await deleteProduct(userId, id);
+    return NextResponse.json({ ok: true });
   } catch (error) {
     return handleRouteError(error, "Gagal menghapus produk.");
   }
