@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Transaction } from "@/lib/types";
 import { formatCurrency, formatDateTime, formatTime } from "@/lib/format";
 import { toast } from "sonner";
 
@@ -31,6 +32,7 @@ export function DashboardView() {
     .filter((debt) => !debt.isPaid)
     .reduce((sum, debt) => sum + debt.amount, 0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [voidTarget, setVoidTarget] = useState<string | null>(null);
   const [voidReason, setVoidReason] = useState("");
   const [voidLoading, setVoidLoading] = useState(false);
@@ -164,7 +166,8 @@ export function DashboardView() {
                   filteredTransactions.slice(0, 5).map((transaction) => (
                     <div
                       key={transaction.id}
-                      className={`flex items-start justify-between gap-2 sm:gap-3 rounded-lg px-2.5 py-2 sm:px-3 sm:py-2.5 ${
+                      onClick={() => setSelectedTx(transaction)}
+                      className={`flex items-start justify-between gap-2 sm:gap-3 rounded-lg px-2.5 py-2 sm:px-3 sm:py-2.5 cursor-pointer hover:ring-1 hover:ring-primary/30 transition-all ${
                         transaction.voided ? "bg-destructive/5 border border-destructive/20" : "bg-muted"
                       }`}
                     >
@@ -345,6 +348,100 @@ export function DashboardView() {
               {voidLoading ? <><Loader2 className="mr-1.5 size-3.5 animate-spin" />Membatalkan...</> : "Ya, batalkan"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Transaction Detail Dialog */}
+      <Dialog open={!!selectedTx} onOpenChange={(open) => { if (!open) setSelectedTx(null); }}>
+        <DialogContent className="max-w-sm" showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Detail Transaksi</DialogTitle>
+            <DialogDescription>{selectedTx && formatDateTime(selectedTx.createdAt)}</DialogDescription>
+          </DialogHeader>
+          {selectedTx && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between rounded-lg bg-muted p-3">
+                <div>
+                  <p className="text-xs text-muted-foreground">Total</p>
+                  <p className="text-lg font-semibold">{formatCurrency(selectedTx.total)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Pembayaran</p>
+                  <p className="text-sm font-medium">{selectedTx.paymentMethod}</p>
+                </div>
+              </div>
+              {selectedTx.voided && (
+                <div className="rounded-lg bg-destructive/10 p-2.5 text-xs text-destructive">
+                  Dibatalkan{selectedTx.voidReason ? `: ${selectedTx.voidReason}` : ""}
+                </div>
+              )}
+              <div>
+                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Item yang dibeli</p>
+                <div className="space-y-1.5">
+                  {selectedTx.items.map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between rounded-lg bg-card border border-border px-3 py-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium truncate">{item.productName}</p>
+                        <p className="text-[10px] text-muted-foreground">{formatCurrency(item.unitPrice)} x {item.quantity}</p>
+                      </div>
+                      <p className="text-sm font-semibold">{formatCurrency(item.unitPrice * item.quantity)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center justify-between border-t border-dashed border-border pt-2 text-xs text-muted-foreground">
+                <span>{selectedTx.items.length} item</span>
+                <span>{selectedTx.items.reduce((sum, i) => sum + i.quantity, 0)} produk</span>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Transaction Detail Dialog */}
+      <Dialog open={!!selectedTx} onOpenChange={(open) => { if (!open) setSelectedTx(null); }}>
+        <DialogContent className="max-w-sm" showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Detail Transaksi</DialogTitle>
+            <DialogDescription>{selectedTx && formatDateTime(selectedTx.createdAt)}</DialogDescription>
+          </DialogHeader>
+          {selectedTx && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between rounded-lg bg-muted p-3">
+                <div>
+                  <p className="text-xs text-muted-foreground">Total</p>
+                  <p className="text-lg font-semibold">{formatCurrency(selectedTx.total)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Pembayaran</p>
+                  <p className="text-sm font-medium">{selectedTx.paymentMethod}</p>
+                </div>
+              </div>
+              {selectedTx.voided && (
+                <div className="rounded-lg bg-destructive/10 p-2.5 text-xs text-destructive">
+                  Dibatalkan{selectedTx.voidReason ? `: ${selectedTx.voidReason}` : ""}
+                </div>
+              )}
+              <div>
+                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Item yang dibeli</p>
+                <div className="space-y-1.5">
+                  {selectedTx.items.map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between rounded-lg bg-card border border-border px-3 py-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium truncate">{item.productName}</p>
+                        <p className="text-[10px] text-muted-foreground">{formatCurrency(item.unitPrice)} x {item.quantity}</p>
+                      </div>
+                      <p className="text-sm font-semibold">{formatCurrency(item.unitPrice * item.quantity)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center justify-between border-t border-dashed border-border pt-2 text-xs text-muted-foreground">
+                <span>{selectedTx.items.length} item</span>
+                <span>{selectedTx.items.reduce((sum, i) => sum + i.quantity, 0)} produk</span>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
