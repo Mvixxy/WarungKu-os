@@ -146,20 +146,20 @@ export function DashboardView() {
             </div>
 
             <div className="rounded-xl border border-border bg-card p-3 sm:p-4">
-              <div className="flex items-center gap-2">
-                <ArrowRightLeft className="size-3 sm:size-3.5 text-primary" />
-                <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2">
+                  <ArrowRightLeft className="size-3 sm:size-3.5 text-primary" />
                   <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wide">Timeline transaksi</p>
-                  <div className="relative">
-                    <Search className="absolute left-2 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                      type="text"
-                      placeholder="Cari transaksi..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="h-7 w-36 rounded-lg border border-border bg-background pl-7 pr-2 text-xs"
-                    />
-                  </div>
+                </div>
+                <div className="relative">
+                  <Search className="absolute left-2 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Cari transaksi..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="h-7 w-full sm:w-36 rounded-lg border border-border bg-background pl-7 pr-2 text-xs"
+                  />
                 </div>
               </div>
               <div className="mt-3 space-y-1.5 sm:mt-4 sm:space-y-2">
