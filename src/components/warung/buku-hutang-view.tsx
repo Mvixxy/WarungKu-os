@@ -35,6 +35,7 @@ export function BukuHutangView() {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"semua" | "belum" | "lunas">("semua");
   const [createOpen, setCreateOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
   const [draft, setDraft] = useState<DebtDraft>(emptyDraft);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -78,6 +79,7 @@ export function BukuHutangView() {
   const reminderCount = debts.filter((debt) => debt.lastReminderAt).length;
 
   async function handleCreateDebt() {
+    setCreateLoading(true);
     try {
       if (
         draft.borrowerName.trim().length === 0 ||
@@ -93,6 +95,8 @@ export function BukuHutangView() {
       toast.success("Kasbon berhasil disimpan.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Gagal menyimpan kasbon.");
+    } finally {
+      setCreateLoading(false);
     }
   }
 
@@ -197,8 +201,10 @@ export function BukuHutangView() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" size="sm" className="rounded-lg" onClick={() => setCreateOpen(false)}>Batal</Button>
-                  <Button size="sm" className="rounded-lg" onClick={() => void handleCreateDebt()}>Simpan</Button>
+                  <Button variant="outline" size="sm" className="rounded-lg" onClick={() => { setCreateOpen(false); setCreateLoading(false); }} disabled={createLoading}>Batal</Button>
+                  <Button size="sm" className="rounded-lg" onClick={() => void handleCreateDebt()} disabled={!draft.borrowerName.trim() || draft.whatsapp.trim().length < 10 || draft.amount <= 0 || createLoading}>
+                    {createLoading ? <><Loader2 className="mr-1.5 size-3.5 animate-spin" />Menyimpan...</> : "Simpan"}
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
