@@ -218,7 +218,7 @@ export function DashboardView() {
                     disabled={loadingMore}
                     className="w-full pt-2 text-xs text-primary hover:underline disabled:text-muted-foreground"
                   >
-                    {loadingMore ? "Memuat..." : "Muat lebih banyak transaksi..."}
+                    {loadingMore ? (<><Loader2 className="mr-1 inline size-3 animate-spin" />Memuat data...</>) : "Muat lebih banyak transaksi..."}
                   </button>
                 )}
               </div>
