@@ -42,6 +42,7 @@ export function BukuHutangView() {
   const [partialTarget, setPartialTarget] = useState<string | null>(null);
   const [partialAmount, setPartialAmount] = useState("");
   const [partialLoading, setPartialLoading] = useState(false);
+  const [remindTarget, setRemindTarget] = useState<string | null>(null);
 
   async function handlePartialPay() {
     if (!partialTarget || !partialAmount) return;
@@ -266,7 +267,9 @@ export function BukuHutangView() {
                       variant="outline"
                       size="sm"
                       className="h-7 rounded-md text-xs"
+                      disabled={remindTarget === debt.id}
                       onClick={async () => {
+                        setRemindTarget(debt.id);
                         try {
                           // Update reminder timestamp in DB
                           await sendDebtReminder(debt.id);
@@ -279,16 +282,13 @@ export function BukuHutangView() {
                             `Jatuh tempo: ${dueDate}\n\n` +
                             `Mohon segera melakukan pembayaran. Terima kasih.`;
                           let phone = debt.whatsapp.replace(/[^0-9]/g, "");
-                          // Convert Indonesian local format to international
                           if (phone.startsWith("0")) {
                             phone = "62" + phone.slice(1);
                           }
-                          // Ensure it starts with country code
                           if (!phone.startsWith("62") && !phone.startsWith("+")) {
                             phone = "62" + phone;
                           }
                           const message = encodeURIComponent(text);
-                          // Use anchor element to avoid popup blocker
                           const url = `https://api.whatsapp.com/send?phone=${phone}&text=${message}`;
                           const anchor = document.createElement("a");
                           anchor.href = url;
@@ -302,11 +302,13 @@ export function BukuHutangView() {
                           });
                         } catch (error) {
                           toast.error(error instanceof Error ? error.message : "Gagal kirim pengingat.");
+                        } finally {
+                          setRemindTarget(null);
                         }
                       }}
                     >
-                      <MessageSquareShare className="size-3 sm:size-3.5" />
-                      Kirim
+                      {remindTarget === debt.id ? <Loader2 className="size-3 sm:size-3.5 animate-spin" /> : <MessageSquareShare className="size-3 sm:size-3.5" />}
+                      {remindTarget === debt.id ? "Mengirim..." : "Kirim"}
                     </Button>
                     {!debt.isPaid && (
                       <>
