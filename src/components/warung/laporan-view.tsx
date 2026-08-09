@@ -109,7 +109,6 @@ export function LaporanView() {
           title="Pengeluaran"
           value={formatCompactCurrency(summary.expenseTotal)}
           description="Biaya operasional periode ini."
-          onClick={() => setExpenseOpen(true)}
         />
         <StatCard
           title="Laba bersih"
@@ -119,15 +118,24 @@ export function LaporanView() {
         />
       </section>
 
-      {filteredExpenses.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-lg">Daftar pengeluaran</CardTitle>
-            <CardDescription className="text-xs">Klik ikon untuk edit atau hapus.</CardDescription>
+      <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="font-heading text-lg">Daftar pengeluaran</CardTitle>
+              <CardDescription className="text-xs">Semua pengeluaran tercatat. Klik ikon untuk edit atau hapus.</CardDescription>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              className="h-8 rounded-lg text-xs no-print shrink-0"
+              onClick={() => setExpenseOpen(true)}
+            >
+              + Tambah
+            </Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {filteredExpenses.map((expense) => (
+              {expenses.map((expense) => (
                 <div key={expense.id} className="flex items-center justify-between rounded-xl border border-border p-3">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium truncate">{expense.title}</p>
@@ -155,7 +163,6 @@ export function LaporanView() {
             </div>
           </CardContent>
         </Card>
-      )}
 
       <div className="grid gap-3 xl:grid-cols-[1.05fr_0.95fr]">
         <Card>
@@ -479,10 +486,10 @@ export function LaporanView() {
             ))}
           </div>
 
-          {filteredExpenses.length > 0 && (
+          {expenses.length > 0 && (
             <div style={{ marginBottom: "24px" }}>
               <p style={{ fontSize: "13px", fontWeight: 600, marginBottom: "8px" }}>Pengeluaran</p>
-              {filteredExpenses.map((expense) => (
+              {expenses.map((expense) => (
                 <div key={expense.id} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #E7E5E4" }}>
                   <span style={{ fontSize: "12px" }}>{expense.title} ({expense.category})</span>
                   <span style={{ fontSize: "12px", fontWeight: 600 }}>{formatCurrency(expense.amount)}</span>
