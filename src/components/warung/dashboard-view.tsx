@@ -32,6 +32,7 @@ export function DashboardView() {
     .filter((debt) => !debt.isPaid)
     .reduce((sum, debt) => sum + debt.amount, 0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loadingMore, setLoadingMore] = useState(false);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [voidTarget, setVoidTarget] = useState<string | null>(null);
   const [voidReason, setVoidReason] = useState("");
@@ -210,10 +211,14 @@ export function DashboardView() {
                 {transactions.length > 5 && (
                   <button
                     type="button"
-                    onClick={() => void loadMoreTransactions()}
-                    className="w-full pt-2 text-xs text-primary hover:underline"
+                    onClick={async () => {
+                      setLoadingMore(true);
+                      try { await loadMoreTransactions(); } finally { setLoadingMore(false); }
+                    }}
+                    disabled={loadingMore}
+                    className="w-full pt-2 text-xs text-primary hover:underline disabled:text-muted-foreground"
                   >
-                    Muat lebih banyak transaksi...
+                    {loadingMore ? "Memuat..." : "Muat lebih banyak transaksi..."}
                   </button>
                 )}
               </div>
