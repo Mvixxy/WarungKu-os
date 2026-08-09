@@ -15,7 +15,7 @@ import { formatCurrency, formatDateTime, formatTime } from "@/lib/format";
 import { toast } from "sonner";
 
 export function DashboardView() {
-  const { debts, lowStockProducts, products, transactions, voidTransaction } = useAppState();
+  const { debts, lowStockProducts, products, transactions, voidTransaction, loadMoreTransactions, loadMoreDebts, pagination } = useAppState();
 
   const todayTransactions = transactions.filter((transaction) => {
     const value = new Date(transaction.createdAt);

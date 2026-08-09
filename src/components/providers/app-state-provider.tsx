@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { emptyAppState } from "@/lib/empty-state";
-import { AppState, Debt, Expense, DebtDraft, PaymentMethod, Product, ProductDraft, Settings, Transaction } from "@/lib/types";
+import { AppState, Debt, Expense, DebtDraft, PaginationInfo, PaymentMethod, Product, ProductDraft, Settings, Transaction } from "@/lib/types";
 
 type CartLine = {
   product: Product;
@@ -38,6 +38,10 @@ type AppStateContextValue = AppState & {
   updateSettings: (settings: Settings) => Promise<void>;
   voidTransaction: (transactionId: string, reason: string) => Promise<void>;
   resetWorkspace: () => Promise<void>;
+  loadMoreTransactions: () => Promise<void>;
+  loadMoreDebts: () => Promise<void>;
+  loadMoreExpenses: () => Promise<void>;
+  pagination?: AppState["pagination"];
 };
 
 const AppStateContext = createContext<AppStateContextValue | null>(null);
@@ -428,6 +432,54 @@ export function AppStateProvider({
     }));
   }
 
+  async function loadMoreTransactions() {
+    const currentOffset = state.pagination?.transactions.offset ?? 0;
+    const currentLimit = state.pagination?.transactions.limit ?? 20;
+    const response = await requestJson<{ transactions: Transaction[]; pagination: PaginationInfo }>(
+      `/api/data/transactions?limit=${currentLimit}&offset=${currentOffset + currentLimit}`
+    );
+    setState((current) => ({
+      ...current,
+      transactions: [...current.transactions, ...response.transactions],
+      pagination: current.pagination ? {
+        ...current.pagination,
+        transactions: response.pagination,
+      } : undefined,
+    }));
+  }
+
+  async function loadMoreDebts() {
+    const currentOffset = state.pagination?.debts.offset ?? 0;
+    const currentLimit = state.pagination?.debts.limit ?? 20;
+    const response = await requestJson<{ debts: Debt[]; pagination: PaginationInfo }>(
+      `/api/data/debts?limit=${currentLimit}&offset=${currentOffset + currentLimit}`
+    );
+    setState((current) => ({
+      ...current,
+      debts: [...current.debts, ...response.debts],
+      pagination: current.pagination ? {
+        ...current.pagination,
+        debts: response.pagination,
+      } : undefined,
+    }));
+  }
+
+  async function loadMoreExpenses() {
+    const currentOffset = state.pagination?.expenses.offset ?? 0;
+    const currentLimit = state.pagination?.expenses.limit ?? 20;
+    const response = await requestJson<{ expenses: Expense[]; pagination: PaginationInfo }>(
+      `/api/data/expenses?limit=${currentLimit}&offset=${currentOffset + currentLimit}`
+    );
+    setState((current) => ({
+      ...current,
+      expenses: [...current.expenses, ...response.expenses],
+      pagination: current.pagination ? {
+        ...current.pagination,
+        expenses: response.pagination,
+      } : undefined,
+    }));
+  }
+
   return (
     <AppStateContext.Provider
       value={{
@@ -456,7 +508,11 @@ export function AppStateProvider({
         sendDebtReminder,
         updateSettings,
         voidTransaction,
-    resetWorkspace,
+        resetWorkspace,
+        loadMoreTransactions,
+        loadMoreDebts,
+        loadMoreExpenses,
+        pagination: state.pagination,
       }}
     >
       {children}

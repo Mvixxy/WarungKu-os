@@ -300,7 +300,16 @@ function normalizeSettings(settings: Settings): Settings {
   };
 }
 
-export async function getBootstrapState(userId: string): Promise<AppState> {
+export type PaginationParams = {
+  transactionLimit?: number;
+  transactionOffset?: number;
+  debtLimit?: number;
+  debtOffset?: number;
+  expenseLimit?: number;
+  expenseOffset?: number;
+};
+
+export async function getBootstrapState(userId: string, pagination?: PaginationParams): Promise<AppState> {
   await ensureAppReady();
 
   const [profile] = await db
@@ -319,11 +328,15 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
     .where(eq(products.userId, userId))
     .orderBy(desc(products.createdAt));
 
+  const transactionLimit = pagination?.transactionLimit ?? 100;
+  const transactionOffset = pagination?.transactionOffset ?? 0;
   const transactionRows = await db
     .select()
     .from(transactions)
     .where(eq(transactions.userId, userId))
-    .orderBy(desc(transactions.createdAt));
+    .orderBy(desc(transactions.createdAt))
+    .limit(transactionLimit)
+    .offset(transactionOffset);
 
   const transactionIds = transactionRows.map((transaction) => transaction.id);
   const itemRows =
@@ -334,17 +347,39 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
           .where(inArray(transactionItems.transactionId, transactionIds))
       : [];
 
+  const debtLimit = pagination?.debtLimit ?? 100;
+  const debtOffset = pagination?.debtOffset ?? 0;
   const debtRows = await db
     .select()
     .from(debts)
     .where(eq(debts.userId, userId))
-    .orderBy(desc(debts.createdAt));
+    .orderBy(desc(debts.createdAt))
+    .limit(debtLimit)
+    .offset(debtOffset);
 
+  const expenseLimit = pagination?.expenseLimit ?? 100;
+  const expenseOffset = pagination?.expenseOffset ?? 0;
   const expenseRows = await db
     .select()
     .from(expenses)
     .where(eq(expenses.userId, userId))
-    .orderBy(desc(expenses.createdAt));
+    .orderBy(desc(expenses.createdAt))
+    .limit(expenseLimit)
+    .offset(expenseOffset);
+
+  // Count totals for pagination
+  const [{ count: totalTransactions }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(transactions)
+    .where(eq(transactions.userId, userId));
+  const [{ count: totalDebts }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(debts)
+    .where(eq(debts.userId, userId));
+  const [{ count: totalExpenses }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(expenses)
+    .where(eq(expenses.userId, userId));
 
   const itemsByTransaction = new Map<string, Transaction["items"]>();
   for (const item of itemRows) {
@@ -401,6 +436,11 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
       category: expense.category as AppState["expenses"][number]["category"],
     })),
     settings: mapSettings(profile),
+    pagination: {
+      transactions: { total: totalTransactions, limit: transactionLimit, offset: transactionOffset },
+      debts: { total: totalDebts, limit: debtLimit, offset: debtOffset },
+      expenses: { total: totalExpenses, limit: expenseLimit, offset: expenseOffset },
+    },
   };
 }
 

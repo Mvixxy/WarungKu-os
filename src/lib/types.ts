@@ -75,6 +75,12 @@ export interface Settings {
   categories: string[];
 }
 
+export interface PaginationInfo {
+  total: number;
+  limit: number;
+  offset: number;
+}
+
 export interface AppState {
   products: Product[];
   cart: CartItem[];
@@ -83,6 +89,11 @@ export interface AppState {
   expenses: Expense[];
   paymentMethod: PaymentMethod;
   settings: Settings;
+  pagination?: {
+    transactions: PaginationInfo;
+    debts: PaginationInfo;
+    expenses: PaginationInfo;
+  };
 }
 
 export interface ProductDraft {
