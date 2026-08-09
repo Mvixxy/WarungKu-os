@@ -448,6 +448,7 @@ export async function createProduct(userId: string, draft: ProductDraft) {
       stock: draft.stock,
       minimumStock: draft.minimumStock,
       description: draft.description,
+      imageUrl: draft.imageUrl || null,
       createdAt: timestamp,
       updatedAt: timestamp,
     })
@@ -462,6 +463,7 @@ export async function createProduct(userId: string, draft: ProductDraft) {
     stock: product.stock,
     minimumStock: product.minimumStock,
     description: product.description,
+    imageUrl: product.imageUrl ?? undefined,
   };
 }
 

@@ -39,6 +39,7 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
         stock integer NOT NULL DEFAULT 0,
         minimum_stock integer NOT NULL DEFAULT 5,
         description text NOT NULL DEFAULT '',
+        image_url text,
         created_at timestamptz NOT NULL,
         updated_at timestamptz NOT NULL
       );

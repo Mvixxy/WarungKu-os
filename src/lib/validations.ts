@@ -8,6 +8,7 @@ export const productDraftSchema = z.object({
   stock: z.number().int().min(0, "Stok tidak boleh negatif."),
   minimumStock: z.number().int().min(0, "Stok minimum tidak boleh negatif."),
   description: z.string().max(500).default(""),
+  imageUrl: z.string().url("URL tidak valid.").or(z.literal("")).optional().default(""),
 });
 
 export const transactionSchema = z.object({
