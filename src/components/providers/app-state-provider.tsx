@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
+import { Loader2 } from "lucide-react";
 import { emptyAppState } from "@/lib/empty-state";
 import { AppState, Debt, Expense, DebtDraft, PaymentMethod, Product, ProductDraft, Settings, Transaction } from "@/lib/types";
 
@@ -498,7 +499,16 @@ export function AppStateProvider({
         loadMoreExpenses,
       }}
     >
-      {children}
+      {isLoading ? (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Memuat data...</p>
+          </div>
+        </div>
+      ) : (
+        children
+      )}
     </AppStateContext.Provider>
   );
 }
