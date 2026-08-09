@@ -2,6 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { BadgeCheck, Bell, Loader2, MapPin, RotateCcw, Store, WalletCards } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
 import { Button } from "@/components/ui/button";
@@ -20,6 +28,7 @@ export function PengaturanView() {
   const [form, setForm] = useState<Settings>(settings);
   const [isSaving, setIsSaving] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [confirmResetOpen, setConfirmResetOpen] = useState(false);
 
   useEffect(() => {
     setForm(settings);
@@ -68,6 +77,7 @@ export function PengaturanView() {
     try {
       setIsResetting(true);
       await resetWorkspace();
+      setConfirmResetOpen(false);
       toast.success("Workspace dikembalikan ke kondisi awal.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Gagal reset.");
@@ -259,12 +269,11 @@ export function PengaturanView() {
               type="button"
               size="sm"
               variant="outline"
-              className="rounded-lg"
-              onClick={() => void handleWorkspaceReset()}
-              disabled={isResetting}
+              className="rounded-lg text-destructive border-destructive/30 hover:bg-destructive/10"
+              onClick={() => setConfirmResetOpen(true)}
             >
               <RotateCcw className="size-3.5 sm:size-4" />
-              {isResetting ? "Resetting..." : "Reset workspace"}
+              Reset workspace
             </Button>
           </div>
         </CardContent>
@@ -341,6 +350,41 @@ export function PengaturanView() {
           </CardContent>
         </Card>
       </div>
+      <Dialog open={confirmResetOpen} onOpenChange={setConfirmResetOpen}>
+        <DialogContent className="max-w-sm" showCloseButton>
+          <DialogHeader>
+            <DialogTitle className="text-destructive">Reset Workspace?</DialogTitle>
+            <DialogDescription>
+              Semua data akan dihapus permanen: produk, transaksi, hutang, pengeluaran, dan pengaturan.
+              Tindakan ini tidak bisa dibatalkan.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-lg"
+              onClick={() => setConfirmResetOpen(false)}
+              disabled={isResetting}
+            >
+              Batal
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="rounded-lg"
+              onClick={() => void handleWorkspaceReset()}
+              disabled={isResetting}
+            >
+              {isResetting ? (
+                <><Loader2 className="mr-1.5 size-3.5 animate-spin" />Mereset...</>
+              ) : (
+                <><RotateCcw className="mr-1.5 size-3.5" />Ya, reset semua</>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

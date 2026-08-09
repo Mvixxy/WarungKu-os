@@ -8,9 +8,9 @@ const globalForDatabase = globalThis as typeof globalThis & {
 
 function createPool() {
   return new Pool({
-    connectionString:
-      process.env.DATABASE_URL ??
-      "postgresql://postgres:postgres@127.0.0.1:5432/warungos",
+    connectionString: process.env.DATABASE_URL ?? (() => {
+      throw new Error("DATABASE_URL env var is required. Set it in your .env or Vercel environment variables.");
+    })(),
   });
 }
 

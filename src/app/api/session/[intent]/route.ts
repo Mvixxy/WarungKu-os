@@ -19,6 +19,38 @@ const AUTH_INTENTS = {
 
 type Intent = keyof typeof AUTH_INTENTS;
 
+/**
+ * Validate callbackURL to prevent open redirect attacks.
+ * Only allows relative paths starting with "/" on the same origin.
+ */
+function safeCallbackURL(raw: string, requestOrigin: string): string {
+  // Must be a relative path
+  if (!raw.startsWith("/")) {
+    return "/dashboard";
+  }
+
+  // No protocol allowed (blocks http://evil.com/path)
+  if (raw.includes("://")) {
+    return "/dashboard";
+  }
+
+  // No newline/injection
+  if (raw.includes("\n") || raw.includes("\r")) {
+    return "/dashboard";
+  }
+
+  try {
+    const url = new URL(raw, requestOrigin);
+    // Must stay on same origin
+    if (url.origin !== requestOrigin) {
+      return "/dashboard";
+    }
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return "/dashboard";
+  }
+}
+
 function redirectToAuth(request: NextRequest, mode: string, error: string) {
   const url = new URL("/auth", request.url);
   url.searchParams.set("mode", mode);
@@ -55,7 +87,8 @@ export async function POST(
   }
 
   const formData = await request.formData();
-  const callbackURL = String(formData.get("callbackURL") ?? "/dashboard");
+  const rawCallback = String(formData.get("callbackURL") ?? "/dashboard");
+  const callbackURL = safeCallbackURL(rawCallback, request.nextUrl.origin);
   const payload = {
     callbackURL,
     ...(intent === "sign-up"

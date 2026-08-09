@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { timingSafeEqual } from "node:crypto";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db, pool } from "@/db/client";
 import {
   debts,
@@ -518,10 +518,6 @@ export async function createTransaction(
       throw new Error("Salah satu produk tidak ditemukan.");
     }
 
-    if (product.stock < item.quantity) {
-      throw new Error(`Stok ${product.name} tidak cukup.`);
-    }
-
     return { product, quantity: item.quantity };
   });
 
@@ -554,13 +550,19 @@ export async function createTransaction(
     );
 
     for (const item of lineItems) {
-      await tx
-        .update(products)
-        .set({
-          stock: item.product.stock - item.quantity,
-          updatedAt: createdAt,
-        })
-        .where(and(eq(products.id, item.product.id), eq(products.userId, userId)));
+      const result = await tx.execute(sql`
+        UPDATE products
+        SET stock = stock - ${item.quantity}, updated_at = ${createdAt}
+        WHERE id = ${item.product.id}
+          AND user_id = ${userId}
+          AND stock >= ${item.quantity}
+      `);
+
+      if (result.rowCount === 0) {
+        throw new Error(
+          `Stok ${item.product.name} tidak cukup (mungkin sudah habis oleh transaksi lain).`
+        );
+      }
     }
   });
 

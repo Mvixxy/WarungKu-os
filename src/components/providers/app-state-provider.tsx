@@ -13,6 +13,8 @@ type CartLine = {
 };
 
 type AppStateContextValue = AppState & {
+  isLoading: boolean;
+  error: string | null;
   cartLines: CartLine[];
   cartTotal: number;
   lowStockProducts: Product[];
@@ -65,6 +67,8 @@ export function AppStateProvider({
 }>) {
   const router = useRouter();
   const [state, setState] = useState<AppState>(emptyAppState);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { data: session, isPending } = useSession();
   const sessionUserId = session?.user?.id ?? null;
 
@@ -74,10 +78,13 @@ export function AppStateProvider({
     }
 
     if (!sessionUserId) {
+      setIsLoading(false);
       return;
     }
 
     let isActive = true;
+    setIsLoading(true);
+    setError(null);
 
     void requestJson<{ appState: AppState }>("/api/bootstrap")
       .then((response) => {
@@ -92,16 +99,21 @@ export function AppStateProvider({
             ? current.paymentMethod
             : response.appState.paymentMethod,
         }));
+        setIsLoading(false);
       })
-      .catch((error) => {
+      .catch((err) => {
         if (!isActive) {
           return;
         }
 
-        if (error instanceof Error && error.message === "UNAUTHORIZED") {
+        if (err instanceof Error && err.message === "UNAUTHORIZED") {
           setState(emptyAppState);
           router.replace("/auth");
+          return;
         }
+
+        setError(err instanceof Error ? err.message : "Gagal memuat data. Periksa koneksi internet Anda.");
+        setIsLoading(false);
       });
 
     return () => {
@@ -364,6 +376,8 @@ export function AppStateProvider({
     <AppStateContext.Provider
       value={{
         ...state,
+        isLoading,
+        error,
         cartLines,
         cartTotal,
         lowStockProducts,

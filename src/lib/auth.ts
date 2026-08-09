@@ -61,9 +61,9 @@ function resolveAuthBaseUrl() {
 function getAuthPool() {
   if (!globalForAuth.__warungosAuthPool) {
     globalForAuth.__warungosAuthPool = new Pool({
-      connectionString:
-        process.env.DATABASE_URL ??
-        "postgresql://postgres:postgres@127.0.0.1:5432/warungos",
+      connectionString: process.env.DATABASE_URL ?? (() => {
+    throw new Error("DATABASE_URL env var is required. Set it in your .env or Vercel environment variables.");
+  })(),
     });
   }
 
@@ -72,9 +72,9 @@ function getAuthPool() {
 
 export const auth = betterAuth({
   database: getAuthPool(),
-  secret:
-    process.env.BETTER_AUTH_SECRET ??
-    "warungos-dev-secret-please-change-this-in-production",
+  secret: process.env.BETTER_AUTH_SECRET ?? (() => {
+    throw new Error("BETTER_AUTH_SECRET env var is required. Set it in your .env or Vercel environment variables.");
+  })(),
   baseURL: resolveAuthBaseUrl(),
   trustedOrigins: async (request) => getTrustedAuthOrigins(request),
   emailAndPassword: {
