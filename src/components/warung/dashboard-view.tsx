@@ -190,7 +190,7 @@ export function DashboardView() {
                         {!transaction.voided && (
                           <button
                             type="button"
-                            onClick={() => setVoidTarget(transaction.id)}
+                            onClick={(e) => { e.stopPropagation(); setVoidTarget(transaction.id); }}
                             className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
                             title="Batalkan transaksi"
                           >
