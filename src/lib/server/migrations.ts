@@ -114,6 +114,17 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       CREATE INDEX IF NOT EXISTS ai_messages_chat_idx ON ai_messages(chat_id, created_at);
     `,
   },
+  {
+    version: 2,
+    name: "add_product_image_url",
+    sql: `
+      DO $$ BEGIN
+        ALTER TABLE products ADD COLUMN image_url text;
+      EXCEPTION
+        WHEN duplicate_column THEN null;
+      END $$;
+    `,
+  },
 ];
 
 export async function runMigrations() {
