@@ -11,6 +11,8 @@ import {
   transactions,
 } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import { runMigrations } from "@/lib/server/migrations";
+import { logger } from "@/lib/server/logger";
 import { AppState, DebtDraft, PaymentMethod, ProductDraft, Settings, Transaction } from "@/lib/types";
 
 let initializationPromise: Promise<void> | null = null;
@@ -41,6 +43,8 @@ function parseDueDate(value: string) {
 }
 
 async function ensureTables() {
+  await runMigrations();
+  // Legacy fallback: ensure tables exist even if migrations haven't run yet
   await pool.query(`
     CREATE TABLE IF NOT EXISTS store_profiles (
       user_id text PRIMARY KEY,
@@ -765,6 +769,7 @@ export async function remindDebt(userId: string, debtId: string) {
 }
 
 export async function voidTransaction(userId: string, transactionId: string, reason: string) {
+  logger.info("Voiding transaction", { userId, transactionId, reason });
   const [transaction] = await db
     .select()
     .from(transactions)
@@ -916,6 +921,7 @@ export async function updateStoreSettings(userId: string, settings: Settings) {
 }
 
 export async function resetWorkspace(userId: string) {
+  logger.warn("Workspace reset", { userId });
   await ensureAppReady();
 
   const transactionIds = (

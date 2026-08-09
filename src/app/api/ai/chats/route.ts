@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestUser } from "@/lib/server/app-service";
-import { handleRouteError } from "@/lib/server/route-error";
+import { handleRouteError, checkApiRateLimit } from "@/lib/server/route-error";
 import { createChat, listChats } from "@/lib/server/ai/persist";
 
 export const runtime = "nodejs";
@@ -17,6 +17,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const rateLimit = checkApiRateLimit(request, { windowSeconds: 60, maxRequests: 10 });
+    if (!rateLimit.allowed) return rateLimit.response!;
     const { userId } = await getRequestUser();
     const body = (await request.json().catch(() => ({}))) as { title?: string };
     const chat = await createChat(userId, body.title?.trim() || "Percakapan baru");
