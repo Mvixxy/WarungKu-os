@@ -136,6 +136,11 @@ async function ensureTables() {
     -- Migration: add paid_amount column to existing debts
     ALTER TABLE debts ADD COLUMN IF NOT EXISTS paid_amount integer NOT NULL DEFAULT 0;
 
+    -- Migration: add voided fields to existing transactions
+    ALTER TABLE transactions ADD COLUMN IF NOT EXISTS voided integer NOT NULL DEFAULT 0;
+    ALTER TABLE transactions ADD COLUMN IF NOT EXISTS voided_at timestamptz;
+    ALTER TABLE transactions ADD COLUMN IF NOT EXISTS void_reason text;
+
     CREATE TABLE IF NOT EXISTS ai_messages (
       id text PRIMARY KEY,
       chat_id text NOT NULL,
@@ -371,6 +376,9 @@ export async function getBootstrapState(userId: string): Promise<AppState> {
       id: transaction.id,
       paymentMethod: transaction.paymentMethod as PaymentMethod,
       total: transaction.total,
+      voided: transaction.voided === 1,
+      voidedAt: transaction.voidedAt ?? undefined,
+      voidReason: transaction.voidReason ?? undefined,
       createdAt: transaction.createdAt,
       items: itemsByTransaction.get(transaction.id) ?? [],
     })),
@@ -729,6 +737,53 @@ export async function remindDebt(userId: string, debtId: string) {
     isPaid: updated.isPaid === 1,
     lastReminderAt: updated.lastReminderAt ?? undefined,
   };
+}
+
+export async function voidTransaction(userId: string, transactionId: string, reason: string) {
+  const [transaction] = await db
+    .select()
+    .from(transactions)
+    .where(and(eq(transactions.id, transactionId), eq(transactions.userId, userId)))
+    .limit(1);
+
+  if (!transaction) {
+    throw new Error("Transaksi tidak ditemukan.");
+  }
+
+  if (transaction.voided === 1) {
+    throw new Error("Transaksi sudah dibatalkan.");
+  }
+
+  const items = await db
+    .select()
+    .from(transactionItems)
+    .where(eq(transactionItems.transactionId, transactionId));
+
+  await db.transaction(async (tx) => {
+    // Mark transaction as voided
+    await tx
+      .update(transactions)
+      .set({
+        voided: 1,
+        voidedAt: nowIso(),
+        voidReason: reason || null,
+      })
+      .where(eq(transactions.id, transactionId));
+
+    // Restore stock for each item
+    for (const item of items) {
+      const result = await tx.execute(sql`
+        UPDATE products
+        SET stock = stock + ${item.quantity}, updated_at = ${nowIso()}
+        WHERE id = ${item.productId}
+          AND user_id = ${userId}
+      `);
+      // Product may have been deleted — that's OK, just skip
+    }
+  });
+
+  const nextState = await getBootstrapState(userId);
+  return nextState.transactions.find((t) => t.id === transactionId)!;
 }
 
 export async function createExpense(

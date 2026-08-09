@@ -36,6 +36,7 @@ type AppStateContextValue = AppState & {
   markDebtPaid: (debtId: string) => Promise<void>;
   sendDebtReminder: (debtId: string) => Promise<Debt | null>;
   updateSettings: (settings: Settings) => Promise<void>;
+  voidTransaction: (transactionId: string, reason: string) => Promise<void>;
   resetWorkspace: () => Promise<void>;
 };
 
@@ -392,6 +393,28 @@ export function AppStateProvider({
     }));
   }
 
+  async function voidTransaction(transactionId: string, reason: string) {
+    const response = await requestJson<{ transaction: Transaction }>(`/api/transactions/${transactionId}/void`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    });
+    setState((current) => ({
+      ...current,
+      transactions: current.transactions.map((t) =>
+        t.id === transactionId ? response.transaction : t
+      ),
+      products: response.transaction.items.length > 0
+        ? current.products // Products will be refreshed from bootstrap
+        : current.products,
+    }));
+    // Refresh products to get updated stock
+    const bootstrap = await requestJson<{ appState: AppState }>("/api/bootstrap");
+    setState((current) => ({
+      ...current,
+      products: bootstrap.appState.products,
+    }));
+  }
+
   async function resetWorkspace() {
     const response = await requestJson<{ appState: AppState }>("/api/bootstrap/reset", {
       method: "POST",
@@ -432,7 +455,8 @@ export function AppStateProvider({
         markDebtPaid,
         sendDebtReminder,
         updateSettings,
-        resetWorkspace,
+        voidTransaction,
+    resetWorkspace,
       }}
     >
       {children}

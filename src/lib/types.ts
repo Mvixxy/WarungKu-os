@@ -35,6 +35,9 @@ export interface Transaction {
   id: string;
   paymentMethod: PaymentMethod;
   total: number;
+  voided: boolean;
+  voidedAt?: string;
+  voidReason?: string;
   createdAt: string;
   items: TransactionItem[];
 }

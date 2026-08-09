@@ -1,16 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowRightLeft, Package2, ReceiptText, ShoppingBasket, WalletCards } from "lucide-react";
+import { AlertTriangle, ArrowRightLeft, Ban, Loader2, Package2, ReceiptText, ShoppingBasket, WalletCards } from "lucide-react";
 import { useAppState } from "@/components/providers/app-state-provider";
 import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatDateTime, formatTime } from "@/lib/format";
+import { toast } from "sonner";
 
 export function DashboardView() {
-  const { debts, lowStockProducts, products, transactions } = useAppState();
+  const { debts, lowStockProducts, products, transactions, voidTransaction } = useAppState();
 
   const todayTransactions = transactions.filter((transaction) => {
     const value = new Date(transaction.createdAt);
@@ -26,6 +31,25 @@ export function DashboardView() {
     .filter((debt) => !debt.isPaid)
     .reduce((sum, debt) => sum + debt.amount, 0);
   const latestTransaction = transactions[0] ?? null;
+  const [voidTarget, setVoidTarget] = useState<string | null>(null);
+  const [voidReason, setVoidReason] = useState("");
+  const [voidLoading, setVoidLoading] = useState(false);
+
+  async function handleVoid() {
+    if (!voidTarget) return;
+    setVoidLoading(true);
+    try {
+      await voidTransaction(voidTarget, voidReason);
+      setVoidTarget(null);
+      setVoidReason("");
+      toast.success("Transaksi dibatalkan.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal membatalkan.");
+    } finally {
+      setVoidLoading(false);
+    }
+  }
+
   const latestDebts = debts.slice(0, 4);
 
   return (
@@ -121,17 +145,39 @@ export function DashboardView() {
                   transactions.slice(0, 5).map((transaction) => (
                     <div
                       key={transaction.id}
-                      className="flex items-start justify-between gap-2 sm:gap-3 rounded-lg bg-muted px-2.5 py-2 sm:px-3 sm:py-2.5"
+                      className={`flex items-start justify-between gap-2 sm:gap-3 rounded-lg px-2.5 py-2 sm:px-3 sm:py-2.5 ${
+                        transaction.voided ? "bg-destructive/5 border border-destructive/20" : "bg-muted"
+                      }`}
                     >
-                      <div>
-                        <p className="text-xs sm:text-sm font-medium">{formatCurrency(transaction.total)}</p>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <p className={`text-xs sm:text-sm font-medium ${transaction.voided ? "line-through text-muted-foreground" : ""}`}>
+                            {formatCurrency(transaction.total)}
+                          </p>
+                          {transaction.voided && (
+                            <Badge variant="destructive" className="text-[9px] px-1 py-0">Dibatalkan</Badge>
+                          )}
+                        </div>
                         <p className="mt-0.5 text-[10px] sm:text-xs text-muted-foreground">
                           {transaction.items.length} produk • {transaction.paymentMethod}
+                          {transaction.voidReason && ` • ${transaction.voidReason}`}
                         </p>
                       </div>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">
-                        {formatDateTime(transaction.createdAt)}
-                      </p>
+                      <div className="flex items-center gap-1.5">
+                        {!transaction.voided && (
+                          <button
+                            type="button"
+                            onClick={() => setVoidTarget(transaction.id)}
+                            className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                            title="Batalkan transaksi"
+                          >
+                            <Ban className="size-3" />
+                          </button>
+                        )}
+                        <p className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">
+                          {formatDateTime(transaction.createdAt)}
+                        </p>
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -242,6 +288,37 @@ export function DashboardView() {
           </Card>
         </div>
       </div>
+      <Dialog open={!!voidTarget} onOpenChange={(open) => { if (!open) { setVoidTarget(null); setVoidLoading(false); } }}>
+        <DialogContent className="max-w-sm" showCloseButton>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-destructive/10">
+                <Ban className="size-4 text-destructive" />
+              </span>
+              Batalkan transaksi?
+            </DialogTitle>
+            <DialogDescription>
+              Transaksi akan ditandai dibatalkan dan stok akan dikembalikan. Tindakan ini tidak bisa dibatalkan.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label htmlFor="void-reason" className="text-[10px]">Alasan (opsional)</Label>
+            <Input
+              id="void-reason"
+              value={voidReason}
+              onChange={(e) => setVoidReason(e.target.value)}
+              placeholder="Contoh: Salah input"
+              className="h-9 rounded-lg text-sm"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" className="rounded-lg" onClick={() => setVoidTarget(null)} disabled={voidLoading}>Batal</Button>
+            <Button variant="destructive" size="sm" className="rounded-lg" onClick={() => void handleVoid()} disabled={voidLoading}>
+              {voidLoading ? <><Loader2 className="mr-1.5 size-3.5 animate-spin" />Membatalkan...</> : "Ya, batalkan"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

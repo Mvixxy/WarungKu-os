@@ -36,6 +36,9 @@ export const transactions = pgTable("transactions", {
   userId: text("user_id").notNull(),
   total: integer("total").notNull(),
   paymentMethod: text("payment_method").notNull(),
+  voided: integer("voided").notNull().default(0),
+  voidedAt: timestamp("voided_at", { withTimezone: true, mode: "string" }),
+  voidReason: text("void_reason"),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).notNull(),
 });
 
