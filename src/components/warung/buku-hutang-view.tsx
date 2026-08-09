@@ -147,16 +147,16 @@ export function BukuHutangView() {
                 <WalletCards className="size-3.5 sm:size-4" />
                 Tambah kasbon
               </DialogTrigger>
-              <DialogContent className="max-w-md rounded-xl p-0">
-                <DialogHeader className="p-4 pb-0">
+              <DialogContent className="max-w-sm" showCloseButton>
+                <DialogHeader>
                   <DialogTitle className="font-heading text-lg">Catat hutang baru</DialogTitle>
                   <DialogDescription className="text-xs">
                     Simpan data pelanggan dan nominal hutang.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-3 p-4 pt-2">
+                <div className="grid gap-3">
                   <div className="grid gap-1.5">
-                    <Label htmlFor="borrower-name" className="text-xs">Nama peminjam</Label>
+                    <Label htmlFor="borrower-name" className="text-[10px]">Nama peminjam</Label>
                     <Input
                       id="borrower-name"
                       value={draft.borrowerName}
@@ -165,7 +165,7 @@ export function BukuHutangView() {
                     />
                   </div>
                   <div className="grid gap-1.5">
-                    <Label htmlFor="borrower-wa" className="text-xs">Nomor WhatsApp</Label>
+                    <Label htmlFor="borrower-wa" className="text-[10px]">Nomor WhatsApp</Label>
                     <Input
                       id="borrower-wa"
                       value={draft.whatsapp}
@@ -174,34 +174,31 @@ export function BukuHutangView() {
                       className="h-9 rounded-lg text-sm"
                     />
                   </div>
-                  <div className="grid gap-1.5 sm:grid-cols-2">
-                    <div className="grid gap-1.5">
-                      <Label htmlFor="borrower-amount" className="text-xs">Nominal hutang</Label>
-                      <Input
-                        id="borrower-amount"
-                        type="number"
-                        min={0}
-                        value={draft.amount}
-                        onChange={(event) => setDraft({ ...draft, amount: Number(event.target.value) })}
-                        className="h-9 rounded-lg text-sm"
-                      />
-                    </div>
-                    <div className="grid gap-1.5">
-                      <Label htmlFor="borrower-due-date" className="text-xs">Jatuh tempo</Label>
-                      <Input
-                        id="borrower-due-date"
-                        type="date"
-                        value={draft.dueDate}
-                        onChange={(event) => setDraft({ ...draft, dueDate: event.target.value })}
-                        className="h-9 rounded-lg text-sm"
-                      />
-                    </div>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="borrower-amount" className="text-[10px]">Nominal hutang</Label>
+                    <Input
+                      id="borrower-amount"
+                      inputMode="numeric"
+                      value={draft.amount === 0 ? "" : draft.amount}
+                      onChange={(event) => setDraft({ ...draft, amount: Number(event.target.value.replace(/[^0-9]/g, "")) || 0 })}
+                      placeholder="0"
+                      className="h-9 rounded-lg text-sm"
+                    />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="borrower-due-date" className="text-[10px]">Jatuh tempo</Label>
+                    <Input
+                      id="borrower-due-date"
+                      type="date"
+                      value={draft.dueDate}
+                      onChange={(event) => setDraft({ ...draft, dueDate: event.target.value })}
+                      className="h-9 rounded-lg text-sm"
+                    />
                   </div>
                 </div>
-                <DialogFooter className="rounded-b-xl px-4 pb-4" showCloseButton>
-                  <Button type="button" size="sm" className="rounded-lg" onClick={() => void handleCreateDebt()}>
-                    Simpan
-                  </Button>
+                <DialogFooter>
+                  <Button variant="outline" size="sm" className="rounded-lg" onClick={() => setCreateOpen(false)}>Batal</Button>
+                  <Button size="sm" className="rounded-lg" onClick={() => void handleCreateDebt()}>Simpan</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
