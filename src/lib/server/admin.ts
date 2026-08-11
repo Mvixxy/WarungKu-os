@@ -79,15 +79,17 @@ export async function deleteUser(userId: string): Promise<boolean> {
     await client.query('DELETE FROM debts WHERE user_id = $1', [userId]);
     await client.query('DELETE FROM products WHERE user_id = $1', [userId]);
     await client.query('DELETE FROM store_profiles WHERE user_id = $1', [userId]);
-    await client.query('DELETE FROM session WHERE user_id = $1', [userId]);
-    await client.query('DELETE FROM account WHERE user_id = $1', [userId]);
+    await client.query('DELETE FROM session WHERE "userId" = $1', [userId]);
+    await client.query('DELETE FROM account WHERE "userId" = $1', [userId]);
     await client.query('DELETE FROM "user" WHERE id = $1', [userId]);
     await client.query("COMMIT");
     logger.info("User deleted with all data", { userId });
     return true;
   } catch (err) {
-    await client.query("ROLLBACK");
-    logger.error("Failed to delete user", { userId, error: String(err) });
+    await client.query("ROLLBACK").catch(() => {});
+    const errMsg = err instanceof Error ? err.message : String(err);
+    logger.error("Failed to delete user", { userId, error: errMsg });
+    console.error("[DeleteUser]", errMsg, err);
     return false;
   } finally {
     client.release();
@@ -142,7 +144,7 @@ export async function getSystemStats() {
     SELECT
       (SELECT COUNT(*) FROM "user") as total_users,
       (SELECT COUNT(*) FROM "user" WHERE approved = true) as approved_users,
-      (SELECT COUNT(*) FROM "user" WHERE approved = false OR approved IS NULL) as pending_users,
+      (SELECT COUNT(*) FROM "user" WHERE (approved = false OR approved IS NULL) AND is_admin != true) as pending_users,
       (SELECT COUNT(*) FROM products) as total_products,
       (SELECT COUNT(*) FROM transactions) as total_transactions,
       (SELECT COUNT(*) FROM debts WHERE is_paid = 0) as active_debts,

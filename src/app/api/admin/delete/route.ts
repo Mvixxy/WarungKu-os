@@ -21,7 +21,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "targetUserId wajib diisi." }, { status: 400 });
     }
 
-    // Prevent self-deletion
     if (body.targetUserId === userId) {
       return NextResponse.json({ error: "Tidak bisa menghapus akun sendiri." }, { status: 400 });
     }
@@ -33,6 +32,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ message: "User berhasil dihapus." });
   } catch (error) {
-    return handleRouteError(error, "Gagal menghapus user.", 500);
+    console.error("[Admin Delete]", error);
+    return NextResponse.json({ error: "Gagal menghapus user: " + String(error) }, { status: 500 });
   }
 }
