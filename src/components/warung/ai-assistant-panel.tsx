@@ -82,14 +82,13 @@ async function api<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
 
 function BuAisyahAvatar({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   const sizeClass = size === "lg" ? "size-10" : size === "md" ? "size-8" : "size-6";
-  const textSize = size === "lg" ? "text-sm" : size === "md" ? "text-xs" : "text-[10px]";
   return (
-    <div className={cn(
-      "flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-heading font-bold shadow-sm",
-      sizeClass, textSize
-    )}>
-      A
-    </div>
+    <img
+      src="/bu-aisyah-avatar.svg"
+      alt="Bu AIsyah"
+      className={cn("rounded-full object-cover shadow-sm ring-1 ring-primary/10", sizeClass)}
+      draggable={false}
+    />
   );
 }
 
