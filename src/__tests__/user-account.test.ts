@@ -22,9 +22,9 @@ describe("User account validation", () => {
   });
 
   it("rejects mismatched passwords", () => {
-    const newPw = "password123";
-    const confirmPw = "password456";
-    expect(newPw !== confirmPw).true;
+    const newPw = ["password123"];
+    const confirmPw = ["password456"];
+    expect(newPw[0] !== confirmPw[0]).true;
   });
 
   it("accepts matching passwords", () => {

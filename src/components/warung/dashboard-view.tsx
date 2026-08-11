@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowRightLeft, Ban, Loader2, Package2, ReceiptText, Search, ShoppingBasket, WalletCards } from "lucide-react";
+import { AlertTriangle, ArrowRightLeft, Ban, Loader2, Package2, Printer, ReceiptText, Search, ShoppingBasket, WalletCards } from "lucide-react";
 import { useAppState } from "@/components/providers/app-state-provider";
 import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
@@ -11,12 +11,13 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Transaction } from "@/lib/types";
+import { Settings, Transaction } from "@/lib/types";
+import { Receipt } from "@/components/receipt";
 import { formatCurrency, formatDateTime, formatTime } from "@/lib/format";
 import { toast } from "sonner";
 
 export function DashboardView() {
-  const { debts, lowStockProducts, products, transactions, voidTransaction, loadMoreTransactions } = useAppState();
+  const { debts, lowStockProducts, products, transactions, settings, voidTransaction, loadMoreTransactions } = useAppState();
 
   const todayTransactions = transactions.filter((transaction) => {
     const value = new Date(transaction.createdAt);
@@ -398,57 +399,25 @@ export function DashboardView() {
                 <span>{selectedTx.items.length} item</span>
                 <span>{selectedTx.items.reduce((sum, i) => sum + i.quantity, 0)} produk</span>
               </div>
+              {!selectedTx.voided && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full rounded-lg no-print"
+                  onClick={() => window.print()}
+                >
+                  <Printer className="mr-1.5 size-3.5" />
+                  Cetak Struk
+                </Button>
+              )}
+              <div className="print-area">
+                {selectedTx && <Receipt transaction={selectedTx} settings={settings} />}
+              </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
 
-      {/* Transaction Detail Dialog */}
-      <Dialog open={!!selectedTx} onOpenChange={(open) => { if (!open) setSelectedTx(null); }}>
-        <DialogContent className="max-w-sm" showCloseButton>
-          <DialogHeader>
-            <DialogTitle>Detail Transaksi</DialogTitle>
-            <DialogDescription>{selectedTx && formatDateTime(selectedTx.createdAt)}</DialogDescription>
-          </DialogHeader>
-          {selectedTx && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between rounded-lg bg-muted p-3">
-                <div>
-                  <p className="text-xs text-muted-foreground">Total</p>
-                  <p className="text-lg font-semibold">{formatCurrency(selectedTx.total)}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">Pembayaran</p>
-                  <p className="text-sm font-medium">{selectedTx.paymentMethod}</p>
-                </div>
-              </div>
-              {selectedTx.voided && (
-                <div className="rounded-lg bg-destructive/10 p-2.5 text-xs text-destructive">
-                  Dibatalkan{selectedTx.voidReason ? `: ${selectedTx.voidReason}` : ""}
-                </div>
-              )}
-              <div>
-                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Item yang dibeli</p>
-                <div className="space-y-1.5">
-                  {selectedTx.items.map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between rounded-lg bg-card border border-border px-3 py-2">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium truncate">{item.productName}</p>
-                        <p className="text-[10px] text-muted-foreground">{formatCurrency(item.unitPrice)} x {item.quantity}</p>
-                      </div>
-                      <p className="text-sm font-semibold">{formatCurrency(item.unitPrice * item.quantity)}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="flex items-center justify-between border-t border-dashed border-border pt-2 text-xs text-muted-foreground">
-                <span>{selectedTx.items.length} item</span>
-                <span>{selectedTx.items.reduce((sum, i) => sum + i.quantity, 0)} produk</span>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -195,3 +195,35 @@
   animation: shimmer 1.8s ease-in-out infinite;
   border-radius: var(--radius);
 }
+
+/* Receipt print styles */
+.receipt {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .receipt,
+  .receipt * {
+    visibility: visible !important;
+  }
+
+  .receipt {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    padding: 16px;
+    background: white;
+    color: black;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+}

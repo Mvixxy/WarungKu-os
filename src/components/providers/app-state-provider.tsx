@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
+import { checkDebtReminders, requestNotificationPermission } from "@/lib/notifications";
 import { emptyAppState } from "@/lib/empty-state";
 import { AppState, Debt, Expense, DebtDraft, PaymentMethod, Product, ProductDraft, Settings, Transaction } from "@/lib/types";
 
