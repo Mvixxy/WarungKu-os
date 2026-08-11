@@ -227,6 +227,7 @@ export function InventarisView() {
   const [reassignTarget, setReassignTarget] = useState<{ category: string; count: number } | null>(null);
   const [reassignTo, setReassignTo] = useState("");
   const [duplicateTarget, setDuplicateTarget] = useState<{ name: string; isExact: boolean; existing?: { id: string; name: string } } | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [importLoading, setImportLoading] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
@@ -528,16 +529,7 @@ export function InventarisView() {
                 variant="outline"
                 size="sm"
                 className="h-9 shrink-0 rounded-lg px-2 text-xs"
-                onClick={() => handleExportJSON()}
-              >
-                <Download className="size-3.5" />
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-9 shrink-0 rounded-lg px-2 text-xs"
-                onClick={() => handleExportXLSX()}
+                onClick={() => setExportOpen(true)}
               >
                 <Download className="size-3.5" />
               </Button>
@@ -844,6 +836,43 @@ export function InventarisView() {
         </DialogContent>
       </Dialog>
 
+
+      <Dialog open={exportOpen} onOpenChange={setExportOpen}>
+        <DialogContent className="max-w-sm" showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Export Inventaris</DialogTitle>
+            <DialogDescription>Download {products.length} produk sebagai file data.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-10 w-full justify-start gap-3 rounded-lg text-sm"
+              onClick={() => { handleExportJSON(); setExportOpen(false); }}
+            >
+              <Download className="size-4 text-primary" />
+              <div className="text-left">
+                <p className="font-medium">JSON</p>
+                <p className="text-[10px] text-muted-foreground">Format data terstruktur, cocok untuk import kembali</p>
+              </div>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-10 w-full justify-start gap-3 rounded-lg text-sm"
+              onClick={() => { handleExportXLSX(); setExportOpen(false); }}
+            >
+              <Download className="size-4 text-primary" />
+              <div className="text-left">
+                <p className="font-medium">Excel (.xlsx)</p>
+                <p className="text-[10px] text-muted-foreground">Bisa dibuka di Excel, Google Sheets, atau spreadsheet lain</p>
+              </div>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <Dialog open={importOpen} onOpenChange={(o) => { setImportOpen(o); if (!o) { setImportResult(null); setImportErrors([]); } }}>
         <DialogContent className="max-w-md" showCloseButton>
           <DialogHeader>
