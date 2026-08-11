@@ -103,7 +103,7 @@ export async function getAllUsersWithStats() {
       u.id,
       u.name,
       u.email,
-      u.created_at,
+      u."createdAt" as created_at,
       u.approved,
       u.is_admin,
       COALESCE(p.product_count, 0) as product_count,
@@ -115,7 +115,7 @@ export async function getAllUsersWithStats() {
     LEFT JOIN (SELECT user_id, COUNT(*) as transaction_count FROM transactions GROUP BY user_id) t ON t.user_id = u.id
     LEFT JOIN (SELECT user_id, COUNT(*) as debt_count FROM debts WHERE is_paid = 0 GROUP BY user_id) d ON d.user_id = u.id
     LEFT JOIN (SELECT user_id, COUNT(*) as expense_count FROM expenses GROUP BY user_id) e ON e.user_id = u.id
-    ORDER BY u.created_at DESC
+    ORDER BY u."createdAt" DESC
   `);
 
   return usersResult.rows.map((row) => ({
