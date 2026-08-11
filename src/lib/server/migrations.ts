@@ -125,7 +125,7 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
         WHEN duplicate_column THEN null;
       END $$;
     `,
-  }
+  },
   {
     version: 5,
     name: "add_user_approval",
@@ -136,7 +136,7 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       -- Auto-approve existing users (they were created before this system)
       UPDATE "user" SET approved = true WHERE approved IS NULL;
     `,
-  },,
+  },
 ];
 
 export async function runMigrations() {
