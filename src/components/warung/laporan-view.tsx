@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Printer, TrendingUp } from "lucide-react";
+import { Download, Printer, Search, TrendingUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
@@ -48,6 +48,7 @@ export function LaporanView() {
   const [deleteExpenseTarget, setDeleteExpenseTarget] = useState<Expense | null>(null);
   const [deleteExpenseLoading, setDeleteExpenseLoading] = useState(false);
   const [expenseRange, setExpenseRange] = useState<ReportRange | "semua">("semua");
+  const [expenseSearch, setExpenseSearch] = useState("");
 
   const handleAddExpense = async () => {
     if (!expenseDraft.title.trim() || !expenseDraft.amount) return;
@@ -147,14 +148,24 @@ export function LaporanView() {
           <CardContent>
             {(() => {
               const expenseStart = expenseRange === "semua" ? null : getRangeStart(expenseRange);
-              const displayExpenses = expenseStart
+              const periodFiltered = expenseStart
                 ? expenses.filter((e) => new Date(e.createdAt) >= expenseStart)
                 : expenses;
+              const displayExpenses = expenseSearch
+                ? periodFiltered.filter((e) => e.title.toLowerCase().includes(expenseSearch.toLowerCase()) || e.category.toLowerCase().includes(expenseSearch.toLowerCase()))
+                : periodFiltered;
               return displayExpenses.length === 0 ? (
                 <p className="text-center text-xs text-muted-foreground py-6">
                   {expenseRange === "semua" ? "Belum ada pengeluaran." : "Tidak ada pengeluaran di periode ini."}
                 </p>
               ) : (
+              <>
+              <Input
+                value={expenseSearch}
+                onChange={(e) => setExpenseSearch(e.target.value)}
+                placeholder="Cari pengeluaran..."
+                className="h-8 rounded-lg text-xs"
+              />
               <div className="space-y-2">
               {displayExpenses.map((expense) => (
                 <div key={expense.id} className="flex items-center justify-between rounded-xl border border-border p-3">
@@ -182,6 +193,7 @@ export function LaporanView() {
                 </div>
               ))}
               </div>
+              </>
               );
             })()}
           </CardContent>
