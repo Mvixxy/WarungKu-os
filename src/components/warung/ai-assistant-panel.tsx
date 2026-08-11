@@ -491,11 +491,11 @@ export function AIAssistantPanel({ open, onOpenChange }: { open: boolean; onOpen
             type="button"
             onClick={() => onOpenChange(true)}
             className="group/rail flex h-full w-full flex-col items-center justify-center gap-2 px-2 py-4 text-muted-foreground transition-colors hover:bg-secondary/60"
-            aria-label="Buka Bu AIsyah"
+            aria-label="Tanya Bu AIsyah"
           >
             <BuAisyahAvatar size="md" />
             <span className="text-[9px] sm:text-[10px] font-medium tracking-wide text-primary" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>
-              Bu AIsyah
+              Tanya Bu AIsyah
             </span>
           </button>
         ) : (
