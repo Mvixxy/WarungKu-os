@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, Loader2, PackagePlus, PencilLine, Plus, Search, Settings2, Trash2, Warehouse, X } from "lucide-react";
+import { AlertTriangle, Download, Loader2, PackagePlus, PencilLine, Plus, Search, Settings2, Trash2, Upload, Warehouse, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
 import { StatCard } from "@/components/stat-card";
@@ -23,6 +23,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatCurrency } from "@/lib/format";
 import { Product, ProductCategory, ProductDraft } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { exportProductsJSON, validateImportJSON, ImportResult } from "@/lib/inventory-io";
 import { fuzzyFindSimilar } from "@/lib/fuzzy";
 
 const defaultCategories = ["Sembako"];
@@ -225,6 +226,10 @@ export function InventarisView() {
   const [reassignTarget, setReassignTarget] = useState<{ category: string; count: number } | null>(null);
   const [reassignTo, setReassignTo] = useState("");
   const [duplicateTarget, setDuplicateTarget] = useState<{ name: string; isExact: boolean; existing?: { id: string; name: string } } | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importLoading, setImportLoading] = useState(false);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [importErrors, setImportErrors] = useState<string[]>([]);
 
   const categories = Array.from(
     new Set([...defaultCategories, ...(settings.categories ?? []), ...products.map((p) => p.category)])
@@ -348,6 +353,60 @@ export function InventarisView() {
     }
   }
 
+  function handleExport() {
+    exportProductsJSON(products);
+    toast.success(`${products.length} produk berhasil diexport!`);
+  }
+
+  function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const json = JSON.parse(reader.result as string);
+        const { drafts, errors } = validateImportJSON(json);
+        if (errors.length > 0 && drafts.length === 0) {
+          setImportErrors(errors);
+          setImportResult(null);
+        } else {
+          setImportErrors(errors);
+          setImportResult({ total: drafts.length, imported: 0, errors: [] });
+          // Store drafts for confirmation
+          (window as unknown as Record<string, unknown>).__importDrafts = drafts;
+        }
+      } catch {
+        setImportErrors(["File tidak bisa dibaca sebagai JSON."]);
+        setImportResult(null);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  }
+
+  async function confirmImport() {
+    const drafts = (window as unknown as Record<string, unknown>).__importDrafts as Array<Record<string, unknown>> | undefined;
+    if (!drafts || drafts.length === 0) return;
+    setImportLoading(true);
+    try {
+      const res = await fetch("/api/products/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ products: drafts }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Import gagal.");
+      setImportResult({ total: drafts.length, imported: data.imported, errors: [] });
+      toast.success(`${data.imported} produk berhasil diimport!`);
+      // Refresh data
+      window.location.reload();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Import gagal.");
+    } finally {
+      setImportLoading(false);
+    }
+  }
+
   async function handleRestock() {
     if (saving) return;
     try {
@@ -425,6 +484,24 @@ export function InventarisView() {
                 onClick={() => setCategoryManageOpen(true)}
               >
                 <Settings2 className="size-3.5" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-9 shrink-0 rounded-lg px-2 text-xs"
+                onClick={() => handleExport()}
+              >
+                <Download className="size-3.5" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-9 shrink-0 rounded-lg px-2 text-xs"
+                onClick={() => { setImportOpen(true); setImportResult(null); setImportErrors([]); }}
+              >
+                <Upload className="size-3.5" />
               </Button>
             </div>
             <Dialog open={createOpen} onOpenChange={(o) => { setCreateOpen(o); if (!o) setSaving(false); }}>
@@ -716,6 +793,57 @@ export function InventarisView() {
           <DialogFooter>
             <Button type="button" variant="outline" size="sm" className="rounded-lg" onClick={() => setDeleteTarget(null)}>Batal</Button>
             <Button type="button" variant="destructive" size="sm" className="rounded-lg px-4" disabled={saving} onClick={() => void handleDeleteProduct()}>{saving ? (<><Loader2 className="mr-1.5 size-3.5 animate-spin" />Menghapus...</>) : "Hapus"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={importOpen} onOpenChange={(o) => { setImportOpen(o); if (!o) { setImportResult(null); setImportErrors([]); } }}>
+        <DialogContent className="max-w-md" showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Import Produk</DialogTitle>
+            <DialogDescription>Unggah file JSON yang sudah diekspor dari WarungKu lain.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {!importResult ? (
+              <div className="rounded-lg border-2 border-dashed border-border p-6 text-center">
+                <Upload className="mx-auto mb-2 size-8 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">Pilih file JSON untuk diimport</p>
+                <Input
+                  type="file"
+                  accept=".json"
+                  className="mt-3"
+                  onChange={(e) => handleImportFile(e)}
+                />
+              </div>
+            ) : importResult.imported > 0 ? (
+              <div className="rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950">
+                <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                  Berhasil import {importResult.imported} dari {importResult.total} produk!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Ditemukan {importResult.total} produk untuk diimport.
+                </p>
+                {importErrors.length > 0 && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950">
+                    <p className="mb-1 text-xs font-medium text-amber-800 dark:text-amber-200">Peringatan:</p>
+                    {importErrors.map((err, i) => (
+                      <p key={i} className="text-xs text-amber-700 dark:text-amber-300">{err}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" size="sm" className="rounded-lg" onClick={() => { setImportOpen(false); setImportResult(null); setImportErrors([]); }}>Batal</Button>
+            {importResult && importResult.imported === 0 && importResult.total > 0 && (
+              <Button type="button" size="sm" className="rounded-lg px-4" disabled={importLoading} onClick={() => void confirmImport()}>
+                {importLoading ? (<><Loader2 className="mr-1.5 size-3.5 animate-spin" />Mengimport...</>) : `Import ${importResult.total} produk`}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
