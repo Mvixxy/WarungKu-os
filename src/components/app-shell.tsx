@@ -137,7 +137,7 @@ export function AppShell({
             aria-label={leftCollapsed ? "Buka sidebar" : "Tutup sidebar"}
             title={
               aiOpen
-                ? "Sidebar otomatis tertutup saat Asisten AI aktif"
+                ? "Sidebar otomatis tertutup saat Bu AIsyah aktif"
                 : leftCollapsed
                   ? "Buka sidebar"
                   : "Tutup sidebar"
@@ -245,7 +245,7 @@ export function AppShell({
                       className="flex h-11 w-full items-center gap-2 rounded-xl bg-primary/10 px-3 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
                     >
                       <Sparkles className="size-4" />
-                      AI Asisten
+                      Bu AIsyah
                     </button>
                     <div className="mb-3 border-t border-sidebar-border" />
                     <button

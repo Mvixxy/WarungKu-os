@@ -78,12 +78,28 @@ async function api<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   return data as T;
 }
 
+/* ─── Avatar ─── */
+
+function BuAisyahAvatar({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+  const sizeClass = size === "lg" ? "size-10" : size === "md" ? "size-8" : "size-6";
+  const textSize = size === "lg" ? "text-sm" : size === "md" ? "text-xs" : "text-[10px]";
+  return (
+    <div className={cn(
+      "flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-heading font-bold shadow-sm",
+      sizeClass, textSize
+    )}>
+      A
+    </div>
+  );
+}
+
 /* ─── Sub-components ─── */
 
 function MessageBubble({ role, children }: { role: "user" | "assistant"; children: React.ReactNode }) {
   return (
     <div className={cn("flex w-full", role === "user" ? "justify-end" : "justify-start")}>
-      <div className={cn("max-w-[88%]", role === "user" && "w-auto")}>
+      <div className={cn("max-w-[88%] flex items-end gap-2", role === "user" && "w-auto flex-row-reverse gap-0")}>
+        {role === "assistant" && <BuAisyahAvatar size="sm" />}
         {children}
       </div>
     </div>
@@ -92,7 +108,7 @@ function MessageBubble({ role, children }: { role: "user" | "assistant"; childre
 
 function AssistantTextBubble({ text }: { text: string }) {
   return (
-    <div className="rounded-xl rounded-bl-md border border-border bg-card px-3 py-2 text-xs sm:text-sm whitespace-pre-wrap text-foreground">
+    <div className="rounded-2xl rounded-bl-md border border-border bg-secondary/60 px-3.5 py-2.5 text-xs sm:text-sm whitespace-pre-wrap text-foreground leading-relaxed">
       {text}
     </div>
   );
@@ -100,23 +116,23 @@ function AssistantTextBubble({ text }: { text: string }) {
 
 function DataMessageCard({ result }: { result: ToolResult }) {
   return (
-    <Card size="sm">
+    <Card size="sm" className="border-border bg-card shadow-sm">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <span className="flex size-6 items-center justify-center rounded-md bg-primary/10 text-primary">
+          <span className="flex size-6 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <PackageSearch className="size-3 sm:size-3.5" />
           </span>
           <div className="flex-1">
             <CardTitle className="text-xs sm:text-sm">{result.title}</CardTitle>
-            {result.summary && <CardDescription className="mt-0 text-[10px] sm:text-xs sm:text-sm">{result.summary}</CardDescription>}
+            {result.summary && <CardDescription className="mt-0 text-[10px] sm:text-xs">{result.summary}</CardDescription>}
           </div>
-          <Badge variant="secondary" className="rounded-full text-[9px] sm:text-[10px] sm:text-xs sm:text-sm px-1.5 py-0">DB</Badge>
+          <Badge variant="secondary" className="rounded-full text-[9px] sm:text-[10px] px-1.5 py-0 bg-primary/5 text-primary border-primary/10">DB</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-1">
         {(result.rows ?? []).map((row, i) => (
-          <div key={`${row.label}-${i}`} className="flex items-center justify-between gap-2 rounded-md bg-muted/50 px-2.5 py-1.5">
-            <span className="text-[10px] sm:text-xs sm:text-sm text-muted-foreground">{row.label}</span>
+          <div key={`${row.label}-${i}`} className="flex items-center justify-between gap-2 rounded-lg bg-secondary/50 px-2.5 py-1.5">
+            <span className="text-[10px] sm:text-xs text-muted-foreground">{row.label}</span>
             <span className={cn("text-xs sm:text-sm font-medium", row.tone === "warn" && "text-amber-600", row.tone === "success" && "text-emerald-600")}>
               {row.value}
             </span>
@@ -130,14 +146,14 @@ function DataMessageCard({ result }: { result: ToolResult }) {
 function SuggestionMessageCard({ result }: { result: ToolResult }) {
   const data = result.data as { narrative?: string } | null;
   return (
-    <Card size="sm" className="border-primary/20 bg-primary/5">
+    <Card size="sm" className="border-accent/20 bg-accent/5">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <span className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <span className="flex size-6 items-center justify-center rounded-lg bg-accent/15 text-accent-foreground">
             <Sparkles className="size-3 sm:size-3.5" />
           </span>
           <CardTitle className="flex-1 text-xs sm:text-sm">{result.title}</CardTitle>
-          <Badge variant="secondary" className="rounded-full text-[9px] sm:text-[10px] sm:text-xs sm:text-sm px-1.5 py-0 gap-1">
+          <Badge variant="secondary" className="rounded-full text-[9px] sm:text-[10px] px-1.5 py-0 gap-1 bg-accent/10 text-accent-foreground border-accent/20">
             <TrendingUp className="size-2.5 sm:size-3" /> Saran
           </Badge>
         </div>
@@ -145,16 +161,16 @@ function SuggestionMessageCard({ result }: { result: ToolResult }) {
       <CardContent className="space-y-2">
         {data?.narrative && (
           <div>
-            <p className="text-[9px] sm:text-[10px] sm:text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wide">Ringkasan</p>
+            <p className="text-[9px] sm:text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wide">Ringkasan</p>
             <p className="text-xs sm:text-sm text-foreground mt-0.5">{data.narrative}</p>
           </div>
         )}
         <div className="space-y-1">
-          <p className="text-[9px] sm:text-[10px] sm:text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wide">Top earner</p>
+          <p className="text-[9px] sm:text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wide">Top earner</p>
           {(result.rows ?? []).map((row, i) => (
-            <div key={`${row.label}-${i}`} className="flex items-center justify-between rounded-md bg-card border border-border px-2.5 py-1.5">
+            <div key={`${row.label}-${i}`} className="flex items-center justify-between rounded-lg bg-card border border-border px-2.5 py-1.5">
               <span className="text-xs sm:text-sm">{row.label}</span>
-              <span className="text-[10px] sm:text-xs sm:text-sm text-muted-foreground">{row.value}</span>
+              <span className="text-[10px] sm:text-xs text-muted-foreground">{row.value}</span>
             </div>
           ))}
         </div>
@@ -165,22 +181,22 @@ function SuggestionMessageCard({ result }: { result: ToolResult }) {
 
 function ActionMessageCard({ toolName, result }: { toolName: string | null; result: ToolResult }) {
   return (
-    <Card size="sm" className="border-accent/30 bg-accent/10">
+    <Card size="sm" className="border-accent/25 bg-accent/5">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <span className="flex size-6 items-center justify-center rounded-md bg-accent/20 text-accent-foreground">
+          <span className="flex size-6 items-center justify-center rounded-lg bg-accent/15 text-accent-foreground">
             <Wallet className="size-3 sm:size-3.5" />
           </span>
           <div className="flex-1">
             <CardTitle className="text-xs sm:text-sm">{result.title}</CardTitle>
-            {toolName && <CardDescription className="mt-0 font-mono text-[9px] sm:text-[10px] sm:text-xs sm:text-sm">tool: {toolName}</CardDescription>}
+            {toolName && <CardDescription className="mt-0 font-mono text-[9px] sm:text-[10px]">tool: {toolName}</CardDescription>}
           </div>
-          <Badge variant="secondary" className="rounded-full text-[9px] sm:text-[10px] sm:text-xs sm:text-sm px-1.5 py-0">Selesai</Badge>
+          <Badge variant="secondary" className="rounded-full text-[9px] sm:text-[10px] px-1.5 py-0 bg-accent/10 text-accent-foreground border-accent/20">Selesai</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-1.5">
         {result.summary && <p className="text-xs sm:text-sm font-medium text-foreground">{result.summary}</p>}
-        <div className="rounded-md bg-card border border-border p-2">
+        <div className="rounded-lg bg-card border border-border p-2">
           {(result.rows ?? []).map((row, i) => (
             <div key={`${row.label}-${i}`} className="flex items-center justify-between gap-2 border-b border-dashed border-border py-1 text-xs sm:text-sm last:border-0">
               <span className="text-muted-foreground">{row.label}</span>
@@ -190,7 +206,7 @@ function ActionMessageCard({ toolName, result }: { toolName: string | null; resu
             </div>
           ))}
         </div>
-        <div className="flex items-center gap-1.5 rounded-md bg-accent/10 px-2.5 py-1.5 text-[10px] sm:text-xs sm:text-sm text-accent-foreground">
+        <div className="flex items-center gap-1.5 rounded-lg bg-accent/10 px-2.5 py-1.5 text-[10px] sm:text-xs text-accent-foreground">
           <Check className="size-3 sm:size-3.5" /> Tersimpan ke database.
         </div>
       </CardContent>
@@ -200,10 +216,10 @@ function ActionMessageCard({ toolName, result }: { toolName: string | null; resu
 
 function InfoMessageCard({ result }: { result: ToolResult }) {
   return (
-    <Card size="sm">
+    <Card size="sm" className="border-border">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <span className={cn("flex size-6 items-center justify-center rounded-md", result.ok ? "bg-muted text-muted-foreground" : "bg-destructive/10 text-destructive")}>
+          <span className={cn("flex size-6 items-center justify-center rounded-lg", result.ok ? "bg-secondary text-muted-foreground" : "bg-destructive/10 text-destructive")}>
             {result.ok ? <BookOpen className="size-3 sm:size-3.5" /> : <AlertTriangle className="size-3 sm:size-3.5" />}
           </span>
           <CardTitle className="flex-1 text-xs sm:text-sm">{result.title}</CardTitle>
@@ -211,7 +227,7 @@ function InfoMessageCard({ result }: { result: ToolResult }) {
       </CardHeader>
       {(result.message || result.error) && (
         <CardContent>
-          <p className="text-[10px] sm:text-xs sm:text-sm text-muted-foreground">{result.message ?? result.error}</p>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">{result.message ?? result.error}</p>
         </CardContent>
       )}
     </Card>
@@ -221,10 +237,10 @@ function InfoMessageCard({ result }: { result: ToolResult }) {
 function NavigationMessageCard({ result }: { result: ToolResult }) {
   const data = (result.data ?? {}) as { href?: string; label?: string };
   return (
-    <Card size="sm">
+    <Card size="sm" className="border-border">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <span className="flex size-6 items-center justify-center rounded-md bg-muted text-muted-foreground">
+          <span className="flex size-6 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
             <ChevronRight className="size-3 sm:size-3.5" />
           </span>
           <CardTitle className="flex-1 text-xs sm:text-sm">{result.title}</CardTitle>
@@ -232,9 +248,9 @@ function NavigationMessageCard({ result }: { result: ToolResult }) {
       </CardHeader>
       {data.href && (
         <CardContent>
-          <a href={data.href} className="group/nav flex w-full items-center justify-between rounded-md bg-muted px-2.5 py-2 text-left transition-colors hover:bg-muted/70">
+          <a href={data.href} className="group/nav flex w-full items-center justify-between rounded-lg bg-secondary/60 px-2.5 py-2 text-left transition-colors hover:bg-secondary">
             <div>
-              <p className="text-[9px] sm:text-[10px] sm:text-xs sm:text-sm text-muted-foreground">Tujuan</p>
+              <p className="text-[9px] sm:text-[10px] sm:text-xs text-muted-foreground">Tujuan</p>
               <p className="text-xs sm:text-sm font-medium">{data.label ?? data.href}</p>
             </div>
             <ChevronRight className="size-3 text-muted-foreground transition-transform group-hover/nav:translate-x-0.5" />
@@ -290,64 +306,81 @@ function ChatContent({
   return (
     <>
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <div className="space-y-2.5 px-3 py-3">
+        <div className="space-y-3 px-3 py-3">
           {visibleMessages.length === 0 && !isLoading && (
             <MessageBubble role="assistant">
-              <AssistantTextBubble text="Halo! Saya WarungKu AI. Saya bisa cek stok, hitung untung, atau jalankan aksi. Coba: 'untung minggu ini berapa?'" />
+              <div className="space-y-2">
+                <AssistantTextBubble text="Halo! Saya Bu AIsyah, asisten warungmu. Saya bisa bantu cek stok, hitung untung, atau jalankan aksi langsung. Coba tanya: " />
+                <div className="flex flex-wrap gap-1.5 pl-8">
+                  {quickPrompts.slice(0, 2).map((q) => (
+                    <button
+                      key={q}
+                      type="button"
+                      onClick={() => handleSend(q)}
+                      className="inline-flex items-center gap-1 rounded-full bg-primary/8 border border-primary/15 px-2.5 py-1 text-[10px] sm:text-xs font-medium text-primary transition-colors hover:bg-primary/15"
+                    >
+                      <Sparkles className="size-2.5 sm:size-3" />{q}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </MessageBubble>
           )}
           {visibleMessages.map((m) => {
-            if (m.role === "user") return <MessageBubble key={m.id} role="user"><div className="rounded-xl rounded-br-md bg-primary px-3 py-2 text-xs sm:text-sm text-primary-foreground">{m.content}</div></MessageBubble>;
+            if (m.role === "user") return <MessageBubble key={m.id} role="user"><div className="rounded-2xl rounded-br-md bg-primary px-3.5 py-2.5 text-xs sm:text-sm text-primary-foreground leading-relaxed">{m.content}</div></MessageBubble>;
             if (m.role === "assistant" && m.content.trim()) return <MessageBubble key={m.id} role="assistant"><AssistantTextBubble text={m.content} /></MessageBubble>;
             if (m.role === "tool") return <MessageBubble key={m.id} role="assistant"><ToolCard message={m} /></MessageBubble>;
             return null;
           })}
           {isThinking && (
             <MessageBubble role="assistant">
-              <div className="inline-flex items-center gap-1 rounded-xl rounded-bl-md border border-border bg-card px-3 py-2">
-                <span className="size-1 animate-bounce rounded-full bg-primary [animation-delay:-0.2s]" />
-                <span className="size-1 animate-bounce rounded-full bg-primary [animation-delay:-0.1s]" />
-                <span className="size-1 animate-bounce rounded-full bg-primary" />
+              <div className="inline-flex items-center gap-2 rounded-2xl rounded-bl-md border border-border bg-secondary/60 px-3.5 py-2.5">
+                <BuAisyahAvatar size="sm" />
+                <div className="flex items-center gap-1">
+                  <span className="size-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.2s]" />
+                  <span className="size-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.1s]" />
+                  <span className="size-1.5 animate-bounce rounded-full bg-primary" />
+                </div>
               </div>
             </MessageBubble>
           )}
-          {error && <div className="rounded-md bg-destructive/10 px-2.5 py-1.5 text-[10px] sm:text-xs sm:text-sm text-destructive">{error}</div>}
+          {error && <div className="mx-8 rounded-xl bg-destructive/10 border border-destructive/20 px-3 py-2 text-[10px] sm:text-xs text-destructive">{error}</div>}
           <div ref={bottomRef} aria-hidden className="h-px" />
         </div>
       </div>
 
-      <div className="border-t border-border bg-muted/30 px-2.5 py-2.5 shrink-0">
-        <div className="mb-1.5 flex flex-wrap gap-1">
+      <div className="border-t border-border bg-secondary/30 px-3 py-3 shrink-0">
+        <div className="mb-2 flex flex-wrap gap-1.5">
           {quickPrompts.map((q) => (
             <button
               key={q}
               type="button"
               onClick={() => handleSend(q)}
               disabled={isThinking || !chat}
-              className="inline-flex items-center gap-0.5 rounded-md bg-card border border-border px-2 py-0.5 text-[9px] sm:text-[10px] sm:text-xs sm:text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/5 hover:text-primary disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1 text-[9px] sm:text-[10px] sm:text-xs font-medium text-muted-foreground transition-colors hover:bg-primary/5 hover:text-primary hover:border-primary/20 disabled:opacity-50"
             >
               <ArrowRight className="size-2.5 sm:size-3" />{q}
             </button>
           ))}
         </div>
-        <div className="flex items-end gap-1.5">
+        <div className="flex items-end gap-2">
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(input); } }}
-            placeholder="Tanya stok, untung, atau perintah..."
-            className="max-h-24 min-h-8 flex-1 resize-none rounded-lg border-border bg-card py-1.5 text-xs sm:text-sm"
+            placeholder="Tanya Bu AIsyah..."
+            className="max-h-24 min-h-9 flex-1 resize-none rounded-xl border-border bg-card py-2 text-xs sm:text-sm focus:ring-primary/20"
             rows={1}
             disabled={!chat}
           />
-          <Button variant="outline" size="icon-sm" className="size-8 rounded-md" onClick={() => toast.info("Voice belum tersedia.")} aria-label="Rekam">
+          <Button variant="outline" size="icon-sm" className="size-9 rounded-xl border-border hover:bg-secondary hover:text-primary" onClick={() => toast.info("Voice belum tersedia.")} aria-label="Rekam">
             <Mic className="size-3 sm:size-3.5" />
           </Button>
-          <Button size="icon-sm" className="size-8 rounded-md" onClick={() => handleSend(input)} disabled={!input.trim() || isThinking || !chat} aria-label="Kirim">
+          <Button size="icon-sm" className="size-9 rounded-xl bg-primary hover:bg-primary/90 shadow-sm" onClick={() => handleSend(input)} disabled={!input.trim() || isThinking || !chat} aria-label="Kirim">
             <Send className="size-3 sm:size-3.5" />
           </Button>
         </div>
-        <p className="mt-1 text-[8px] sm:text-[10px] sm:text-xs sm:text-sm text-muted-foreground">Aksi langsung tertulis ke database.</p>
+        <p className="mt-1.5 text-[8px] sm:text-[10px] text-muted-foreground/70 text-center">Aksi langsung tertulis ke database oleh Bu AIsyah</p>
       </div>
     </>
   );
@@ -384,7 +417,7 @@ export function AIAssistantPanel({ open, onOpenChange }: { open: boolean; onOpen
       const detail = await api<{ messages: ServerMessage[] }>(`/api/ai/chats/${active.id}/messages`);
       setMessages(detail.messages);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal memuat chat AI.");
+      setError(err instanceof Error ? err.message : "Gagal memuat chat Bu AIsyah.");
       hasBootstrappedRef.current = false;
     } finally {
       setIsLoading(false);
@@ -452,36 +485,32 @@ export function AIAssistantPanel({ open, onOpenChange }: { open: boolean; onOpen
           "hidden lg:flex h-full shrink-0 flex-col overflow-hidden rounded-2xl border border-border bg-card transition-[width] duration-200 ease-out",
           open ? "w-[360px] xl:w-[400px]" : "w-[56px]"
         )}
-        aria-label="Asisten AI"
+        aria-label="Bu AIsyah"
       >
         {!open ? (
           <button
             type="button"
             onClick={() => onOpenChange(true)}
-            className="group/rail flex h-full w-full flex-col items-center justify-center gap-2 px-2 py-4 text-muted-foreground transition-colors hover:bg-muted"
-            aria-label="Buka asisten AI"
+            className="group/rail flex h-full w-full flex-col items-center justify-center gap-2 px-2 py-4 text-muted-foreground transition-colors hover:bg-secondary/60"
+            aria-label="Buka Bu AIsyah"
           >
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover/rail:scale-105">
-              <Sparkles className="size-3.5" />
-            </span>
-            <span className="text-[9px] sm:text-[10px] sm:text-xs sm:text-sm font-medium tracking-wide" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>
-              Asisten AI
+            <BuAisyahAvatar size="md" />
+            <span className="text-[9px] sm:text-[10px] font-medium tracking-wide text-primary" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>
+              Bu AIsyah
             </span>
           </button>
         ) : (
           <>
-            <header className="flex items-center gap-2 border-b border-border px-3 py-2.5 shrink-0">
-              <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <Sparkles className="size-3 sm:size-3.5" />
-              </span>
+            <header className="flex items-center gap-2.5 border-b border-border px-3 py-3 shrink-0 bg-gradient-to-r from-secondary/80 to-card">
+              <BuAisyahAvatar size="md" />
               <div className="flex-1 min-w-0">
-                <p className="font-heading text-xs sm:text-sm font-semibold truncate">{chat?.title ?? "AI"}</p>
-                <p className="text-[9px] sm:text-[10px] sm:text-xs sm:text-sm text-muted-foreground">OpenRouter · Tool calling</p>
+                <p className="font-heading text-sm font-semibold text-foreground">Bu AIsyah</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">Asisten WarungKu</p>
               </div>
-              <Button variant="ghost" size="icon-sm" onClick={handleNewChat} disabled={isLoading || isThinking} className="size-7 rounded-md">
+              <Button variant="ghost" size="icon-sm" onClick={handleNewChat} disabled={isLoading || isThinking} className="size-7 rounded-lg hover:bg-secondary hover:text-primary">
                 <ArrowRight className="size-3 sm:size-3.5" />
               </Button>
-              <Button variant="ghost" size="icon-sm" onClick={() => onOpenChange(false)} className="size-7 rounded-md">
+              <Button variant="ghost" size="icon-sm" onClick={() => onOpenChange(false)} className="size-7 rounded-lg hover:bg-secondary hover:text-primary">
                 <X className="size-3 sm:size-3.5" />
               </Button>
             </header>
@@ -512,23 +541,21 @@ export function AIAssistantPanel({ open, onOpenChange }: { open: boolean; onOpen
             onClick={() => onOpenChange(false)}
           />
           {/* Sheet */}
-          <div className="absolute bottom-0 left-0 right-0 flex flex-col max-h-[85vh] rounded-t-2xl border border-border bg-card shadow-2xl animate-in slide-in-from-bottom duration-200">
+          <div className="absolute bottom-0 left-0 right-0 flex flex-col max-h-[85vh] rounded-t-3xl border border-border bg-card shadow-2xl animate-in slide-in-from-bottom duration-200">
             {/* Handle */}
-            <div className="flex justify-center pt-2 pb-1">
-              <div className="h-1 w-8 rounded-full bg-muted-foreground/30" />
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="h-1 w-10 rounded-full bg-primary/30" />
             </div>
-            <header className="flex items-center gap-2 border-b border-border px-3 py-2.5 shrink-0">
-              <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <Sparkles className="size-3 sm:size-3.5" />
-              </span>
+            <header className="flex items-center gap-2.5 border-b border-border px-3 py-3 shrink-0 bg-gradient-to-r from-secondary/80 to-card">
+              <BuAisyahAvatar size="md" />
               <div className="flex-1 min-w-0">
-                <p className="font-heading text-xs sm:text-sm font-semibold truncate">{chat?.title ?? "AI"}</p>
-                <p className="text-[9px] sm:text-[10px] sm:text-xs sm:text-sm text-muted-foreground">OpenRouter · Tool calling</p>
+                <p className="font-heading text-sm font-semibold text-foreground">Bu AIsyah</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">Asisten WarungKu</p>
               </div>
-              <Button variant="ghost" size="icon-sm" onClick={handleNewChat} disabled={isLoading || isThinking} className="size-7 rounded-md">
+              <Button variant="ghost" size="icon-sm" onClick={handleNewChat} disabled={isLoading || isThinking} className="size-7 rounded-lg hover:bg-secondary hover:text-primary">
                 <ArrowRight className="size-3 sm:size-3.5" />
               </Button>
-              <Button variant="ghost" size="icon-sm" onClick={() => onOpenChange(false)} className="size-7 rounded-md">
+              <Button variant="ghost" size="icon-sm" onClick={() => onOpenChange(false)} className="size-7 rounded-lg hover:bg-secondary hover:text-primary">
                 <X className="size-3 sm:size-3.5" />
               </Button>
             </header>
