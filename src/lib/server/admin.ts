@@ -2,8 +2,17 @@ import { pool } from "@/db/client";
 import { logger } from "./logger";
 
 /**
+ * Parse a PostgreSQL boolean value (can be boolean, string 't'/'f', or number 1/0).
+ */
+function pgBool(val: unknown): boolean {
+  if (typeof val === "boolean") return val;
+  if (typeof val === "string") return val === "t" || val === "true" || val === "1";
+  if (typeof val === "number") return val === 1;
+  return false;
+}
+
+/**
  * Check if a user is approved and/or admin.
- * Returns { approved, isAdmin } or null if user not found.
  */
 export async function getUserStatus(userId: string): Promise<{ approved: boolean; isAdmin: boolean } | null> {
   const result = await pool.query(
@@ -13,8 +22,8 @@ export async function getUserStatus(userId: string): Promise<{ approved: boolean
   if (result.rows.length === 0) return null;
   const row = result.rows[0];
   return {
-    approved: row.approved === true || row.approved === "true" || row.approved === 1,
-    isAdmin: row.is_admin === true || row.is_admin === "true" || row.is_admin === 1,
+    approved: pgBool(row.approved),
+    isAdmin: pgBool(row.is_admin),
   };
 }
 
@@ -62,8 +71,6 @@ export async function deleteUser(userId: string): Promise<boolean> {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-
-    // Delete in order respecting foreign keys
     await client.query('DELETE FROM ai_messages WHERE user_id = $1', [userId]);
     await client.query('DELETE FROM ai_chats WHERE user_id = $1', [userId]);
     await client.query('DELETE FROM transaction_items WHERE transaction_id IN (SELECT id FROM transactions WHERE user_id = $1)', [userId]);
@@ -75,7 +82,6 @@ export async function deleteUser(userId: string): Promise<boolean> {
     await client.query('DELETE FROM session WHERE user_id = $1', [userId]);
     await client.query('DELETE FROM account WHERE user_id = $1', [userId]);
     await client.query('DELETE FROM "user" WHERE id = $1', [userId]);
-
     await client.query("COMMIT");
     logger.info("User deleted with all data", { userId });
     return true;
@@ -117,8 +123,8 @@ export async function getAllUsersWithStats() {
     name: row.name,
     email: row.email,
     createdAt: row.created_at,
-    approved: row.approved === true || row.approved === "true" || row.approved === 1,
-    isAdmin: row.is_admin === true || row.is_admin === "true" || row.is_admin === 1,
+    approved: pgBool(row.approved),
+    isAdmin: pgBool(row.is_admin),
     stats: {
       products: Number(row.product_count),
       transactions: Number(row.transaction_count),
