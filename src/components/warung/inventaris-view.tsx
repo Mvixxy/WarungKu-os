@@ -23,7 +23,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatCurrency } from "@/lib/format";
 import { Product, ProductCategory, ProductDraft } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { exportProductsJSON, validateImportJSON, ImportResult } from "@/lib/inventory-io";
+import * as XLSX from "xlsx";
+import { exportProductsJSON, exportProductsXLSX, validateImportJSON, validateImportXLSX, type ImportResult } from "@/lib/inventory-io";
 import { fuzzyFindSimilar } from "@/lib/fuzzy";
 
 const defaultCategories = ["Sembako"];
@@ -230,6 +231,7 @@ export function InventarisView() {
   const [importLoading, setImportLoading] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [importErrors, setImportErrors] = useState<string[]>([]);
+  const [importDrafts, setImportDrafts] = useState<unknown[]>([]);
 
   const categories = Array.from(
     new Set([...defaultCategories, ...(settings.categories ?? []), ...products.map((p) => p.category)])
@@ -353,40 +355,76 @@ export function InventarisView() {
     }
   }
 
-  function handleExport() {
+  function handleExportJSON() {
     exportProductsJSON(products);
-    toast.success(`${products.length} produk berhasil diexport!`);
+    toast.success(`${products.length} produk berhasil diexport sebagai JSON!`);
+  }
+
+  function handleExportXLSX() {
+    exportProductsXLSX(products);
+    toast.success(`${products.length} produk berhasil diexport sebagai XLSX!`);
   }
 
   function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const json = JSON.parse(reader.result as string);
-        const { drafts, errors } = validateImportJSON(json);
-        if (errors.length > 0 && drafts.length === 0) {
-          setImportErrors(errors);
+
+    const isXLSX = file.name.endsWith(".xlsx") || file.name.endsWith(".xls");
+    const isJSON = file.name.endsWith(".json");
+
+    if (!isXLSX && !isJSON) {
+      toast.error("Format file tidak didukung. Gunakan .json atau .xlsx");
+      return;
+    }
+
+    if (isJSON) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const json = JSON.parse(reader.result as string);
+          const { drafts, errors } = validateImportJSON(json);
+          if (errors.length > 0 && drafts.length === 0) {
+            setImportErrors(errors);
+            setImportResult(null);
+          } else {
+            setImportErrors(errors);
+            setImportResult({ total: drafts.length, imported: 0, errors: [] });
+            setImportDrafts(drafts);
+          }
+        } catch {
+          setImportErrors(["File tidak bisa dibaca sebagai JSON."]);
           setImportResult(null);
-        } else {
-          setImportErrors(errors);
-          setImportResult({ total: drafts.length, imported: 0, errors: [] });
-          // Store drafts for confirmation
-          (window as unknown as Record<string, unknown>).__importDrafts = drafts;
         }
-      } catch {
-        setImportErrors(["File tidak bisa dibaca sebagai JSON."]);
-        setImportResult(null);
-      }
-    };
-    reader.readAsText(file);
+      };
+      reader.readAsText(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = new Uint8Array(reader.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: "array" });
+          const { drafts, errors } = validateImportXLSX(workbook);
+          if (errors.length > 0 && drafts.length === 0) {
+            setImportErrors(errors);
+            setImportResult(null);
+          } else {
+            setImportErrors(errors);
+            setImportResult({ total: drafts.length, imported: 0, errors: [] });
+            setImportDrafts(drafts);
+          }
+        } catch {
+          setImportErrors(["File XLSX tidak bisa dibaca."]);
+          setImportResult(null);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
     e.target.value = "";
   }
 
   async function confirmImport() {
-    const drafts = (window as unknown as Record<string, unknown>).__importDrafts as Array<Record<string, unknown>> | undefined;
-    if (!drafts || drafts.length === 0) return;
+    if (importDrafts.length === 0) return;
+    const drafts = importDrafts;
     setImportLoading(true);
     try {
       const res = await fetch("/api/products/import", {
@@ -490,7 +528,16 @@ export function InventarisView() {
                 variant="outline"
                 size="sm"
                 className="h-9 shrink-0 rounded-lg px-2 text-xs"
-                onClick={() => handleExport()}
+                onClick={() => handleExportJSON()}
+              >
+                <Download className="size-3.5" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-9 shrink-0 rounded-lg px-2 text-xs"
+                onClick={() => handleExportXLSX()}
               >
                 <Download className="size-3.5" />
               </Button>
@@ -801,16 +848,16 @@ export function InventarisView() {
         <DialogContent className="max-w-md" showCloseButton>
           <DialogHeader>
             <DialogTitle>Import Produk</DialogTitle>
-            <DialogDescription>Unggah file JSON yang sudah diekspor dari WarungKu lain.</DialogDescription>
+            <DialogDescription>Unggah file JSON atau XLSX dari WarungKu lain.</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             {!importResult ? (
               <div className="rounded-lg border-2 border-dashed border-border p-6 text-center">
                 <Upload className="mx-auto mb-2 size-8 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">Pilih file JSON untuk diimport</p>
+                <p className="text-sm text-muted-foreground">Pilih file JSON atau XLSX untuk diimport</p>
                 <Input
                   type="file"
-                  accept=".json"
+                  accept=".json,.xlsx,.xls"
                   className="mt-3"
                   onChange={(e) => handleImportFile(e)}
                 />

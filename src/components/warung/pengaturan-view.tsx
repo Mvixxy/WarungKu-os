@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { BadgeCheck, Bell, Loader2, MapPin, RotateCcw, Store, WalletCards } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { BadgeCheck, Bell, Database, Download, Loader2, MapPin, RotateCcw, Store, Upload, WalletCards } from "lucide-react";
+import * as XLSX from "xlsx";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { UserAccountCard } from "@/components/warung/user-account-card";
 import { formatCurrency } from "@/lib/format";
+import { exportProductsJSON, exportProductsXLSX, validateImportJSON, validateImportXLSX, type ImportResult } from "@/lib/inventory-io";
 import { PaymentMethod, Settings } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +33,15 @@ export function PengaturanView() {
   const [isResetting, setIsResetting] = useState(false);
   const [confirmResetOpen, setConfirmResetOpen] = useState(false);
   const [resetConfirmText, setResetConfirmText] = useState("");
+
+  // Database import/export state
+  const [importOpen, setImportOpen] = useState(false);
+  const [importLoading, setImportLoading] = useState(false);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [importErrors, setImportErrors] = useState<string[]>([]);
+  const [importDrafts, setImportDrafts] = useState<unknown[]>([]);
+  const [importFormat, setImportFormat] = useState<"json" | "xlsx" | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setForm(settings);
@@ -86,6 +97,111 @@ export function PengaturanView() {
     } finally {
       setIsResetting(false);
     }
+  }
+
+  // ─── Database export handlers ─────────────────────────
+
+  function handleExportJSON() {
+    exportProductsJSON(products);
+    toast.success(`${products.length} produk diekspor sebagai JSON.`);
+  }
+
+  function handleExportXLSX() {
+    exportProductsXLSX(products);
+    toast.success(`${products.length} produk diekspor sebagai XLSX.`);
+  }
+
+  // ─── Database import handlers ─────────────────────────
+
+  function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const isXLSX = file.name.endsWith(".xlsx") || file.name.endsWith(".xls");
+    const isJSON = file.name.endsWith(".json");
+
+    if (!isXLSX && !isJSON) {
+      toast.error("Format file tidak didukung. Gunakan .json atau .xlsx");
+      return;
+    }
+
+    if (isJSON) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const json = JSON.parse(reader.result as string);
+          const { drafts, errors } = validateImportJSON(json);
+          setImportFormat("json");
+          setImportErrors(errors);
+          if (drafts.length > 0) {
+            setImportDrafts(drafts);
+            setImportResult({ total: drafts.length, imported: 0, errors: [] });
+          } else {
+            setImportDrafts([]);
+            setImportResult(null);
+          }
+        } catch {
+          setImportErrors(["File tidak bisa dibaca sebagai JSON."]);
+          setImportResult(null);
+          setImportDrafts([]);
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = new Uint8Array(reader.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: "array" });
+          const { drafts, errors } = validateImportXLSX(workbook);
+          setImportFormat("xlsx");
+          setImportErrors(errors);
+          if (drafts.length > 0) {
+            setImportDrafts(drafts);
+            setImportResult({ total: drafts.length, imported: 0, errors: [] });
+          } else {
+            setImportDrafts([]);
+            setImportResult(null);
+          }
+        } catch {
+          setImportErrors(["File XLSX tidak bisa dibaca."]);
+          setImportResult(null);
+          setImportDrafts([]);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    e.target.value = "";
+  }
+
+  async function confirmImport() {
+    if (importDrafts.length === 0) return;
+    setImportLoading(true);
+    try {
+      const res = await fetch("/api/products/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ products: importDrafts }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Import gagal.");
+      setImportResult({ total: importDrafts.length, imported: data.imported, errors: [] });
+      toast.success(`${data.imported} produk berhasil diimport!`);
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Import gagal.");
+    } finally {
+      setImportLoading(false);
+    }
+  }
+
+  function resetImportDialog() {
+    setImportOpen(false);
+    setImportResult(null);
+    setImportErrors([]);
+    setImportDrafts([]);
+    setImportFormat(null);
   }
 
   return (
@@ -352,8 +468,91 @@ export function PengaturanView() {
           </CardContent>
         </Card>
 
+        {/* Database Export/Import Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-heading text-lg">Database warung</CardTitle>
+            <CardDescription className="text-xs">
+              Export atau import data inventaris produk. Bisa dipakai untuk share database antar warung.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {/* Export Section */}
+            <div className="rounded-xl border border-border p-3.5">
+              <div className="flex items-center gap-1.5">
+                <Download className="size-3.5 text-primary" />
+                <p className="text-xs font-medium">Export data</p>
+              </div>
+              <p className="mt-1 text-[10px] text-muted-foreground">
+                Download {products.length} produk sebagai file data.
+              </p>
+              <div className="mt-2.5 flex flex-wrap gap-1.5">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-8 rounded-lg text-xs"
+                  onClick={handleExportJSON}
+                  disabled={products.length === 0}
+                >
+                  <Download className="mr-1 size-3" />
+                  JSON
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-8 rounded-lg text-xs"
+                  onClick={handleExportXLSX}
+                  disabled={products.length === 0}
+                >
+                  <Download className="mr-1 size-3" />
+                  Excel (.xlsx)
+                </Button>
+              </div>
+            </div>
+
+            {/* Import Section */}
+            <div className="rounded-xl border border-border p-3.5">
+              <div className="flex items-center gap-1.5">
+                <Upload className="size-3.5 text-primary" />
+                <p className="text-xs font-medium">Import data</p>
+              </div>
+              <p className="mt-1 text-[10px] text-muted-foreground">
+                Upload file JSON atau XLSX dari warung lain.
+              </p>
+              <div className="mt-2.5">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json,.xlsx,.xls"
+                  className="hidden"
+                  onChange={handleImportFile}
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-8 rounded-lg text-xs"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="mr-1 size-3" />
+                  Pilih file
+                </Button>
+              </div>
+            </div>
+
+            <p className="text-[10px] text-muted-foreground">
+              Format yang didukung: <span className="font-medium">.json</span> (WarungKu) dan <span className="font-medium">.xlsx</span> (Excel/Spreadsheet).
+              Kategori valid: Makanan, Minuman, Sembako, Kebutuhan Harian.
+            </p>
+          </CardContent>
+        </Card>
+
         <UserAccountCard />
       </div>
+
+      {/* Reset Workspace Dialog */}
       <Dialog open={confirmResetOpen} onOpenChange={(open) => { setConfirmResetOpen(open); if (!open) setResetConfirmText(""); }}>
         <DialogContent className="max-w-sm" showCloseButton>
           <DialogHeader>
@@ -399,6 +598,58 @@ export function PengaturanView() {
                 <><RotateCcw className="mr-1.5 size-3.5" />Ya, reset semua</>
               )}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={importOpen} onOpenChange={(o) => { if (!o) resetImportDialog(); }}>
+        <DialogContent className="max-w-md" showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Import Produk</DialogTitle>
+            <DialogDescription>
+              {importFormat === "xlsx" ? "Data dari file Excel (.xlsx)" : "Data dari file JSON"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {!importResult ? (
+              <div className="rounded-lg border-2 border-dashed border-border p-6 text-center">
+                <Database className="mx-auto mb-2 size-8 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">Memproses file...</p>
+              </div>
+            ) : importResult.imported > 0 ? (
+              <div className="rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950">
+                <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                  Berhasil import {importResult.imported} dari {importResult.total} produk!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Ditemukan {importResult.total} produk untuk diimport.
+                </p>
+                {importErrors.length > 0 && (
+                  <div className="max-h-40 overflow-y-auto rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950">
+                    <p className="mb-1 text-xs font-medium text-amber-800 dark:text-amber-200">
+                      Peringatan ({importErrors.length}):
+                    </p>
+                    {importErrors.map((err, i) => (
+                      <p key={i} className="text-xs text-amber-700 dark:text-amber-300">{err}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" size="sm" className="rounded-lg" onClick={resetImportDialog}>
+              {importResult?.imported ? "Tutup" : "Batal"}
+            </Button>
+            {importResult && importResult.imported === 0 && importResult.total > 0 && (
+              <Button type="button" size="sm" className="rounded-lg px-4" disabled={importLoading} onClick={() => void confirmImport()}>
+                {importLoading ? (<><Loader2 className="mr-1.5 size-3.5 animate-spin" />Mengimport...</>) : `Import ${importResult.total} produk`}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
