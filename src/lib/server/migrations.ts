@@ -1,3 +1,4 @@
+import { logger } from "./logger";
 import { pool } from "@/db/client";
 
 /**
@@ -149,12 +150,12 @@ export async function runMigrations() {
       continue;
     }
 
-    console.log(`[Migration] Running v${migration.version}: ${migration.name}`);
+    logger.info("Running migration", { version: migration.version, name: migration.name });
     await pool.query(migration.sql);
     await pool.query(
       "INSERT INTO schema_migrations (version, name) VALUES ($1, $2)",
       [migration.version, migration.name]
     );
-    console.log(`[Migration] v${migration.version} applied successfully.`);
+    logger.info("Migration applied", { version: migration.version });
   }
 }

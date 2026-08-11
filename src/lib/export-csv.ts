@@ -1,5 +1,5 @@
 import { Transaction, Expense, Debt } from "./types";
-import { formatCurrency, formatDate } from "./format";
+import { formatDate } from "./format";
 
 export function exportTransactionsCSV(transactions: Transaction[]) {
   const headers = ["Tanggal", "Total", "Metode Bayar", "Status", "Item"];

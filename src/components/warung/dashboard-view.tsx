@@ -16,7 +16,7 @@ import { formatCurrency, formatDateTime, formatTime } from "@/lib/format";
 import { toast } from "sonner";
 
 export function DashboardView() {
-  const { debts, lowStockProducts, products, transactions, voidTransaction, loadMoreTransactions, loadMoreDebts } = useAppState();
+  const { debts, lowStockProducts, products, transactions, voidTransaction, loadMoreTransactions } = useAppState();
 
   const todayTransactions = transactions.filter((transaction) => {
     const value = new Date(transaction.createdAt);
@@ -205,7 +205,7 @@ export function DashboardView() {
                   ))
                 ) : (
                   <div className="py-4 text-center text-xs text-muted-foreground">
-                    searchQuery ? "Tidak ada transaksi yang cocok." : "Belum ada riwayat transaksi."
+                    {searchQuery ? "Tidak ada transaksi yang cocok." : "Belum ada riwayat transaksi."}
                   </div>
                 )}
                 {transactions.length > 5 && (

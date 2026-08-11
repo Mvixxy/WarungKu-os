@@ -23,18 +23,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatCompactCurrency, formatCurrency, formatDate } from "@/lib/format";
 import { buildSeries, estimateProductVelocity, getRangeStart, ReportRange, summarizeReport } from "@/lib/reporting";
-import { exportTransactionsCSV, exportExpensesCSV, exportDebtsCSV } from "@/lib/export-csv";
+import { exportTransactionsCSV, exportExpensesCSV } from "@/lib/export-csv";
 
 export function LaporanView() {
-  const { transactions, expenses, debts, products, settings, addExpense, updateExpense, deleteExpense } = useAppState();
+  const { transactions, expenses, products, settings, addExpense, updateExpense, deleteExpense } = useAppState();
   const [range, setRange] = useState<ReportRange>("harian");
   const [expenseOpen, setExpenseOpen] = useState(false);
   const [expenseLoading, setExpenseLoading] = useState(false);
   const [expenseDraft, setExpenseDraft] = useState<{ title: string; amount: string; category: "Operasional" | "Belanja" | "Utilitas" }>({ title: "", amount: "", category: "Operasional" });
 
   const summary = summarizeReport(range, transactions, expenses);
-  const periodStart = getRangeStart(range);
-  const filteredExpenses = expenses.filter((e) => new Date(e.createdAt) >= periodStart);
+  const _periodStart = getRangeStart(range);
   const series = buildSeries(range, transactions);
   const topVelocity = estimateProductVelocity(products, transactions)
     .sort((left, right) => right.sold - left.sold)

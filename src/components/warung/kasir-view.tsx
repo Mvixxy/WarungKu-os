@@ -12,7 +12,6 @@ import {
   Search,
   ShoppingBasket,
   Sparkles,
-  Wallet,
   Wheat,
   Loader2,
   Printer,

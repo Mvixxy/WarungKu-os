@@ -42,7 +42,7 @@ function NumberInput({
   id,
   value,
   onChange,
-  min = 0,
+  min: _min = 0,
 }: {
   id: string;
   value: number;

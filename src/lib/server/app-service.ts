@@ -806,7 +806,7 @@ export async function voidTransaction(userId: string, transactionId: string, rea
 
     // Restore stock for each item
     for (const item of items) {
-      const result = await tx.execute(sql`
+      const _voidResult = await tx.execute(sql`
         UPDATE products
         SET stock = stock + ${item.quantity}, updated_at = ${nowIso()}
         WHERE id = ${item.productId}
