@@ -16,6 +16,7 @@ import {
   Sparkles,
   Store,
   Wallet,
+  Shield,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -37,6 +38,7 @@ const navigation = [
   { href: "/buku-hutang", label: "Hutang", icon: Wallet },
   { href: "/laporan", label: "Laporan", icon: ScrollText },
   { href: "/pengaturan", label: "Pengaturan", icon: Settings2 },
+  { href: "/admin", label: "Admin", icon: Shield, adminOnly: true },
 ];
 
 const bottomNav = [
@@ -91,8 +93,16 @@ export function AppShell({
   const [aiOpen, setAiOpen] = useState(false);
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/admin/check")
+      .then((r) => r.json())
+      .then((data) => setIsAdmin(data.isAdmin ?? false))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (aiOpen) setLeftCollapsed(true);
@@ -159,7 +169,7 @@ export function AppShell({
                 : "space-y-1",
             )}
           >
-            {navigation.map((item) => {
+            {navigation.filter((item) => !("adminOnly" in item && item.adminOnly && !isAdmin)).map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
 
@@ -210,7 +220,7 @@ export function AppShell({
                   <ThemeToggle />
                 </div>
                 <div className="flex flex-1 flex-col space-y-1 border-t border-sidebar-border px-4 pt-3 pb-6">
-                  {navigation.map((item) => {
+                  {navigation.filter((item) => !("adminOnly" in item && item.adminOnly && !isAdmin)).map((item) => {
                     const Icon = item.icon;
                     const isActive = pathname === item.href;
                     return (

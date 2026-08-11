@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Script from "next/script";
 import { AppShell } from "@/components/app-shell";
 import { auth } from "@/lib/auth";
+import { getUserStatus } from "@/lib/server/admin";
 
 export default async function DashboardLayout({
   children,
@@ -15,6 +16,11 @@ export default async function DashboardLayout({
 
   if (!session?.user) {
     redirect("/auth");
+  }
+
+  const status = await getUserStatus(session.user.id);
+  if (!status?.approved) {
+    redirect("/pending");
   }
 
   return (
