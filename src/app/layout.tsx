@@ -25,6 +25,10 @@ export const metadata: Metadata = {
   title: "WarungKu",
   description: "Aplikasi kasir tablet-first untuk operasional warung modern.",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/apple-touch-icon.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

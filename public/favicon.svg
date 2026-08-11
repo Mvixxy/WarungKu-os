@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Background rounded square -->
+  <rect width="512" height="512" rx="96" fill="#8B5E3C"/>
+  <rect width="512" height="512" rx="96" fill="url(#bgGrad)"/>
+  
+  <!-- Store awning roof -->
+  <path d="M108 230 L256 150 L404 230" stroke="#FFF8F0" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Awning scallops -->
+  <path d="M108 230 Q145 270 182 230 Q219 270 256 230 Q293 270 330 230 Q367 270 404 230" stroke="#FFF8F0" stroke-width="20" stroke-linecap="round" fill="none"/>
+  
+  <!-- Store body / pillars -->
+  <rect x="148" y="270" width="28" height="120" rx="4" fill="#FFF8F0" opacity="0.9"/>
+  <rect x="336" y="270" width="28" height="120" rx="4" fill="#FFF8F0" opacity="0.9"/>
+  
+  <!-- Counter / shelf -->
+  <rect x="140" y="340" width="232" height="16" rx="4" fill="#FFF8F0" opacity="0.85"/>
+  
+  <!-- Items on shelf -->
+  <rect x="170" y="300" width="24" height="40" rx="3" fill="#D4914E" opacity="0.7"/>
+  <rect x="210" y="310" width="20" height="30" rx="3" fill="#C47A3A" opacity="0.7"/>
+  <rect x="248" y="295" width="22" height="45" rx="3" fill="#D4914E" opacity="0.7"/>
+  <rect x="282" y="305" width="24" height="35" rx="3" fill="#C47A3A" opacity="0.7"/>
+  
+  <!-- KU text -->
+  <text x="256" y="445" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="64" font-weight="700" fill="#FFF8F0" opacity="0.95" letter-spacing="6">KU</text>
+  
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#A06B3F"/>
+      <stop offset="100%" stop-color="#6B4226"/>
+    </linearGradient>
+  </defs>
+</svg>
