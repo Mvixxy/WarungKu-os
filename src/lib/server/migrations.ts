@@ -126,17 +126,7 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       END $$;
     `,
   },
-  {
-    version: 5,
-    name: "add_user_approval",
-    sql: `
-      ALTER TABLE "user" ADD COLUMN IF NOT EXISTS approved boolean DEFAULT false;
-      ALTER TABLE "user" ADD COLUMN IF NOT EXISTS is_admin boolean DEFAULT false;
 
-      -- Auto-approve existing users (they were created before this system)
-      UPDATE "user" SET approved = true WHERE approved IS NULL;
-    `,
-  },
 ];
 
 export async function runMigrations() {
