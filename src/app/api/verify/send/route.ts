@@ -27,9 +27,24 @@ export async function POST(request: Request) {
     }
 
     const user = userResult.rows[0];
-    if (user.email_verified === true || user.email_verified === "t") {
+    const emailVerified = user.email_verified === true || user.email_verified === "t";
+    if (emailVerified) {
       return NextResponse.json({ message: "Email sudah terverifikasi." });
     }
+
+    // Ensure email_verifications table exists
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS email_verifications (
+        id text PRIMARY KEY,
+        email text NOT NULL,
+        code text NOT NULL,
+        expires_at timestamptz NOT NULL,
+        used integer NOT NULL DEFAULT 0,
+        created_at timestamptz NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS email_verifications_email_idx
+        ON email_verifications(email, created_at DESC);
+    `);
 
     // Rate limit: max 3 codes per email per 10 minutes
     const recentCodes = await pool.query(
@@ -50,7 +65,7 @@ export async function POST(request: Request) {
     // Generate and store new code
     const code = generateCode();
     const id = `ev_${crypto.randomUUID().slice(0, 10)}`;
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
     await pool.query(
       'INSERT INTO email_verifications (id, email, code, expires_at) VALUES ($1, $2, $3, $4)',

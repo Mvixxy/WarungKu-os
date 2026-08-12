@@ -6,6 +6,20 @@ import { auth } from "@/lib/auth";
 import { getUserStatus, pgBool } from "@/lib/server/admin";
 import { pool } from "@/db/client";
 
+async function isEmailVerified(userId: string): Promise<boolean> {
+  try {
+    const result = await pool.query<{ email_verified: unknown }>(
+      'SELECT email_verified FROM "user" WHERE id = $1',
+      [userId]
+    );
+    const row = result.rows[0];
+    if (!row) return false;
+    return pgBool(row.email_verified);
+  } catch {
+    return false;
+  }
+}
+
 export default async function DashboardLayout({
   children,
 }: Readonly<{
@@ -19,14 +33,8 @@ export default async function DashboardLayout({
     redirect("/auth");
   }
 
-  // Check email verification
-  const userResult = await pool.query<{ email_verified: unknown }>(
-    'SELECT email_verified FROM "user" WHERE id = $1',
-    [session.user.id]
-  );
-  const userRow = userResult.rows[0];
-
-  if (userRow && !pgBool(userRow.email_verified)) {
+  const verified = await isEmailVerified(session.user.id);
+  if (!verified) {
     redirect("/verify");
   }
 

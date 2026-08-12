@@ -126,9 +126,56 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       END $$;
     `,
   },
+  {
+    version: 3,
+    name: "admin_approval_columns",
+    sql: `
+      DO $$ BEGIN
+        ALTER TABLE "user" ADD COLUMN approved boolean DEFAULT false;
+      EXCEPTION
+        WHEN duplicate_column THEN null;
+      END $$;
+
+      DO $$ BEGIN
+        ALTER TABLE "user" ADD COLUMN is_admin boolean DEFAULT false;
+      EXCEPTION
+        WHEN duplicate_column THEN null;
+      END $$;
+    `,
+  },
+  {
+    version: 4,
+    name: "set_initial_admin",
+    sql: `
+      -- Mark existing users as approved (they registered before the approval system)
+      UPDATE "user" SET approved = true WHERE approved IS NULL OR approved = false;
+    `,
+  },
+  {
+    version: 5,
+    name: "email_verification",
+    sql: `
+      CREATE TABLE IF NOT EXISTS email_verifications (
+        id text PRIMARY KEY,
+        email text NOT NULL,
+        code text NOT NULL,
+        expires_at timestamptz NOT NULL,
+        used integer NOT NULL DEFAULT 0,
+        created_at timestamptz NOT NULL DEFAULT NOW()
+      );
+
+      CREATE INDEX IF NOT EXISTS email_verifications_email_idx
+        ON email_verifications(email, created_at DESC);
+
+      DO $$ BEGIN
+        ALTER TABLE "user" ADD COLUMN email_verified boolean DEFAULT false;
+      EXCEPTION
+        WHEN duplicate_column THEN null;
+      END $$;
+    `,
+  },
 
 ];
-
 export async function runMigrations() {
   // Ensure migration tracking table exists
   await pool.query(`
