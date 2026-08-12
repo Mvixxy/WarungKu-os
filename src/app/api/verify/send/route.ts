@@ -57,6 +57,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Email sudah terverifikasi." });
     }
 
+    // DEDUP: If there's already a valid unused code sent less than 2 minutes ago, don't send another
+    const existingCode = await pool.query(
+      `SELECT id FROM email_verifications 
+       WHERE email = $1 AND used = 0 AND expires_at > NOW() 
+         AND created_at > NOW() - INTERVAL '2 minutes'
+       LIMIT 1`,
+      [user.email]
+    );
+    if (existingCode.rows.length > 0) {
+      return NextResponse.json({ message: "Kode sudah dikirim. Cek email kamu." });
+    }
+
     // Rate limit: max 3 codes per email per 10 minutes
     const recentCodes = await pool.query(
       `SELECT COUNT(*) as count FROM email_verifications 

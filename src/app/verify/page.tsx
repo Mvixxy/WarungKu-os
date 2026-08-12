@@ -17,6 +17,7 @@ export default function VerifyPage() {
   const [cooldown, setCooldown] = useState(0);
   const [verified, setVerified] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const codeSentRef = useRef(false);
 
   // Check if already verified
   useEffect(() => {
@@ -30,8 +31,10 @@ export default function VerifyPage() {
       .catch(() => {});
   }, [router]);
 
-  // Auto-send code on mount
+  // Auto-send code on mount (only once)
   useEffect(() => {
+    if (codeSentRef.current) return;
+    codeSentRef.current = true;
     handleSendCode(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -70,12 +73,10 @@ export default function VerifyPage() {
     newCode[index] = value;
     setCode(newCode);
 
-    // Auto-focus next input
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
 
-    // Auto-submit when all filled
     if (newCode.every((c) => c.length === 1)) {
       void handleVerify(newCode.join(""));
     }
@@ -95,11 +96,9 @@ export default function VerifyPage() {
     const newCode = pasted.split("").concat(Array(6).fill("")).slice(0, 6);
     setCode(newCode);
 
-    // Focus last filled or next empty
     const nextIndex = Math.min(pasted.length, 5);
     inputRefs.current[nextIndex]?.focus();
 
-    // Auto-submit if 6 digits pasted
     if (pasted.length === 6) {
       void handleVerify(pasted);
     }
@@ -172,7 +171,6 @@ export default function VerifyPage() {
             </p>
           </div>
 
-          {/* Code Input */}
           <div className="flex justify-center gap-2">
             {code.map((digit, i) => (
               <Input
@@ -198,7 +196,6 @@ export default function VerifyPage() {
             </div>
           )}
 
-          {/* Resend */}
           <div className="space-y-2">
             {cooldown > 0 ? (
               <p className="text-xs text-muted-foreground">
