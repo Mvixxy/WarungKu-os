@@ -4,14 +4,10 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Users,
-  Package,
-  Receipt,
-  AlertTriangle,
   CheckCircle2,
   XCircle,
   Trash2,
   Shield,
-  TrendingUp,
   Loader2,
   ArrowLeft,
   Search,
@@ -21,16 +17,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { formatCurrency } from "@/lib/format";
 
 type SystemStats = {
   totalUsers: number;
   approvedUsers: number;
   pendingUsers: number;
-  totalProducts: number;
-  totalTransactions: number;
-  activeDebts: number;
-  totalRevenue: number;
 };
 
 type UserWithStats = {
@@ -40,6 +31,7 @@ type UserWithStats = {
   createdAt: string;
   approved: boolean;
   isAdmin: boolean;
+  online: boolean;
   stats: {
     products: number;
     transactions: number;
@@ -72,9 +64,31 @@ export default function AdminPage() {
 
       const statsData = await statsRes.json();
       const usersData = await usersRes.json();
-      setStats(statsData.stats);
-      setUsers(usersData.users);
+
+      // Simplified stats
+      setStats({
+        totalUsers: statsData.stats.totalUsers,
+        approvedUsers: statsData.stats.approvedUsers,
+        pendingUsers: statsData.stats.pendingUsers,
+      });
+
+      // Check online status for each user
+      const usersWithOnline = await Promise.all(
+        usersData.users.map(async (u: UserWithStats) => {
+          try {
+            const res = await fetch(`/api/admin/user-status?userId=${u.id}`);
+            if (res.ok) {
+              const data = await res.json();
+              return { ...u, online: data.online ?? false };
+            }
+          } catch {}
+          return { ...u, online: false };
+        })
+      );
+
+      setUsers(usersWithOnline);
     } catch {
+      // silent
     } finally {
       setLoading(false);
     }
@@ -171,7 +185,7 @@ export default function AdminPage() {
       u.email.toLowerCase().includes(search.toLowerCase())
   );
 
-  const pendingUsers = filteredUsers.filter((u) => !u.approved);
+  const pendingUsers = filteredUsers.filter((u) => !u.approved && !u.isAdmin);
   const approvedUsers = filteredUsers.filter((u) => u.approved && !u.isAdmin);
   const adminUsers = filteredUsers.filter((u) => u.isAdmin);
 
@@ -183,10 +197,9 @@ export default function AdminPage() {
     );
   }
 
-
   return (
     <div className="min-h-dvh bg-background">
-      <div className="mx-auto max-w-5xl space-y-4 p-4 lg:p-6">
+      <div className="mx-auto max-w-3xl space-y-4 p-4 lg:p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -201,7 +214,7 @@ export default function AdminPage() {
             </Button>
             <div>
               <h1 className="font-heading text-xl font-semibold">Admin Dashboard</h1>
-              <p className="text-xs text-muted-foreground">Monitor dan kelola pengguna WarungKu OS</p>
+              <p className="text-xs text-muted-foreground">Monitor pengguna WarungKu OS</p>
             </div>
           </div>
           <Badge variant="outline" className="gap-1">
@@ -210,37 +223,29 @@ export default function AdminPage() {
           </Badge>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - User only */}
         {stats && (
-          <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <section className="grid grid-cols-3 gap-3">
             <Card className="p-4">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Users className="size-4" />
                 <p className="text-xs">Total User</p>
               </div>
               <p className="mt-1.5 font-heading text-2xl font-semibold">{stats.totalUsers}</p>
-              <p className="text-[10px] text-muted-foreground">{stats.pendingUsers} menunggu</p>
             </Card>
             <Card className="p-4">
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Package className="size-4" />
-                <p className="text-xs">Total Produk</p>
+                <CheckCircle2 className="size-4 text-green-600" />
+                <p className="text-xs">Aktif</p>
               </div>
-              <p className="mt-1.5 font-heading text-2xl font-semibold">{stats.totalProducts}</p>
+              <p className="mt-1.5 font-heading text-2xl font-semibold">{stats.approvedUsers}</p>
             </Card>
             <Card className="p-4">
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Receipt className="size-4" />
-                <p className="text-xs">Total Transaksi</p>
+                <XCircle className="size-4 text-amber-500" />
+                <p className="text-xs">Menunggu</p>
               </div>
-              <p className="mt-1.5 font-heading text-2xl font-semibold">{stats.totalTransactions}</p>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <TrendingUp className="size-4" />
-                <p className="text-xs">Total Omzet</p>
-              </div>
-              <p className="mt-1.5 font-heading text-2xl font-semibold">{formatCurrency(stats.totalRevenue)}</p>
+              <p className="mt-1.5 font-heading text-2xl font-semibold">{stats.pendingUsers}</p>
             </Card>
           </section>
         )}
@@ -259,14 +264,11 @@ export default function AdminPage() {
         {/* Pending Users */}
         {pendingUsers.length > 0 && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 font-heading text-base">
-                <AlertTriangle className="size-4 text-amber-500" />
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 font-heading text-sm">
+                <span className="size-2 rounded-full bg-amber-500" />
                 Menunggu Persetujuan ({pendingUsers.length})
               </CardTitle>
-              <CardDescription className="text-xs">
-                User yang sudah mendaftar tapi belum disetujui.
-              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
               {pendingUsers.map((user) => (
@@ -274,12 +276,18 @@ export default function AdminPage() {
                   key={user.id}
                   className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50/50 p-3 dark:border-amber-800 dark:bg-amber-950/30"
                 >
-                  <div>
-                    <p className="text-sm font-medium">{user.name || "Tanpa nama"}</p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      Daftar: {new Date(user.createdAt).toLocaleDateString("id-ID")}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-col items-center">
+                      <div className="size-2 rounded-full bg-amber-500" />
+                      <span className="text-[9px] text-amber-600">offline</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{user.name || "Tanpa nama"}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        Daftar: {new Date(user.createdAt).toLocaleDateString("id-ID")}
+                      </p>
+                    </div>
                   </div>
                   <div className="flex gap-1.5">
                     <Button
@@ -314,8 +322,8 @@ export default function AdminPage() {
 
         {/* Approved Users */}
         <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-base">
+          <CardHeader className="pb-3">
+            <CardTitle className="font-heading text-sm">
               Pengguna Aktif ({approvedUsers.length})
             </CardTitle>
           </CardHeader>
@@ -329,14 +337,16 @@ export default function AdminPage() {
                     key={user.id}
                     className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-3"
                   >
-                    <div>
-                      <p className="text-sm font-medium">{user.name || "Tanpa nama"}</p>
-                      <p className="text-xs text-muted-foreground">{user.email}</p>
-                      <div className="mt-1 flex gap-3 text-[10px] text-muted-foreground">
-                        <span>{user.stats.products} produk</span>
-                        <span>{user.stats.transactions} transaksi</span>
-                        <span>{user.stats.debts} hutang aktif</span>
-                        <span>{user.stats.expenses} pengeluaran</span>
+                    <div className="flex items-center gap-3">
+                      <div className="flex flex-col items-center">
+                        <div className={`size-2 rounded-full ${user.online ? "bg-green-500" : "bg-gray-400"}`} />
+                        <span className={`text-[9px] ${user.online ? "text-green-600" : "text-gray-400"}`}>
+                          {user.online ? "online" : "offline"}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{user.name || "Tanpa nama"}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
                       </div>
                     </div>
                     <div className="flex gap-1.5">
@@ -372,9 +382,9 @@ export default function AdminPage() {
         {/* Admin Users */}
         {adminUsers.length > 0 && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 font-heading text-base">
-                <Shield className="size-4 text-primary" />
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 font-heading text-sm">
+                <Shield className="size-3.5 text-primary" />
                 Admin ({adminUsers.length})
               </CardTitle>
             </CardHeader>
@@ -383,10 +393,18 @@ export default function AdminPage() {
                 {adminUsers.map((user) => (
                   <div
                     key={user.id}
-                    className="rounded-lg border border-primary/20 bg-primary/5 p-3"
+                    className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3"
                   >
-                    <p className="text-sm font-medium">{user.name || "Tanpa nama"}</p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                    <div className="flex flex-col items-center">
+                      <div className={`size-2 rounded-full ${user.online ? "bg-green-500" : "bg-gray-400"}`} />
+                      <span className={`text-[9px] ${user.online ? "text-green-600" : "text-gray-400"}`}>
+                        {user.online ? "online" : "offline"}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{user.name || "Tanpa nama"}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -396,8 +414,8 @@ export default function AdminPage() {
 
         {/* Promote to Admin */}
         <Card>
-          <CardHeader>
-            <CardTitle className="font-heading text-base">Promosi Admin</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="font-heading text-sm">Promosi Admin</CardTitle>
             <CardDescription className="text-xs">
               Jadikan user lain sebagai admin.
             </CardDescription>
