@@ -302,6 +302,57 @@ function ChatContent({
   quickPrompts: string[];
   bottomRef: React.RefObject<HTMLDivElement | null>;
 }) {
+  const [isRecording, setIsRecording] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    setVoiceSupported(!!SpeechRecognition);
+  }, []);
+
+  const toggleVoice = useCallback(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error("Browser tidak mendukung input suara.");
+      return;
+    }
+
+    if (isRecording && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "id-ID";
+    recognition.continuous = false;
+    recognition.interimResults = true;
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let transcript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setInput(transcript);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+      recognitionRef.current = null;
+    };
+
+    recognition.onerror = () => {
+      setIsRecording(false);
+      recognitionRef.current = null;
+      toast.error("Gagal mengenali suara. Coba lagi.");
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsRecording(true);
+    toast.info("Mendengarkan... Berbicara sekarang.");
+  }, [isRecording, setInput]);
   return (
     <>
       <div className="flex-1 min-h-0 overflow-y-auto">
@@ -372,7 +423,20 @@ function ChatContent({
             rows={1}
             disabled={!chat}
           />
-          <Button variant="outline" size="icon-sm" className="size-9 rounded-xl border-border hover:bg-secondary hover:text-primary" onClick={() => toast.info("Voice belum tersedia.")} aria-label="Rekam">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon-sm"
+            className={`size-9 rounded-xl border-border transition-colors ${
+              isRecording
+                ? "bg-destructive/10 border-destructive/30 text-destructive animate-pulse"
+                : "hover:bg-secondary hover:text-primary"
+            }`}
+            onClick={toggleVoice}
+            disabled={!chat || !voiceSupported}
+            aria-label={isRecording ? "Hentikan rekaman" : "Rekam suara"}
+            title={!voiceSupported ? "Browser tidak mendukung input suara" : isRecording ? "Klik untuk berhenti" : "Klik untuk mulai bicara"}
+          >
             <Mic className="size-3 sm:size-3.5" />
           </Button>
           <Button size="icon-sm" className="size-9 rounded-xl bg-primary hover:bg-primary/90 shadow-sm" onClick={() => handleSend(input)} disabled={!input.trim() || isThinking || !chat} aria-label="Kirim">
