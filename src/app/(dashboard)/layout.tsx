@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import Script from "next/script";
 import { AppShell } from "@/components/app-shell";
 import { auth } from "@/lib/auth";
-import { getUserStatus } from "@/lib/server/admin";
+import { getUserStatus, pgBool } from "@/lib/server/admin";
+import { pool } from "@/db/client";
 
 export default async function DashboardLayout({
   children,
@@ -16,6 +17,17 @@ export default async function DashboardLayout({
 
   if (!session?.user) {
     redirect("/auth");
+  }
+
+  // Check email verification
+  const userResult = await pool.query<{ email_verified: unknown }>(
+    'SELECT email_verified FROM "user" WHERE id = $1',
+    [session.user.id]
+  );
+  const userRow = userResult.rows[0];
+
+  if (userRow && !pgBool(userRow.email_verified)) {
+    redirect("/verify");
   }
 
   const status = await getUserStatus(session.user.id);

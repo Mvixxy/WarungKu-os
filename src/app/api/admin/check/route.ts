@@ -13,7 +13,6 @@ export async function GET() {
     return NextResponse.json({ 
       approved: status?.approved ?? false, 
       isAdmin: status?.isAdmin ?? false,
-      debug: { userId, status }
     });
   } catch (error) {
     return handleRouteError(error, "Gagal cek status.", 500);

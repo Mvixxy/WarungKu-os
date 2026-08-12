@@ -213,7 +213,7 @@ export function AuthScreen() {
                       if (res.error) {
                         setAuthErrMsg(res.error.message || "Gagal membuat akun.");
                       } else {
-                        router.replace("/pending");
+                        router.replace("/verify");
                       }
                     } catch {
                       setAuthErrMsg("Gagal terhubung ke server.");

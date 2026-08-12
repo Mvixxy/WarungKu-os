@@ -4,7 +4,7 @@ import { logger } from "./logger";
 /**
  * Parse a PostgreSQL boolean value (can be boolean, string 't'/'f', or number 1/0).
  */
-function pgBool(val: unknown): boolean {
+export function pgBool(val: unknown): boolean {
   if (typeof val === "boolean") return val;
   if (typeof val === "string") return val === "t" || val === "true" || val === "1";
   if (typeof val === "number") return val === 1;

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Clock, Mail, LogOut } from "lucide-react";
+import { Clock, Mail, LogOut, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
@@ -10,6 +10,15 @@ import { authClient } from "@/lib/auth-client";
 export default function PendingPage() {
   const router = useRouter();
   const [checking, setChecking] = useState(true);
+  const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
+
+  // Check email verification status
+  useEffect(() => {
+    fetch("/api/verify/check")
+      .then((r) => r.json())
+      .then((data) => setEmailVerified(data.verified ?? false))
+      .catch(() => setEmailVerified(false));
+  }, []);
 
   // Poll every 10 seconds to check if approved
   useEffect(() => {
@@ -64,19 +73,52 @@ export default function PendingPage() {
             </p>
           </div>
 
+          {/* Email verification status */}
+          <div className="flex items-center justify-center gap-2 rounded-xl border border-border bg-muted/30 px-4 py-3">
+            {emailVerified === null ? (
+              <>
+                <div className="size-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                <span className="text-xs text-muted-foreground">Mengecek verifikasi email...</span>
+              </>
+            ) : emailVerified ? (
+              <>
+                <CheckCircle2 className="size-4 text-green-600" />
+                <span className="text-xs text-green-600 font-medium">Email sudah terverifikasi</span>
+              </>
+            ) : (
+              <>
+                <XCircle className="size-4 text-amber-600" />
+                <span className="text-xs text-amber-600 font-medium">Email belum diverifikasi</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-xs"
+                  onClick={() => router.push("/verify")}
+                >
+                  Verifikasi sekarang
+                </Button>
+              </>
+            )}
+          </div>
+
           <div className="rounded-xl border border-border bg-muted/30 p-4 text-left">
             <p className="text-xs font-medium text-muted-foreground">Yang perlu Anda lakukan:</p>
             <ol className="mt-2 space-y-1.5 text-xs text-muted-foreground">
               <li className="flex items-start gap-2">
                 <span className="mt-0.5 font-medium text-primary">1.</span>
-                <span>Hubungi admin WarungKu via WhatsApp atau email</span>
+                <span>Verifikasi email Anda jika belum</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-0.5 font-medium text-primary">2.</span>
-                <span>Minta persetujuan akun Anda</span>
+                <span>Hubungi admin WarungKu via WhatsApp atau email</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-0.5 font-medium text-primary">3.</span>
+                <span>Minta persetujuan akun Anda</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-0.5 font-medium text-primary">4.</span>
                 <span>Halaman ini akan otomatis refresh saat disetujui</span>
               </li>
             </ol>

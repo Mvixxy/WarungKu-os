@@ -58,8 +58,6 @@ export default function AdminPage() {
   const [promoteEmail, setPromoteEmail] = useState("");
   const [promoteLoading, setPromoteLoading] = useState(false);
 
-  const [debugInfo, setDebugInfo] = useState<string>("");
-
   const loadData = useCallback(async () => {
     try {
       const [statsRes, usersRes] = await Promise.all([
@@ -70,7 +68,7 @@ export default function AdminPage() {
       if (!statsRes.ok || !usersRes.ok) {
         const statsBody = await statsRes.json().catch(() => ({}));
         const usersBody = await usersRes.json().catch(() => ({}));
-        setDebugInfo(JSON.stringify({ stats: statsRes.status, statsBody, users: usersRes.status, usersBody }));
+        toast.error("Gagal memuat data admin.");
         return;
       }
 
@@ -79,7 +77,6 @@ export default function AdminPage() {
       setStats(statsData.stats);
       setUsers(usersData.users);
     } catch (err) {
-      setDebugInfo("Error: " + String(err));
     } finally {
       setLoading(false);
     }
@@ -188,20 +185,6 @@ export default function AdminPage() {
     );
   }
 
-  if (debugInfo) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-lg">
-          <CardContent className="space-y-4 p-6">
-            <h1 className="font-heading text-lg font-semibold">Debug Info</h1>
-            <p className="text-sm text-muted-foreground">Admin API mengembalikan error. Ini info debug-nya:</p>
-            <pre className="overflow-auto rounded-lg bg-muted p-3 text-xs">{debugInfo}</pre>
-            <Button type="button" size="sm" className="rounded-lg" onClick={() => window.location.reload()}>Retry</Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-dvh bg-background">
