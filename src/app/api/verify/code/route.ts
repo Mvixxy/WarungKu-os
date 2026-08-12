@@ -17,17 +17,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Kode harus 6 digit." }, { status: 400 });
     }
 
-    // Get user email
-    const userResult = await pool.query(
-      'SELECT email FROM "user" WHERE id = $1',
-      [userId]
-    );
-    if (userResult.rows.length === 0) {
-      return NextResponse.json({ error: "User tidak ditemukan." }, { status: 404 });
-    }
-
-    const email = userResult.rows[0].email;
-
     // Ensure table exists
     await pool.query(`
       CREATE TABLE IF NOT EXISTS email_verifications (
@@ -39,6 +28,17 @@ export async function POST(request: NextRequest) {
         created_at timestamptz NOT NULL DEFAULT NOW()
       );
     `);
+
+    // Get user email
+    const userResult = await pool.query(
+      'SELECT email FROM "user" WHERE id = $1',
+      [userId]
+    );
+    if (userResult.rows.length === 0) {
+      return NextResponse.json({ error: "User tidak ditemukan." }, { status: 404 });
+    }
+
+    const email = userResult.rows[0].email;
 
     // Find valid code
     const codeResult = await pool.query(
@@ -58,15 +58,18 @@ export async function POST(request: NextRequest) {
       [codeResult.rows[0].id]
     );
 
-    // Mark email as verified (safe even if column doesn't exist yet)
-    try {
-      await pool.query(
-        'UPDATE "user" SET email_verified = true WHERE id = $1',
-        [userId]
-      );
-    } catch {
-      // Column may not exist yet — still mark as verified in our check
-    }
+    // Ensure email_verified column exists, then mark as verified
+    await pool.query(`
+      DO $$ BEGIN
+        ALTER TABLE "user" ADD COLUMN email_verified boolean DEFAULT false;
+      EXCEPTION
+        WHEN duplicate_column THEN null;
+      END $$;
+    `);
+    await pool.query(
+      'UPDATE "user" SET email_verified = true WHERE id = $1',
+      [userId]
+    );
 
     return NextResponse.json({ message: "Email berhasil diverifikasi!" });
   } catch (error) {

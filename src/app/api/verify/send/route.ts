@@ -17,6 +17,31 @@ export async function POST(request: Request) {
 
     const { userId } = await getRequestUser();
 
+    // Ensure email_verifications table exists (idempotent)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS email_verifications (
+        id text PRIMARY KEY,
+        email text NOT NULL,
+        code text NOT NULL,
+        expires_at timestamptz NOT NULL,
+        used integer NOT NULL DEFAULT 0,
+        created_at timestamptz NOT NULL DEFAULT NOW()
+      );
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS email_verifications_email_idx
+        ON email_verifications(email, created_at DESC);
+    `).catch(() => {});
+
+    // Ensure email_verified column exists
+    await pool.query(`
+      DO $$ BEGIN
+        ALTER TABLE "user" ADD COLUMN email_verified boolean DEFAULT false;
+      EXCEPTION
+        WHEN duplicate_column THEN null;
+      END $$;
+    `);
+
     // Get user email and name
     const userResult = await pool.query(
       'SELECT email, name, email_verified FROM "user" WHERE id = $1',
@@ -31,20 +56,6 @@ export async function POST(request: Request) {
     if (emailVerified) {
       return NextResponse.json({ message: "Email sudah terverifikasi." });
     }
-
-    // Ensure email_verifications table exists
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS email_verifications (
-        id text PRIMARY KEY,
-        email text NOT NULL,
-        code text NOT NULL,
-        expires_at timestamptz NOT NULL,
-        used integer NOT NULL DEFAULT 0,
-        created_at timestamptz NOT NULL DEFAULT NOW()
-      );
-      CREATE INDEX IF NOT EXISTS email_verifications_email_idx
-        ON email_verifications(email, created_at DESC);
-    `);
 
     // Rate limit: max 3 codes per email per 10 minutes
     const recentCodes = await pool.query(
