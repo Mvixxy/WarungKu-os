@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Pencil, Trash2, Download, TrendingUp, Printer } from "lucide-react";
 import { Expense } from "@/lib/types";
 import { StatCard } from "@/components/stat-card";
+import { exportLaporanPDF } from "@/lib/pdf-export";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -328,7 +329,39 @@ export function LaporanView() {
                 type="button"
                 size="sm"
                 className="h-8 rounded-lg text-xs no-print"
-                onClick={() => window.print()}
+                onClick={() => {
+                  const filteredTransactions = transactions.filter((t) => {
+                    const tDate = new Date(t.createdAt);
+                    const now = new Date();
+                    if (range === "harian") return tDate.toDateString() === now.toDateString();
+                    if (range === "mingguan") {
+                      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                      return tDate >= weekAgo;
+                    }
+                    return tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
+                  });
+                  const filteredExpenses = expenses.filter((e) => {
+                    const eDate = new Date(e.createdAt);
+                    const now = new Date();
+                    if (range === "harian") return eDate.toDateString() === now.toDateString();
+                    if (range === "mingguan") {
+                      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                      return eDate >= weekAgo;
+                    }
+                    return eDate.getMonth() === now.getMonth() && eDate.getFullYear() === now.getFullYear();
+                  });
+                  exportLaporanPDF({
+                    transactions: filteredTransactions,
+                    expenses: filteredExpenses,
+                    period: rangeLabel,
+                    totalRevenue: summary.revenue,
+                    totalExpenses: summary.expenseTotal,
+                    netProfit: summary.netProfit,
+                    storeName: settings?.storeName ?? "WarungKu",
+                    ownerName: settings?.ownerName ?? "",
+                  });
+                  toast.success("PDF berhasil didownload!");
+                }}
               >
                 <Download className="size-3 sm:size-3.5" />
                 PDF
