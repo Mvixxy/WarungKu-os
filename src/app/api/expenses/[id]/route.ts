@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestUser, updateExpense, deleteExpense } from "@/lib/server/app-service";
-import { handleRouteError } from "@/lib/server/route-error";
+import { handleRouteError, checkApiRateLimit } from "@/lib/server/route-error";
 import { expenseSchema } from "@/lib/validations";
 
 export const runtime = "nodejs";

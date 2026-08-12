@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestUser, updateProduct, deleteProduct } from "@/lib/server/app-service";
-import { handleRouteError } from "@/lib/server/route-error";
+import { handleRouteError, checkApiRateLimit } from "@/lib/server/route-error";
 import { productDraftSchema } from "@/lib/validations";
 
 export const runtime = "nodejs";
