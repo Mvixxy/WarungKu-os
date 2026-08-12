@@ -20,8 +20,6 @@ export function StatCard({
   description,
   tone = "default",
   href,
-  className,
-  hint,
   onClick,
 }: StatCardProps) {
   const content = (

@@ -3,11 +3,12 @@ import { getRequestUser } from "@/lib/server/app-service";
 import { sendVerificationCode } from "@/lib/server/email";
 import { handleRouteError, checkApiRateLimit } from "@/lib/server/route-error";
 import { pool } from "@/db/client";
+import { randomInt } from "crypto";
 
 export const runtime = "nodejs";
 
 function generateCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return randomInt(100000, 999999).toString();
 }
 
 export async function POST(request: Request) {

@@ -4,7 +4,6 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
-import { checkDebtReminders, requestNotificationPermission } from "@/lib/notifications";
 import { emptyAppState } from "@/lib/empty-state";
 import { AppState, Debt, Expense, DebtDraft, PaymentMethod, Product, ProductDraft, Settings, Transaction } from "@/lib/types";
 
@@ -87,13 +86,13 @@ export function AppStateProvider({
     }
 
     if (!sessionUserId) {
-      setIsLoading(false);
+      setIsLoading(false); // eslint-disable-line react-hooks/set-state-in-effect
       return;
     }
 
     let isActive = true;
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
+    setError(null); // eslint-disable-line react-hooks/set-state-in-effect
 
     void requestJson<{ appState: AppState }>("/api/bootstrap")
       .then((response) => {
@@ -108,7 +107,7 @@ export function AppStateProvider({
             ? current.paymentMethod
             : response.appState.paymentMethod,
         }));
-        setIsLoading(false);
+        setIsLoading(false); // eslint-disable-line react-hooks/set-state-in-effect
       })
       .catch((err) => {
         if (!isActive) {
@@ -122,7 +121,7 @@ export function AppStateProvider({
         }
 
         setError(err instanceof Error ? err.message : "Gagal memuat data. Periksa koneksi internet Anda.");
-        setIsLoading(false);
+        setIsLoading(false); // eslint-disable-line react-hooks/set-state-in-effect
       });
 
     return () => {

@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, Transaction } from "@/lib/types";
+import { Transaction } from "@/lib/types";
 import { Receipt } from "@/components/receipt";
 import { formatCurrency, formatDateTime, formatTime } from "@/lib/format";
 import { toast } from "sonner";

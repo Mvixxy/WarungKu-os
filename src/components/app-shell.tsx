@@ -49,47 +49,13 @@ const bottomNav = [
   { href: "/laporan", label: "Laporan", icon: ScrollText },
 ];
 
-const pageTitles: Record<string, { title: string; subtitle: string }> = {
-  "/dashboard": {
-    title: "Dashboard operasional warung",
-    subtitle:
-      "Lihat angka penting, stok menipis, dan aktivitas terbaru tanpa mengganggu layar kasir.",
-  },
-  "/kasir": {
-    title: "Kasir cepat untuk jam sibuk",
-    subtitle:
-      "Layar ini khusus untuk jualan cepat: pilih produk, atur jumlah, dan selesaikan transaksi.",
-  },
-  "/inventaris": {
-    title: "Kontrol stok tanpa buku catatan",
-    subtitle:
-      "Pantau produk aktif, restok cepat, dan sorot barang yang mulai menipis.",
-  },
-  "/buku-hutang": {
-    title: "Catatan kasbon yang rapi",
-    subtitle:
-      "Simpan pelanggan berhutang, kirim pengingat, dan tandai pelunasan dengan satu klik.",
-  },
-  "/laporan": {
-    title: "Laporan untung yang gampang dipahami",
-    subtitle:
-      "Lihat omzet, pengeluaran, dan preview PDF untuk kebutuhan pinjaman atau evaluasi usaha.",
-  },
-  "/pengaturan": {
-    title: "Pengaturan warung",
-    subtitle:
-      "Atur profil warung, notifikasi stok menipis, dan metode bayar yang ingin ditampilkan.",
-  },
-};
-
 export function AppShell({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const { settings, transactions } = useAppState();
-  const activePage = pageTitles[pathname] ?? pageTitles["/kasir"];
+  const { settings } = useAppState();
   const [aiOpen, setAiOpen] = useState(false);
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -104,9 +70,7 @@ export function AppShell({
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (aiOpen) setLeftCollapsed(true);
-  }, [aiOpen]);
+  // Collapsed state is derived from aiOpen - no effect needed
 
   return (
     <div className="h-screen overflow-hidden bg-background">
@@ -327,7 +291,7 @@ export function AppShell({
             {bottomNav.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
-              const isPrimary = (item as any).primary;
+              const isPrimary = ("primary" in item && item.primary);
               if (isPrimary) {
                 return (
                   <Link

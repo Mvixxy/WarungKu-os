@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     const status = await getUserStatus(userId);
     
     if (!status?.isAdmin) {
-      return NextResponse.json({ error: "Akses ditolak.", debug: { userId, status } }, { status: 403 });
+      return NextResponse.json({ error: "Akses ditolak." }, { status: 403 });
     }
 
     const users = await getAllUsersWithStats();

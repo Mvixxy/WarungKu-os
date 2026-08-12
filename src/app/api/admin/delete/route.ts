@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getRequestUser } from "@/lib/server/app-service";
 import { getUserStatus, deleteUser } from "@/lib/server/admin";
 import { handleRouteError, checkApiRateLimit } from "@/lib/server/route-error";
+import { logger } from "@/lib/server/logger";
 
 export const runtime = "nodejs";
 
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ message: "User berhasil dihapus." });
   } catch (error) {
-    console.error("[Admin Delete]", error);
-    return NextResponse.json({ error: "Gagal menghapus user: " + String(error) }, { status: 500 });
+    logger.error("Admin delete user failed", { error: String(error) });
+    return handleRouteError(error, "Gagal menghapus user.", 500);
   }
 }

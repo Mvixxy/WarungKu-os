@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Printer, Search, TrendingUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { useAppState } from "@/components/providers/app-state-provider";
@@ -15,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Pencil, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Trash2, Download, TrendingUp, Printer } from "lucide-react";
 import { Expense } from "@/lib/types";
 import { StatCard } from "@/components/stat-card";
 import { Button } from "@/components/ui/button";

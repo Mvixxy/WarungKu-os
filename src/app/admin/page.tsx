@@ -66,8 +66,6 @@ export default function AdminPage() {
       ]);
 
       if (!statsRes.ok || !usersRes.ok) {
-        const statsBody = await statsRes.json().catch(() => ({}));
-        const usersBody = await usersRes.json().catch(() => ({}));
         toast.error("Gagal memuat data admin.");
         return;
       }
@@ -76,7 +74,7 @@ export default function AdminPage() {
       const usersData = await usersRes.json();
       setStats(statsData.stats);
       setUsers(usersData.users);
-    } catch (err) {
+    } catch {
     } finally {
       setLoading(false);
     }

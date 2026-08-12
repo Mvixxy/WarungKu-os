@@ -276,7 +276,7 @@ function ToolCard({ message }: { message: ServerMessage }) {
 /* ─── Chat content (shared between mobile & desktop) ─── */
 
 function ChatContent({
-  messages,
+  _messages,
   visibleMessages,
   isThinking,
   isLoading,
@@ -284,12 +284,12 @@ function ChatContent({
   input,
   setInput,
   handleSend,
-  handleNewChat,
+  _handleNewChat,
   chat,
   quickPrompts,
   bottomRef,
 }: {
-  messages: ServerMessage[];
+  _messages: ServerMessage[];
   visibleMessages: ServerMessage[];
   isThinking: boolean;
   isLoading: boolean;
@@ -297,7 +297,7 @@ function ChatContent({
   input: string;
   setInput: (v: string) => void;
   handleSend: (text: string) => void;
-  handleNewChat: () => void;
+  _handleNewChat: () => void;
   chat: ChatRecord | null;
   quickPrompts: string[];
   bottomRef: React.RefObject<HTMLDivElement | null>;
@@ -389,11 +389,11 @@ function ChatContent({
 
 export function AIAssistantPanel({ open, onOpenChange }: { open: boolean; onOpenChange: (next: boolean) => void }) {
   const [chat, setChat] = useState<ChatRecord | null>(null);
-  const [messages, setMessages] = useState<ServerMessage[]>([]);
   const [input, setInput] = useState("");
   const [isThinking, setIsThinking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ServerMessage[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const hasBootstrappedRef = useRef(false);
 
@@ -514,7 +514,7 @@ export function AIAssistantPanel({ open, onOpenChange }: { open: boolean; onOpen
               </Button>
             </header>
             <ChatContent
-              messages={messages}
+              _messages={messages}
               visibleMessages={visibleMessages}
               isThinking={isThinking}
               isLoading={isLoading}
@@ -522,7 +522,7 @@ export function AIAssistantPanel({ open, onOpenChange }: { open: boolean; onOpen
               input={input}
               setInput={setInput}
               handleSend={handleSend}
-              handleNewChat={handleNewChat}
+              _handleNewChat={handleNewChat}
               chat={chat}
               quickPrompts={quickPrompts}
               bottomRef={bottomRef}
@@ -559,7 +559,7 @@ export function AIAssistantPanel({ open, onOpenChange }: { open: boolean; onOpen
               </Button>
             </header>
             <ChatContent
-              messages={messages}
+              _messages={messages}
               visibleMessages={visibleMessages}
               isThinking={isThinking}
               isLoading={isLoading}
@@ -567,7 +567,7 @@ export function AIAssistantPanel({ open, onOpenChange }: { open: boolean; onOpen
               input={input}
               setInput={setInput}
               handleSend={handleSend}
-              handleNewChat={handleNewChat}
+              _handleNewChat={handleNewChat}
               chat={chat}
               quickPrompts={quickPrompts}
               bottomRef={bottomRef}

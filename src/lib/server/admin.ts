@@ -89,7 +89,6 @@ export async function deleteUser(userId: string): Promise<boolean> {
     await client.query("ROLLBACK").catch(() => {});
     const errMsg = err instanceof Error ? err.message : String(err);
     logger.error("Failed to delete user", { userId, error: errMsg });
-    console.error("[DeleteUser]", errMsg, err);
     return false;
   } finally {
     client.release();

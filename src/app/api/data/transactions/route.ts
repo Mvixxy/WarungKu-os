@@ -3,7 +3,7 @@ import { getRequestUser } from "@/lib/server/app-service";
 import { handleRouteError } from "@/lib/server/route-error";
 import { db } from "@/db/client";
 import { transactions, transactionItems } from "@/db/schema";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { desc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 
 export const runtime = "nodejs";
